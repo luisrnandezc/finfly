@@ -1,0 +1,11 @@
+ID,code,name,description,active
+10000000-0000-0000-0000-000000000001,FUEL,Combustible,Combustible para la aeronave,true
+10000000-0000-0000-0000-000000000002,HOTEL,Hotel,Alojamiento de la tripulación,true
+10000000-0000-0000-0000-000000000003,FBO,FBO y handling,Servicios FBO y asistencia en tierra,true
+10000000-0000-0000-0000-000000000004,PER_DIEM,Viáticos,Viáticos de la tripulación,true
+10000000-0000-0000-0000-000000000005,TRANSPORT,Transporte,Taxis y transporte terrestre,true
+10000000-0000-0000-0000-000000000006,FEES,Tasas,Tasas aeroportuarias y administrativas,true
+10000000-0000-0000-0000-000000000007,CATERING,Catering,Bebidas alimentos y catering,true
+10000000-0000-0000-0000-000000000008,TIPS,Propinas,Propinas operacionales,true
+10000000-0000-0000-0000-000000000009,TOWING,Remolque,Servicios de remolque,true
+10000000-0000-0000-0000-000000000010,MISC,Varios,Gastos no incluidos en otra categoría,true
