@@ -1,0 +1,42 @@
+@baseUrl = http://localhost:4004/expenses/
+@reportId = fd9eade7-9b7d-4732-855b-0c4b0885ae73
+
+
+### Create flight-report draft
+POST {{baseUrl}}/FlightReports
+Content-Type: application/json
+
+{
+  "reportNumber": "FR-2026-0001",
+  "aircraft_ID": "20000000-0000-0000-0000-000000000001",
+  "requesterName": "Julián Sierra (FIBEX)",
+  "status": "DRAFT",
+  "notes": "Sample report based on the August 2026 spreadsheet"
+}
+
+### Add outbound flight leg
+POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/legs
+Content-Type: application/json
+
+{
+  "sequence": 1,
+  "flightDate": "2026-08-12",
+  "originAirportCode": "SVVA",
+  "destinationAirportCode": "SKRG",
+  "flightHours": 2.3
+}
+
+### Add return flight leg
+POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/legs
+Content-Type: application/json
+
+{
+  "sequence": 2,
+  "flightDate": "2026-08-15",
+  "originAirportCode": "SKRG",
+  "destinationAirportCode": "SVVA",
+  "flightHours": 2.2
+}
+
+### Read report with flight legs
+GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)?$expand=legs

@@ -45,7 +45,7 @@ entity ExpenseCategories : cuid, managed {
 entity FlightReports : cuid, managed {
     reportNumber    : String(30) not null;
     aircraft        : Association to Aircraft not null;
-    responsibleName : String(160);
+    requesterName   : String(160);
     status          : FlightReportStatus default #draft;
     notes           : LargeString;
 
