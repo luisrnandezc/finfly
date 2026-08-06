@@ -1,4 +1,5 @@
 using { finfly as db } from '../db/schema';
+using { sap.common as common } from '@sap/cds/common';
 
 @path '/expenses'
 service ExpenseService {
@@ -20,5 +21,5 @@ service ExpenseService {
     entity ExpenseCategories as projection on db.ExpenseCategories;
 
     @readonly
-    entity Currencies as projection on db.Currencies;
+    entity Currencies as projection on common.Currencies;
 }

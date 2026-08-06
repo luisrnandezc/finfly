@@ -7,8 +7,8 @@ using {
 } from '@sap/cds/common';
 
 using {
-    Attatchments
-} from '@cap-js/attatchments';
+    Attachments
+} from '@cap-js/attachments';
 
 type FlightReportStatus : String enum {
     draft       = 'DRAFT';
@@ -57,6 +57,17 @@ entity FlightReports : cuid, managed {
 
     expenses        : Composition of many Expenses
                       on expenses.report = $self;
+}
+
+entity FlightLegs : cuid, managed {
+    report                 : Association to FlightReports not null;
+    sequence               : Integer not null;
+    flightDate             : Date not null;
+    originAirportCode      : String(4) not null;
+    destinationAirportCode : String(4) not null;
+    flightHours            : Decimal(5,2);
+    hourMeterStart         : Decimal(10,2);
+    hourMeterEnd           : Decimal(10,2);
 }
 
 entity CrewAssignments : cuid {
