@@ -1,7 +1,7 @@
 using { finfly as db } from '../db/schema';
 using { sap.common as common } from '@sap/cds/common';
 
-@path '/expenses'
+@path: '/expenses'
 service ExpenseService {
 
     @odata.draft.enabled
