@@ -1,12 +1,20 @@
 @baseUrl = http://localhost:4004/expenses/
-@reportId = fd9eade7-9b7d-4732-855b-0c4b0885ae73
+@reportId = 40000000-0000-0000-0000-000000000001
+@outboundLegId = 41000000-0000-0000-0000-000000000001
+@returnLegId = 41000000-0000-0000-0000-000000000002
 
+### Delete test draft
+DELETE {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)
+
+### Delete active test report
+DELETE {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=true)
 
 ### Create flight-report draft
 POST {{baseUrl}}/FlightReports
 Content-Type: application/json
 
 {
+  "ID": "{{reportId}}",
   "reportNumber": "FR-2026-0001",
   "aircraft_ID": "20000000-0000-0000-0000-000000000001",
   "requesterName": "Julián Sierra (FIBEX)",
@@ -19,6 +27,7 @@ POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/legs
 Content-Type: application/json
 
 {
+  "ID": "{{outboundLegId}}",
   "sequence": 1,
   "flightDate": "2026-08-12",
   "originAirportCode": "SVVA",
@@ -31,6 +40,7 @@ POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/legs
 Content-Type: application/json
 
 {
+  "ID": "{{returnLegId}}",
   "sequence": 2,
   "flightDate": "2026-08-15",
   "originAirportCode": "SKRG",
@@ -40,3 +50,67 @@ Content-Type: application/json
 
 ### Read report with flight legs
 GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)?$expand=legs
+
+### Assign first pilot
+POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/crew
+Content-Type: application/json
+
+{
+  "crewMember_ID": "30000000-0000-0000-0000-000000000001",
+  "role": "CAPTAIN"
+}
+
+### Assign second pilot
+POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/crew
+Content-Type: application/json
+
+{
+  "crewMember_ID": "30000000-0000-0000-0000-000000000002",
+  "role": "FIRST_OFFICER"
+}
+
+### Read report with legs and crew
+GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)?$expand=legs,crew($expand=crewMember)
+
+### Read currencies
+GET {{baseUrl}}/Currencies
+
+### Add FBO expense to outbound leg
+POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/expenses
+Content-Type: application/json
+
+{
+  "leg_ID": "{{outboundLegId}}",
+  "category_ID": "10000000-0000-0000-0000-000000000003",
+  "expenseDate": "2026-08-12",
+  "description": "FBO y/o DOSA",
+  "originalAmount": 180000,
+  "originalCurrency_code": "VES"
+}
+
+### Read report with expenses
+GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)?$expand=expenses($expand=category,originalCurrency)
+
+### Add report-level USD expense
+POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/expenses
+Content-Type: application/json
+
+{
+  "category_ID": "10000000-0000-0000-0000-000000000003",
+  "expenseDate": "2026-08-14",
+  "description": "FBO Colombia",
+  "originalAmount": 1800,
+  "originalCurrency_code": "USD"
+}
+
+### Read expenses with category and currency
+GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)?$expand=expenses($expand=category,originalCurrency)
+
+### Activate flight-report draft
+POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/ExpenseService.draftActivate
+Content-Type: application/json
+
+{}
+
+### Read active report
+GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=true)?$expand=legs,crew($expand=crewMember),expenses($expand=category,originalCurrency)
