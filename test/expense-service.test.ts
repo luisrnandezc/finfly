@@ -14,6 +14,13 @@ const IDs = {
   usdExpense: '43000000-0000-0000-0000-000000000002',
 };
 
+const invalidIDs = {
+  report: '50000000-0000-0000-0000-000000000001',
+  validLeg: '51000000-0000-0000-0000-000000000001',
+  nonexistentLeg: '59999999-0000-0000-0000-000000000001',
+  expense: '53000000-0000-0000-0000-000000000001',
+};
+
 describe('ExpenseService', () => {
   it('exposes the seeded expense categories', async () => {
     const { data, status } = await GET(`${baseUrl}/ExpenseCategories`);
@@ -155,5 +162,56 @@ describe('ExpenseService', () => {
     expect(usdExpense.leg_ID).to.equal(null);
     expect(usdExpense.originalAmount).to.equal(1800);
     expect(usdExpense.originalCurrency_code).to.equal('USD');
+  });
+
+  it('rejects activation when an expense references an invalid leg', async () => {
+    let response = await POST(`${baseUrl}/FlightReports`, {
+      ID: invalidIDs.report,
+      reportNumber: 'FR-2026-INVALID-LEG',
+      aircraft_ID: '20000000-0000-0000-0000-000000000001',
+      requesterName: 'Validation test',
+      status: 'DRAFT',
+    });
+
+    expect(response.status).to.equal(201);
+
+    const draftUrl =
+      `${baseUrl}/FlightReports(ID=${invalidIDs.report},IsActiveEntity=false)`;
+
+    response = await POST(`${draftUrl}/legs`, {
+      ID: invalidIDs.validLeg,
+      sequence: 1,
+      flightDate: '2026-08-20',
+      originAirportCode: 'SVVA',
+      destinationAirportCode: 'SKRG',
+      flightHours: 2.3,
+    });
+
+    expect(response.status).to.equal(201);
+
+    response = await POST(`${draftUrl}/expenses`, {
+      ID: invalidIDs.expense,
+      leg_ID: invalidIDs.nonexistentLeg,
+      category_ID: '10000000-0000-0000-0000-000000000003',
+      expenseDate: '2026-08-20',
+      description: 'Expense with invalid leg reference',
+      originalAmount: 100,
+      originalCurrency_code: 'USD',
+    });
+
+    expect(response.status).to.equal(201);
+
+    response = await POST(
+      `${draftUrl}/ExpenseService.draftActivate`,
+      {},
+      {
+        validateStatus: (status: number) => status === 400,
+      },
+    );
+
+    expect(response.status).to.equal(400);
+    expect(response.data.error.message).to.include(
+      'references a flight leg that does not belong to this report',
+    );
   });
 });
