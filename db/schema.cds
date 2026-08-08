@@ -94,6 +94,9 @@ entity FlightLegs : cuid, managed {
     hourMeterEnd           : Decimal(10,2);
 }
 
+@assert.unique: {
+    reportCrewMember: [report, crewMember]
+}
 entity CrewAssignments : cuid {
     report     : Association to FlightReports not null;
 
