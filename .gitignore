@@ -1,37 +1,54 @@
-# CAP finfly
-_out
-*.db
-*.sqlite
-connection.properties
-default-*.json
-.cdsrc-private.json
-gen/
+# Dependencies
 node_modules/
-target/
 
-# Web IDE, App Studio
-.che/
+# CAP and generated output
+_out/
+gen/
+target/
 .gen/
+@cds-models/
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Environment files and credentials
+.env
+.env.*
+!.env.example
+default-*.json
+connection.properties
+.cdsrc-private.json
+*.pem
+*.key
+
+# Test and build output
+coverage/
+.nyc_output/
+dist/
+
+# Temporary files
+tmp/
+temp/
+*.log
+*.orig
+
+# SAP development environments
+.che/
 
 # MTA
-*_mta_build_tmp
+*_mta_build_tmp/
 *.mtar
 mta_archives/
 
-# Other
+# IDE and operating-system files
 .DS_Store
-*.orig
-*.log
-docs/
-
 *.iml
 *.flattened-pom.xml
 
-# IDEs
-# .vscode
-# .idea
-
-# @cap-js/cds-typer
-@cds-models
-
-@cds-models
+# Project-specific generated documentation
+docs/
