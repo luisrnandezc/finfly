@@ -1,26 +1,54 @@
 using ExpenseService as service from '../../srv/expense-service';
+
 annotate service.FlightReports with @(
+
+    UI.HeaderInfo : {
+        $Type : 'UI.HeaderInfoType',
+        TypeName : 'Flight Report',
+        TypeNamePlural : 'Flight Reports',
+        Title : {
+            $Type : 'UI.DataField',
+            Value : reportNumber,
+        },
+        Description : {
+            $Type : 'UI.DataField',
+            Value : requesterName,
+        },
+    },
+
+    UI.SelectionFields : [
+        reportNumber,
+        aircraft_ID,
+        requesterName,
+        status
+    ],
+
     UI.FieldGroup #GeneratedGroup : {
         $Type : 'UI.FieldGroupType',
         Data : [
             {
                 $Type : 'UI.DataField',
-                Label : 'reportNumber',
+                Label : 'Report Number',
                 Value : reportNumber,
             },
             {
                 $Type : 'UI.DataField',
-                Label : 'requesterName',
+                Label : 'Aircraft',
+                Value : aircraft_ID,
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Requester Name',
                 Value : requesterName,
             },
             {
                 $Type : 'UI.DataField',
-                Label : 'status',
+                Label : 'Status',
                 Value : status,
             },
             {
                 $Type : 'UI.DataField',
-                Label : 'notes',
+                Label : 'Notes',
                 Value : notes,
             },
         ],
@@ -36,28 +64,29 @@ annotate service.FlightReports with @(
     UI.LineItem : [
         {
             $Type : 'UI.DataField',
-            Label : 'reportNumber',
+            Label : 'Report Number',
             Value : reportNumber,
         },
         {
             $Type : 'UI.DataField',
-            Label : 'requesterName',
+            Label : 'Requester Name',
             Value : requesterName,
         },
         {
             $Type : 'UI.DataField',
-            Label : 'status',
+            Label : 'Status',
             Value : status,
         },
         {
             $Type : 'UI.DataField',
-            Label : 'notes',
+            Label : 'Notes',
             Value : notes,
         },
     ],
 );
 
 annotate service.FlightReports with {
+
     aircraft @Common.ValueList : {
         $Type : 'Common.ValueListType',
         CollectionPath : 'Aircraft',
