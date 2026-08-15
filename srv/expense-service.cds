@@ -46,3 +46,13 @@ service ExpenseService {
         submittedAt  : Timestamp;
     }
 }
+
+annotate ExpenseService.FlightReports with {
+    status          @readonly;
+    submittedAt     @readonly;
+    submittedBy     @readonly;
+    reviewedAt      @readonly;
+    reviewedBy      @readonly;
+    rejectionReason @readonly;
+    statusHistory   @readonly;
+};

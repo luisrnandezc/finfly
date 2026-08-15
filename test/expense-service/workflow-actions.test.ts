@@ -8,7 +8,7 @@ const { INSERT } = cds.ql;
 
 const baseUrl = '/expenses';
 
-type WorkflowStatus = 'DRAFT' | 'SUBMITTED';
+type WorkflowStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 
 async function seedActiveReport(
   ID: string,
@@ -115,5 +115,69 @@ describe('ExpenseService workflow actions', () => {
     // before the custom action handler is executed.
     expect(response.status).to.equal(400);
     expect(response.data.error.message).to.equal('Provide the missing value.');
+  });
+
+  it('prevents clients from setting the workflow status directly', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000004';
+
+    const response = await POST(`${baseUrl}/FlightReports`, {
+      ID: reportID,
+      reportNumber: 'FR-2026-DIRECT-STATUS',
+      aircraft_ID: masterDataIDs.aircraft,
+      requesterName: 'Direct status test',
+
+      // A malicious or incorrect client attempts to bypass
+      // the submit and approve actions.
+      status: 'APPROVED',
+    });
+
+    expect(response.status).to.equal(201);
+    expect(response.data.IsActiveEntity).to.equal(false);
+
+    // `status` is read-only in the service, so CAP ignores
+    // APPROVED and applies the database default instead.
+    expect(response.data.status).to.equal('DRAFT');
+  });
+
+  it('prevents editing a submitted report', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000005';
+
+    await seedActiveReport(reportID, 'FR-2026-SUBMITTED-LOCKED', 'SUBMITTED');
+
+    const response = await POST(
+      `${activeReportUrl(reportID)}/ExpenseService.draftEdit`,
+      {
+        PreserveChanges: false,
+      },
+      {
+        ...actionConfiguration,
+        validateStatus: (status: number) => status === 409,
+      },
+    );
+
+    expect(response.status).to.equal(409);
+    expect(response.data.error.message).to.equal(
+      'Flight report FR-2026-SUBMITTED-LOCKED cannot be edited because its status is SUBMITTED',
+    );
+  });
+
+  it('allows a rejected report to enter edit mode', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000006';
+
+    await seedActiveReport(reportID, 'FR-2026-REJECTED-EDITABLE', 'REJECTED');
+
+    const response = await POST(
+      `${activeReportUrl(reportID)}/ExpenseService.draftEdit`,
+      {
+        PreserveChanges: false,
+      },
+      actionConfiguration,
+    );
+
+    expect(response.status).to.equal(201);
+    expect(response.data.ID).to.equal(reportID);
+    expect(response.data.IsActiveEntity).to.equal(false);
+    expect(response.data.HasActiveEntity).to.equal(true);
+    expect(response.data.status).to.equal('REJECTED');
   });
 });

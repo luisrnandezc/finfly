@@ -118,6 +118,34 @@ export default class ExpenseService extends cds.ApplicationService {
       }
     });
 
+    this.before('EDIT', FlightReports, async (req: Request) => {
+      const key = req.params[0] as BoundReportKey | undefined;
+      const reportID = key?.ID ?? (req.data.ID as string | undefined);
+
+      if (!reportID) {
+        return req.reject(
+          400,
+          'The flight report ID is required to edit a report',
+        );
+      }
+
+      const report = (await SELECT.one
+        .from(db.FlightReports)
+        .columns('ID', 'reportNumber', 'status')
+        .where({ ID: reportID })) as FlightReportWorkflowData | undefined;
+
+      if (!report) {
+        return req.reject(404, `Flight report with ID ${reportID} not found`);
+      }
+
+      if (!['DRAFT', 'REJECTED'].includes(report.status)) {
+        return req.reject(
+          409,
+          `Flight report ${report.reportNumber} cannot be edited because its status is ${report.status}`,
+        );
+      }
+    });
+
     this.on('submit', FlightReports, async (req: Request) => {
       const key = req.params[0] as BoundReportKey | undefined;
 
