@@ -1,6 +1,6 @@
 import cds, { type Request } from '@sap/cds';
 
-const { SELECT } = cds.ql;
+const { SELECT, INSERT, UPDATE } = cds.ql;
 
 type LegReference = {
   ID: string;
@@ -23,11 +23,22 @@ type CrewMemberReference = {
   crewMember_ID: string;
 };
 
+type BoundReportKey = {
+  ID: string;
+  IsActiveEntity?: boolean;
+};
+
+type FlightReportWorkflowData = {
+  ID: string;
+  reportNumber: string;
+  status: string;
+};
+
 export default class ExpenseService extends cds.ApplicationService {
   init() {
     // CAP's draft entity typings are currently incomplete.
-    const { FlightReports, FlightLegs, CrewAssignments, Expenses } =
-      this.entities as any;
+    const { FlightReports, FlightLegs, CrewAssignments, Expenses } = this
+      .entities as any;
     const db = cds.entities('finfly');
 
     this.before('SAVE', FlightReports, async (req: Request) => {
@@ -105,6 +116,233 @@ export default class ExpenseService extends cds.ApplicationService {
           `Expense ${invalidExpense.ID} references a flight leg that does not belong to this report`,
         );
       }
+    });
+
+    this.on('submit', FlightReports, async (req: Request) => {
+      const key = req.params[0] as BoundReportKey | undefined;
+
+      if (!key?.ID) {
+        return req.reject(
+          400,
+          'The flight report ID is required to submit a report',
+        );
+      }
+
+      if (key.IsActiveEntity === false) {
+        return req.reject(409, 'Save the flight report before submitting it');
+      }
+
+      // All operations executed through this transaction either succeed
+      // together or are rolled back together.
+      const tx = cds.tx(req);
+
+      const report = (await tx.run(
+        SELECT.one
+          .from(db.FlightReports)
+          .columns('ID', 'reportNumber', 'status')
+          .where({ ID: key.ID }),
+      )) as FlightReportWorkflowData | undefined;
+
+      if (!report) {
+        return req.reject(404, `Flight report with ID ${key.ID} not found`);
+      }
+
+      if (!['DRAFT', 'REJECTED'].includes(report.status)) {
+        return req.reject(
+          409,
+          `Flight report ${report.reportNumber} cannot be submitted because its status is ${report.status}`,
+        );
+      }
+
+      const legs = await tx.run(
+        SELECT.from(db.FlightLegs).columns('ID').where({ report_ID: key.ID }),
+      );
+
+      if (legs.length === 0) {
+        return req.reject(
+          400,
+          `Flight report ${report.reportNumber} cannot be submitted because it has no flight legs`,
+        );
+      }
+
+      const expenses = await tx.run(
+        SELECT.from(db.Expenses).columns('ID').where({ report_ID: key.ID }),
+      );
+
+      if (expenses.length === 0) {
+        return req.reject(
+          400,
+          `Flight report ${report.reportNumber} cannot be submitted because it has no expenses`,
+        );
+      }
+
+      const captain = await tx.run(
+        SELECT.one
+          .from(db.CrewAssignments)
+          .columns('crewMember_ID')
+          .where({ report_ID: key.ID, role: 'CAPTAIN' }),
+      );
+
+      if (!captain) {
+        return req.reject(
+          400,
+          `Flight report ${report.reportNumber} cannot be submitted because it has no assigned captain`,
+        );
+      }
+
+      const submittedAt = new Date().toISOString();
+      const submittedBy = req.user.id;
+
+      await tx.run(
+        UPDATE.entity(db.FlightReports)
+          .set({
+            status: 'SUBMITTED',
+            submittedAt,
+            submittedBy,
+            reviewedAt: null,
+            reviewedBy: null,
+            rejectionReason: null,
+          })
+          .where({ ID: report.ID }),
+      );
+
+      await tx.run(
+        INSERT.into(db.FlightReportHistory).entries({
+          report_ID: report.ID,
+          fromStatus: report.status,
+          toStatus: 'SUBMITTED',
+          comment: 'Flight report submitted for audit',
+        }),
+      );
+
+      await this.emit('FlightReportSubmitted', {
+        reportID: report.ID,
+        reportNumber: report.reportNumber,
+        submittedBy,
+        submittedAt,
+      });
+
+      return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
+    });
+
+    this.on('approve', FlightReports, async (req: Request) => {
+      const key = req.params[0] as BoundReportKey | undefined;
+
+      if (!key?.ID) {
+        return req.reject(
+          400,
+          'The flight report ID is required to approve a report',
+        );
+      }
+
+      if (key.IsActiveEntity === false) {
+        return req.reject(409, 'Save the flight report before approving it');
+      }
+
+      const tx = cds.tx(req);
+
+      const report = (await tx.run(
+        SELECT.one
+          .from(db.FlightReports)
+          .columns('ID', 'reportNumber', 'status')
+          .where({ ID: key.ID }),
+      )) as FlightReportWorkflowData | undefined;
+
+      if (!report) {
+        return req.reject(404, `Flight report with ID ${key.ID} not found`);
+      }
+
+      if (report.status !== 'SUBMITTED') {
+        return req.reject(
+          409,
+          `Flight report ${report.reportNumber} cannot be approved because its status is ${report.status}`,
+        );
+      }
+
+      const reviewedAt = new Date().toISOString();
+      const reviewedBy = req.user.id;
+      const comment = req.data.comment as string | undefined;
+
+      await tx.run(
+        UPDATE.entity(db.FlightReports)
+          .set({
+            status: 'APPROVED',
+            reviewedAt,
+            reviewedBy,
+            rejectionReason: null,
+          })
+          .where({ ID: report.ID }),
+      );
+
+      await tx.run(
+        INSERT.into(db.FlightReportHistory).entries({
+          report_ID: report.ID,
+          fromStatus: report.status,
+          toStatus: 'APPROVED',
+          comment: comment?.trim() || 'Flight report approved',
+        }),
+      );
+
+      return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
+    });
+
+    this.on('rejectReport', FlightReports, async (req: Request) => {
+      const key = req.params[0] as BoundReportKey | undefined;
+
+      if (!key?.ID) {
+        return req.reject(400, 'The flight report ID is required');
+      }
+
+      if (key.IsActiveEntity === false) {
+        return req.reject(409, 'Save the flight report before rejecting it');
+      }
+
+      const reason = (req.data.reason as string | undefined)?.trim();
+
+      const tx = cds.tx(req);
+
+      const report = (await tx.run(
+        SELECT.one
+          .from(db.FlightReports)
+          .columns('ID', 'reportNumber', 'status')
+          .where({ ID: key.ID }),
+      )) as FlightReportWorkflowData | undefined;
+
+      if (!report) {
+        return req.reject(404, 'Flight report not found');
+      }
+
+      if (report.status !== 'SUBMITTED') {
+        return req.reject(
+          409,
+          `A report with status ${report.status} cannot be rejected`,
+        );
+      }
+
+      const reviewedAt = new Date().toISOString();
+      const reviewedBy = req.user.id;
+
+      await tx.run(
+        UPDATE.entity(db.FlightReports)
+          .set({
+            status: 'REJECTED',
+            reviewedAt,
+            reviewedBy,
+            rejectionReason: reason,
+          })
+          .where({ ID: report.ID }),
+      );
+
+      await tx.run(
+        INSERT.into(db.FlightReportHistory).entries({
+          report_ID: report.ID,
+          fromStatus: report.status,
+          toStatus: 'REJECTED',
+          comment: reason,
+        }),
+      );
+
+      return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
     });
 
     return super.init();

@@ -11,7 +11,12 @@ async function expectActivationRejected(draftUrl: string): Promise<void> {
   const response = await POST(
     `${draftUrl}/ExpenseService.draftActivate`,
     {},
-    { validateStatus: (status: number) => status === 400 },
+    {
+      headers: {
+        'If-Match': '*',
+      },
+      validateStatus: (status: number) => status === 400,
+    },
   );
 
   expect(response.status).to.equal(400);
@@ -30,15 +35,13 @@ describe('ExpenseService reference validations', () => {
 
     expect(response.status).to.equal(201);
 
-    const draftUrl =
-      `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
     await expectActivationRejected(draftUrl);
   });
 
   it('rejects a report with a nonexistent crew member', async () => {
     const reportID = '80000000-0000-0000-0000-000000000002';
-    const draftUrl =
-      `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
 
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: reportID,
@@ -62,8 +65,7 @@ describe('ExpenseService reference validations', () => {
 
   it('rejects an expense with a nonexistent category', async () => {
     const reportID = '80000000-0000-0000-0000-000000000003';
-    const draftUrl =
-      `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
 
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: reportID,
@@ -90,8 +92,7 @@ describe('ExpenseService reference validations', () => {
 
   it('rejects an expense with a nonexistent currency', async () => {
     const reportID = '80000000-0000-0000-0000-000000000004';
-    const draftUrl =
-      `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
 
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: reportID,

@@ -58,7 +58,17 @@ entity FlightReports : cuid, managed {
     aircraft        : Association to Aircraft not null;
 
     requesterName   : String(160);
-    status          : FlightReportStatus default #draft;
+
+    // Business workflow state-not the Fiori draft state.
+    status          : FlightReportStatus not null default #draft;
+
+    submittedAt     : Timestamp;
+    submittedBy     : String(255);
+
+    reviewedAt      : Timestamp;
+    reviewedBy      : String(255);
+
+    rejectionReason : String(1000);
     notes           : LargeString;
 
     legs            : Composition of many FlightLegs 
@@ -69,6 +79,18 @@ entity FlightReports : cuid, managed {
 
     expenses        : Composition of many Expenses
                       on expenses.report = $self;
+
+    statusHistory   : Composition of many FlightReportHistory
+                      on statusHistory.report = $self;
+}
+
+entity FlightReportHistory : cuid, managed {
+    report : Association to FlightReports not null;
+
+    fromStatus : FlightReportStatus;
+    toStatus   : FlightReportStatus not null;
+
+    comment : String(1000);
 }
 
 @assert.unique: {
@@ -132,3 +154,7 @@ entity Expenses : cuid, managed {
 
     attachments : Composition of many Attachments;
 }
+
+annotate FlightReports with {
+    modifiedAt @odata.etag;
+};

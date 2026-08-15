@@ -27,7 +27,12 @@ async function expectActivationRejected(draftUrl: string): Promise<void> {
   const response = await POST(
     `${draftUrl}/ExpenseService.draftActivate`,
     {},
-    { validateStatus: (status: number) => status === 400 },
+    {
+      headers: {
+        'If-Match': '*',
+      },
+      validateStatus: (status: number) => status === 400,
+    },
   );
 
   expect(response.status).to.equal(400);
@@ -93,10 +98,8 @@ describe('ExpenseService numeric validations', () => {
     ];
 
     for (const testCase of cases) {
-      const reportID =
-        `61000000-0000-0000-0000-0000000000${testCase.suffix}`;
-      const legID =
-        `61100000-0000-0000-0000-0000000000${testCase.suffix}`;
+      const reportID = `61000000-0000-0000-0000-0000000000${testCase.suffix}`;
+      const legID = `61100000-0000-0000-0000-0000000000${testCase.suffix}`;
       const draftUrl = await createDraft(reportID, testCase.reportNumber);
 
       const response = await POST(`${draftUrl}/legs`, {
@@ -130,10 +133,8 @@ describe('ExpenseService numeric validations', () => {
     ];
 
     for (const testCase of cases) {
-      const reportID =
-        `62000000-0000-0000-0000-0000000000${testCase.suffix}`;
-      const legID =
-        `62100000-0000-0000-0000-0000000000${testCase.suffix}`;
+      const reportID = `62000000-0000-0000-0000-0000000000${testCase.suffix}`;
+      const legID = `62100000-0000-0000-0000-0000000000${testCase.suffix}`;
       const draftUrl = await createDraft(reportID, testCase.reportNumber);
 
       const response = await POST(`${draftUrl}/legs`, {
@@ -167,10 +168,8 @@ describe('ExpenseService numeric validations', () => {
     ];
 
     for (const testCase of cases) {
-      const reportID =
-        `64000000-0000-0000-0000-0000000000${testCase.suffix}`;
-      const expenseID =
-        `64100000-0000-0000-0000-0000000000${testCase.suffix}`;
+      const reportID = `64000000-0000-0000-0000-0000000000${testCase.suffix}`;
+      const expenseID = `64100000-0000-0000-0000-0000000000${testCase.suffix}`;
       const draftUrl = await createDraft(reportID, testCase.reportNumber);
 
       const response = await POST(`${draftUrl}/expenses`, {

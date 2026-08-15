@@ -13,7 +13,12 @@ async function activate(
   const response = await POST(
     `${draftUrl}/ExpenseService.draftActivate`,
     {},
-    { validateStatus: (status: number) => status === acceptedStatus },
+    {
+      headers: {
+        'If-Match': '*',
+      },
+      validateStatus: (status: number) => status === acceptedStatus,
+    },
   );
 
   expect(response.status).to.equal(acceptedStatus);
@@ -35,8 +40,7 @@ describe('ExpenseService uniqueness validations', () => {
 
     expect(response.status).to.equal(201);
 
-    const firstDraftUrl =
-      `${baseUrl}/FlightReports(ID=${firstID},IsActiveEntity=false)`;
+    const firstDraftUrl = `${baseUrl}/FlightReports(ID=${firstID},IsActiveEntity=false)`;
     await activate(firstDraftUrl, 201);
 
     response = await POST(`${baseUrl}/FlightReports`, {
@@ -49,15 +53,13 @@ describe('ExpenseService uniqueness validations', () => {
 
     expect(response.status).to.equal(201);
 
-    const secondDraftUrl =
-      `${baseUrl}/FlightReports(ID=${secondID},IsActiveEntity=false)`;
+    const secondDraftUrl = `${baseUrl}/FlightReports(ID=${secondID},IsActiveEntity=false)`;
     await activate(secondDraftUrl, 409);
   });
 
   it('rejects duplicate leg sequences within one report', async () => {
     const reportID = '71000000-0000-0000-0000-000000000001';
-    const draftUrl =
-      `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
 
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: reportID,
@@ -98,8 +100,7 @@ describe('ExpenseService uniqueness validations', () => {
 
   it('rejects assigning the same crew member twice to one report', async () => {
     const reportID = '72000000-0000-0000-0000-000000000001';
-    const draftUrl =
-      `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
 
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: reportID,

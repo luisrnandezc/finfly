@@ -7,7 +7,7 @@ const { GET, POST, expect } = cds.test('serve', 'all', '--in-memory');
 const baseUrl = '/expenses';
 
 describe('ExpenseService flight report lifecycle', () => {
-  it('creates and activates a complete flight report', async () => {
+  it('creates, submits, and approves a complete flight report', async () => {
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: flightReportIDs.report,
       reportNumber: 'FR-2026-0001',
@@ -88,6 +88,11 @@ describe('ExpenseService flight report lifecycle', () => {
     response = await POST(
       `${draftUrl}/ExpenseService.draftActivate`,
       {},
+      {
+        headers: {
+          'If-Match': '*',
+        },
+      },
     );
 
     expect([200, 201]).to.include(response.status);
@@ -129,5 +134,59 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(usdExpense.leg_ID).to.equal(null);
     expect(usdExpense.originalAmount).to.equal(1800);
     expect(usdExpense.originalCurrency_code).to.equal('USD');
+
+    response = await POST(
+      `${activeUrl}/ExpenseService.submit`,
+      {},
+      {
+        headers: {
+          'If-Match': '*',
+        },
+      },
+    );
+
+    expect(response.status).to.equal(200);
+    expect(response.data.status).to.equal('SUBMITTED');
+    expect(response.data.submittedAt).to.exist;
+    expect(response.data.submittedBy).to.exist;
+    expect(response.data.rejectionReason).to.equal(null);
+
+    response = await POST(
+      `${activeUrl}/ExpenseService.approve`,
+      {
+        comment: 'Receipts and amounts verified',
+      },
+      {
+        headers: {
+          'If-Match': '*',
+        },
+      },
+    );
+
+    expect(response.status).to.equal(200);
+    expect(response.data.status).to.equal('APPROVED');
+    expect(response.data.reviewedAt).to.exist;
+    expect(response.data.reviewedBy).to.exist;
+    expect(response.data.rejectionReason).to.equal(null);
+
+    response = await GET(`${activeUrl}?$expand=statusHistory`);
+
+    const submittedHistory = response.data.statusHistory.find(
+      (entry: { toStatus: string }) => entry.toStatus === 'SUBMITTED',
+    );
+
+    expect(submittedHistory).to.exist;
+    expect(submittedHistory.fromStatus).to.equal('DRAFT');
+    expect(submittedHistory.comment).to.equal(
+      'Flight report submitted for audit',
+    );
+
+    const approvedHistory = response.data.statusHistory.find(
+      (entry: { toStatus: string }) => entry.toStatus === 'APPROVED',
+    );
+
+    expect(approvedHistory).to.exist;
+    expect(approvedHistory.fromStatus).to.equal('SUBMITTED');
+    expect(approvedHistory.comment).to.equal('Receipts and amounts verified');
   });
 });

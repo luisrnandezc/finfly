@@ -25,8 +25,7 @@ describe('ExpenseService relationship validations', () => {
 
     expect(response.status).to.equal(201);
 
-    const draftUrl =
-      `${baseUrl}/FlightReports(ID=${IDs.report},IsActiveEntity=false)`;
+    const draftUrl = `${baseUrl}/FlightReports(ID=${IDs.report},IsActiveEntity=false)`;
 
     response = await POST(`${draftUrl}/legs`, {
       ID: IDs.validLeg,
@@ -55,7 +54,12 @@ describe('ExpenseService relationship validations', () => {
     response = await POST(
       `${draftUrl}/ExpenseService.draftActivate`,
       {},
-      { validateStatus: (status: number) => status === 400 },
+      {
+        headers: {
+          'If-Match': '*',
+        },
+        validateStatus: (status: number) => status === 400,
+      },
     );
 
     expect(response.status).to.equal(400);
