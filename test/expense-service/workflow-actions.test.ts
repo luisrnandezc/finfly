@@ -33,9 +33,23 @@ function activeReportUrl(ID: string): string {
   return `${baseUrl}/FlightReports(` + `ID=${ID},IsActiveEntity=true)`;
 }
 
-const actionConfiguration = {
+const pilotActionConfiguration = {
   headers: {
     'If-Match': '*',
+  },
+  auth: {
+    username: 'pilot',
+    password: 'pilot',
+  },
+};
+
+const auditorActionConfiguration = {
+  headers: {
+    'If-Match': '*',
+  },
+  auth: {
+    username: 'auditor',
+    password: 'auditor',
   },
 };
 
@@ -51,7 +65,7 @@ describe('ExpenseService workflow actions', () => {
     let response = await POST(
       `${reportUrl}/ExpenseService.rejectReport`,
       { reason },
-      actionConfiguration,
+      auditorActionConfiguration,
     );
 
     expect(response.status).to.equal(200);
@@ -84,7 +98,7 @@ describe('ExpenseService workflow actions', () => {
         comment: 'This must not be accepted',
       },
       {
-        ...actionConfiguration,
+        ...auditorActionConfiguration,
         validateStatus: (status: number) => status === 409,
       },
     );
@@ -106,7 +120,7 @@ describe('ExpenseService workflow actions', () => {
         reason: '   ',
       },
       {
-        ...actionConfiguration,
+        ...auditorActionConfiguration,
         validateStatus: (status: number) => status === 400,
       },
     );
@@ -150,7 +164,7 @@ describe('ExpenseService workflow actions', () => {
         PreserveChanges: false,
       },
       {
-        ...actionConfiguration,
+        ...pilotActionConfiguration,
         validateStatus: (status: number) => status === 409,
       },
     );
@@ -171,7 +185,7 @@ describe('ExpenseService workflow actions', () => {
       {
         PreserveChanges: false,
       },
-      actionConfiguration,
+      pilotActionConfiguration,
     );
 
     expect(response.status).to.equal(201);

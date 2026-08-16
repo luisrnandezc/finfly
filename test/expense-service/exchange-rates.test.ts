@@ -70,6 +70,10 @@ describe('ExpenseService exchange rates', () => {
         headers: {
           'If-Match': '*',
         },
+        auth: {
+          username: 'pilot',
+          password: 'pilot',
+        },
       },
     );
 

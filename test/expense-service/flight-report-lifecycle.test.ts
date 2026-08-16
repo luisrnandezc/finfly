@@ -142,13 +142,17 @@ describe('ExpenseService flight report lifecycle', () => {
         headers: {
           'If-Match': '*',
         },
+        auth: {
+          username: 'pilot',
+          password: 'pilot',
+        },
       },
     );
 
     expect(response.status).to.equal(200);
     expect(response.data.status).to.equal('SUBMITTED');
     expect(response.data.submittedAt).to.exist;
-    expect(response.data.submittedBy).to.exist;
+    expect(response.data.submittedBy).to.equal('pilot');
     expect(response.data.rejectionReason).to.equal(null);
 
     response = await POST(
@@ -160,13 +164,17 @@ describe('ExpenseService flight report lifecycle', () => {
         headers: {
           'If-Match': '*',
         },
+        auth: {
+          username: 'auditor',
+          password: 'auditor',
+        },
       },
     );
 
     expect(response.status).to.equal(200);
     expect(response.data.status).to.equal('APPROVED');
     expect(response.data.reviewedAt).to.exist;
-    expect(response.data.reviewedBy).to.exist;
+    expect(response.data.reviewedBy).to.equal('auditor');
     expect(response.data.rejectionReason).to.equal(null);
 
     response = await GET(`${activeUrl}?$expand=statusHistory`);

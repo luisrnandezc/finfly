@@ -38,6 +38,32 @@
       "ExchangeRateService": {
         "kind": "odata",
         "model": "srv/external/exchange-rate-service"
+      },
+      "auth": {
+        "kind": "mocked",
+        "users": {
+          "pilot": {
+            "password": "pilot",
+            "roles": [
+              "Pilot"
+            ]
+          },
+          "auditor": {
+            "password": "auditor",
+            "roles": [
+              "Auditor"
+            ]
+          },
+          "admin": {
+            "password": "admin",
+            "roles": [
+              "Admin",
+              "Pilot",
+              "Auditor"
+            ]
+          },
+          "*": false
+        }
       }
     }
   }

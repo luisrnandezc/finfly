@@ -7,16 +7,20 @@ service ExpenseService {
     @odata.draft.enabled
     entity FlightReports as projection on db.FlightReports actions {
 
+        @requires: 'Pilot'
         action submit() returns FlightReports;
 
+        @requires: 'Auditor'
         action approve(
             comment : String(1000)
         ) returns FlightReports;
 
+        @requires: 'Auditor'
         action rejectReport(
             reason : String(1000) not null
         ) returns FlightReports;
 
+        @requires: 'Pilot'
         action refreshExchangeRates() returns FlightReports;
     };
 
