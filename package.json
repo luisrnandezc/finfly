@@ -32,5 +32,13 @@
   ],
   "sapux": [
     "app/flightreports"
-  ]
+  ],
+  "cds": {
+    "requires": {
+      "ExchangeRateService": {
+        "kind": "odata",
+        "model": "srv/external/exchange-rate-service"
+      }
+    }
+  }
 }
