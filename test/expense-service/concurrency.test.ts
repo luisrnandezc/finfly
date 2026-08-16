@@ -1,8 +1,7 @@
-import cds from '@sap/cds';
-
 import { masterDataIDs } from '../support/ids';
+import { expenseServiceTest } from '../support/expense-service-test';
 
-const { GET, PATCH, POST, expect } = cds.test('serve', 'all', '--in-memory');
+const { GET, PATCH, POST, expect } = expenseServiceTest();
 
 const baseUrl = '/expenses';
 

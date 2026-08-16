@@ -1,8 +1,7 @@
-import cds from '@sap/cds';
-
 import { masterDataIDs } from '../support/ids';
+import { expenseServiceTest } from '../support/expense-service-test';
 
-const { POST, expect } = cds.test('serve', 'all', '--in-memory');
+const { POST, expect } = expenseServiceTest();
 
 const baseUrl = '/expenses';
 const nonexistentID = '99999999-0000-0000-0000-000000000001';

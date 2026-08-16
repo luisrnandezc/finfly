@@ -1,13 +1,9 @@
 import cds from '@sap/cds';
 
 import { masterDataIDs } from '../support/ids';
+import { expenseServiceTest } from '../support/expense-service-test';
 
-const { GET, POST, expect } = cds.test(
-  'serve',
-  'all',
-  '--with-mocks',
-  '--in-memory',
-);
+const { GET, POST, expect } = expenseServiceTest({ withMocks: true });
 
 const { INSERT } = cds.ql;
 

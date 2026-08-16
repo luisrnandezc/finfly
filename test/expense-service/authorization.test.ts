@@ -1,8 +1,9 @@
 import cds from '@sap/cds';
 
 import { masterDataIDs } from '../support/ids';
+import { expenseServiceTest } from '../support/expense-service-test';
 
-const { GET, POST, expect } = cds.test('serve', 'all', '--in-memory');
+const { GET, POST, expect } = expenseServiceTest();
 
 const { INSERT } = cds.ql;
 
@@ -113,6 +114,65 @@ describe('ExpenseService authorization', () => {
     const response = await POST(
       `${activeReportUrl(reportID)}/ExpenseService.submit`,
       {},
+      {
+        ...auditorConfiguration,
+        validateStatus: (status: number) => status === 403,
+      },
+    );
+
+    expect(response.status).to.equal(403);
+  });
+
+  it('allows an auditor to read a report', async () => {
+    const reportID = '93000000-0000-0000-0000-000000000004';
+
+    await seedActiveReport(reportID, 'FR-2026-AUDITOR-CAN-READ', 'SUBMITTED');
+
+    const response = await GET(activeReportUrl(reportID), auditorConfiguration);
+
+    expect(response.status).to.equal(200);
+    expect(response.data.ID).to.equal(reportID);
+    expect(response.data.status).to.equal('SUBMITTED');
+  });
+
+  it('prevents an auditor from creating a report', async () => {
+    const response = await POST(
+      `${baseUrl}/FlightReports`,
+      {
+        ID: '93000000-0000-0000-0000-000000000005',
+        reportNumber: 'FR-2026-AUDITOR-CANNOT-CREATE',
+        aircraft_ID: masterDataIDs.aircraft,
+        requesterName: 'Unauthorized report creation',
+      },
+      {
+        ...auditorConfiguration,
+        validateStatus: (status: number) => status === 403,
+      },
+    );
+
+    expect(response.status).to.equal(403);
+  });
+
+  it('prevents an auditor from directly creating an expense', async () => {
+    const reportID = '93000000-0000-0000-0000-000000000006';
+
+    await seedActiveReport(
+      reportID,
+      'FR-2026-AUDITOR-CANNOT-CREATE-EXPENSE',
+      'DRAFT',
+    );
+
+    const response = await POST(
+      `${baseUrl}/Expenses`,
+      {
+        ID: '93100000-0000-0000-0000-000000000001',
+        report_ID: reportID,
+        category_ID: masterDataIDs.fboCategory,
+        expenseDate: '2026-08-16',
+        description: 'Unauthorized expense',
+        originalAmount: 100,
+        originalCurrency_code: 'USD',
+      },
       {
         ...auditorConfiguration,
         validateStatus: (status: number) => status === 403,

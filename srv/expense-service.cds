@@ -60,3 +60,110 @@ annotate ExpenseService.FlightReports with {
     rejectionReason @readonly;
     statusHistory   @readonly;
 };
+
+annotate ExpenseService.FlightReports with @restrict: [
+    {
+        grant: 'READ',
+        to: [
+            'Pilot',
+            'Auditor',
+            'Admin'
+        ]
+    },
+    {
+        grant: [
+            'CREATE',
+            'UPDATE',
+            'DELETE'
+        ],
+        to: [
+            'Pilot',
+            'Admin'
+        ]
+    },
+    {
+        grant: [
+            'submit',
+            'refreshExchangeRates'
+        ],
+        to: [
+            'Pilot',
+            'Admin'
+        ]
+    },
+    {
+        grant: [
+            'approve',
+            'rejectReport'
+        ],
+        to: [
+            'Auditor',
+            'Admin'
+        ]
+    }
+];
+
+annotate ExpenseService.FlightLegs with @restrict: [
+    {
+        grant: 'READ',
+        to: [
+            'Pilot',
+            'Auditor',
+            'Admin'
+        ]
+    },
+    {
+        grant: 'WRITE',
+        to: [
+            'Pilot',
+            'Admin'
+        ]
+    }
+];
+
+annotate ExpenseService.CrewAssignments with @restrict: [
+    {
+        grant: 'READ',
+        to: [
+            'Pilot',
+            'Auditor',
+            'Admin'
+        ]
+    },
+    {
+        grant: 'WRITE',
+        to: [
+            'Pilot',
+            'Admin'
+        ]
+    }
+];
+
+annotate ExpenseService.Expenses with @restrict: [
+    {
+        grant: 'READ',
+        to: [
+            'Pilot',
+            'Auditor',
+            'Admin'
+        ]
+    },
+    {
+        grant: 'WRITE',
+        to: [
+            'Pilot',
+            'Admin'
+        ]
+    }
+];
+
+annotate ExpenseService.FlightReportHistory with @restrict: [
+    {
+        grant: 'READ',
+        to: [
+            'Pilot',
+            'Auditor',
+            'Admin'
+        ]
+    }
+];
