@@ -1,25 +1,39 @@
-# Getting Started
+# FinFly
 
-Welcome to your new project.
+FinFly is an MVP for managing corporate flight reports and their related expenses. It gives flight crews a single place to record trip details, crew assignments, receipts, and costs, while giving auditors a structured workflow to review and approve each report.
 
-It contains these folders and files, following our recommended project layout:
+## MVP scope
 
-File or Folder | Purpose
----------|----------
-`app/` | content for UI frontends goes here
-`db/` | your domain models and data go here
-`srv/` | your service models and code go here
-`package.json` | project metadata and configuration
-`readme.md` | this getting started guide
+- Create and edit flight reports with aircraft, flight legs, and crew assignments
+- Record expenses in multiple currencies, attach receipts, and calculate USD/VES amounts from exchange rates
+- Submit reports through an approval workflow with draft, review, approved, and rejected states
+- Apply role-based access for pilots, auditors, and administrators
+- Preserve review history and validate report data before submission
 
+## Technology
 
-## Next Steps
+- **Backend:** SAP Cloud Application Programming Model (CAP), Node.js, TypeScript, and OData
+- **Frontend:** SAP Fiori elements / SAPUI5
+- **Data:** CDS domain model with SQLite for local development
+- **Quality:** Vitest integration and service-level tests
 
-- Open a new terminal and run `cds watch`
-- (in VS Code simply choose _**Terminal** > Run Task > cds watch_)
-- Start adding content, for example, a [db/schema.cds](db/schema.cds).
+## Run locally
 
+Requires a current Node.js installation.
 
-## Learn More
+```bash
+npm install
+npm start
+```
 
-Learn more at https://cap.cloud.sap/docs/get-started/.
+Open the application URL shown in the terminal. Local development uses mocked users for the `Pilot`, `Auditor`, and `Admin` roles.
+
+Run the automated test suite with:
+
+```bash
+npm test
+```
+
+## Status
+
+FinFly is an MVP focused on the end-to-end flight expense reporting and approval flow. Production deployment, enterprise identity integration, and a live exchange-rate provider are outside the current scope.
