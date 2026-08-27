@@ -26,6 +26,7 @@ describe('ExpenseService exchange rates', () => {
     await db.run(
       INSERT.into(FlightReports).entries({
         ID: reportID,
+        organization_ID: masterDataIDs.organization,
         reportNumber: 'FR-2026-EXCHANGE-RATES',
         aircraft_ID: masterDataIDs.aircraft,
         requesterName: 'Exchange-rate integration test',

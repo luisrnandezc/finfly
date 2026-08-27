@@ -4,6 +4,9 @@ using { sap.common as common } from '@sap/cds/common';
 @path: '/expenses'
 service ExpenseService {
 
+    @readonly
+    entity Organizations as projection on db.Organizations;
+
     @odata.draft.enabled
     entity FlightReports as projection on db.FlightReports actions {
 
@@ -102,136 +105,56 @@ annotate ExpenseService.Expenses with {
 };
 
 annotate ExpenseService.FlightReports with @restrict: [
-    {
-        grant: 'READ',
-        to: [
-            'Pilot',
-            'Auditor',
-            'Admin'
-        ]
-    },
-    {
-        grant: [
-            'CREATE',
-            'UPDATE',
-            'DELETE'
-        ],
-        to: [
-            'Pilot',
-            'Admin'
-        ]
-    },
-    {
-        grant: [
-            'submit',
-            'addExpense',
-            'refreshExchangeRates'
-        ],
-        to: [
-            'Pilot',
-            'Admin'
-        ]
-    },
-    {
-        grant: [
-            'approveAllExpenses',
-        ],
-        to: [
-            'Auditor',
-            'Admin'
-        ]
-    }
+    { grant: 'READ', to: [ 'Pilot', 'Auditor', 'Admin' ], where: 'organization_ID = $user.organization' },
+    { grant: 'CREATE', to: [ 'Pilot', 'Admin' ] },
+    { grant: [ 'UPDATE', 'DELETE' ], to: [ 'Pilot', 'Admin' ], where: 'organization_ID = $user.organization' },
+    { grant: [ 'submit', 'addExpense', 'refreshExchangeRates' ], to: [ 'Pilot', 'Admin' ], where: 'organization_ID = $user.organization' },
+    { grant: 'approveAllExpenses', to: [ 'Auditor', 'Admin' ], where: 'organization_ID = $user.organization' }
 ];
 
 annotate ExpenseService.FlightLegs with @restrict: [
-    {
-        grant: 'READ',
-        to: [
-            'Pilot',
-            'Auditor',
-            'Admin'
-        ]
-    },
-    {
-        grant: 'WRITE',
-        to: [
-            'Pilot',
-            'Admin'
-        ]
-    }
+    { grant: 'READ', to: [ 'Pilot', 'Auditor', 'Admin' ], where: 'report.organization_ID = $user.organization' },
+    { grant: 'WRITE', to: [ 'Pilot', 'Admin' ], where: 'report.organization_ID = $user.organization' }
 ];
 
 annotate ExpenseService.CrewAssignments with @restrict: [
-    {
-        grant: 'READ',
-        to: [
-            'Pilot',
-            'Auditor',
-            'Admin'
-        ]
-    },
-    {
-        grant: 'WRITE',
-        to: [
-            'Pilot',
-            'Admin'
-        ]
-    }
+    { grant: 'READ', to: [ 'Pilot', 'Auditor', 'Admin' ], where: 'report.organization_ID = $user.organization' },
+    { grant: 'WRITE', to: [ 'Pilot', 'Admin' ], where: 'report.organization_ID = $user.organization' }
 ];
 
 annotate ExpenseService.Expenses with @restrict: [
-    {
-        grant: 'READ',
-        to: [
-            'Pilot',
-            'Auditor',
-            'Admin'
-        ]
-    },
-    {
-        grant: 'WRITE',
-        to: [
-            'Pilot',
-            'Admin'
-        ]
-    },
-    {
-        grant: [
-            'approveExpense',
-            'requestExpenseCorrection'
-        ],
-        to: [
-            'Auditor',
-            'Admin'
-        ]
-    },
-    {
-        grant: 'resubmitExpense',
-        to: [
-            'Pilot',
-            'Admin'
-        ]
-    }
+    { grant: 'READ', to: [ 'Pilot', 'Auditor', 'Admin' ], where: 'report.organization_ID = $user.organization' },
+    { grant: 'WRITE', to: [ 'Pilot', 'Admin' ], where: 'report.organization_ID = $user.organization' },
+    { grant: [ 'approveExpense', 'requestExpenseCorrection' ], to: [ 'Auditor', 'Admin' ], where: 'report.organization_ID = $user.organization' },
+    { grant: 'resubmitExpense', to: [ 'Pilot', 'Admin' ], where: 'report.organization_ID = $user.organization' }
 ];
 
-annotate ExpenseService.FlightReportHistory with @restrict: [
-    {
-        grant: 'READ',
-        to: [
-            'Pilot',
-            'Auditor',
-            'Admin'
-        ]
-    }
-];
+annotate ExpenseService.FlightReportHistory with @restrict: [{
+    grant: 'READ',
+    to: [ 'Pilot', 'Auditor', 'Admin' ],
+    where: 'report.organization_ID = $user.organization'
+}];
 
-annotate ExpenseService.ExpenseAuditHistory with @restrict: [
-    {
-        grant: 'READ',
-        to: [
-            'Pilot',
-            'Auditor',
-            'Admin'
-        ]
-    }
-];
+annotate ExpenseService.ExpenseAuditHistory with @restrict: [{
+    grant: 'READ',
+    to: [ 'Pilot', 'Auditor', 'Admin' ],
+    where: 'expense.report.organization_ID = $user.organization'
+}];
+
+annotate ExpenseService.Organizations with @restrict: [{
+    grant: 'READ',
+    to: [ 'Pilot', 'Auditor', 'Admin' ],
+    where: 'ID = $user.organization'
+}];
+
+annotate ExpenseService.Aircraft with @restrict: [{
+    grant: 'READ',
+    to: [ 'Pilot', 'Auditor', 'Admin' ],
+    where: 'organization_ID = $user.organization'
+}];
+
+annotate ExpenseService.CrewMembers with @restrict: [{
+    grant: 'READ',
+    to: [ 'Pilot', 'Auditor', 'Admin' ],
+    where: 'organization_ID = $user.organization'
+}];

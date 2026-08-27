@@ -47,22 +47,40 @@
         "users": {
           "pilot": {
             "password": "pilot",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000001"
+            },
             "roles": [
               "Pilot"
             ]
           },
           "auditor": {
             "password": "auditor",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000001"
+            },
             "roles": [
               "Auditor"
             ]
           },
           "admin": {
             "password": "admin",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000001"
+            },
             "roles": [
               "Admin",
               "Pilot",
               "Auditor"
+            ]
+          },
+          "otherpilot": {
+            "password": "otherpilot",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000002"
+            },
+            "roles": [
+              "Pilot"
             ]
           },
           "*": false

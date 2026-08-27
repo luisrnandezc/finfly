@@ -12,7 +12,9 @@ type ExpenseReference = {
 };
 
 type FlightReportReference = {
-  reportNumber: string;
+  reportNumber?: string | null;
+  organization_ID: string;
+  aircraft_ID: string;
 };
 
 type LegSequenceReference = {
@@ -30,7 +32,8 @@ type BoundReportKey = {
 
 type FlightReportWorkflowData = {
   ID: string;
-  reportNumber: string;
+  organization_ID: string;
+  reportNumber?: string | null;
   status: string;
   auditStatus: string;
 };
@@ -43,7 +46,7 @@ type ExpenseWorkflowData = {
 
 type ParentReportData = {
   ID: string;
-  reportNumber: string;
+  reportNumber?: string | null;
   status: string;
 };
 
@@ -80,6 +83,62 @@ export default class ExpenseService extends cds.ApplicationService {
     const common = cds.entities('sap.common');
     const selfApprovalEnabled =
       (cds.env as any).finfly?.selfApprovalEnabled === true;
+
+    const organizationFor = (req: Request): string => {
+      const organizationID = req.user.attr?.organization as string | undefined;
+
+      if (!organizationID) {
+        req.reject(403, 'No organization is assigned to the authenticated user');
+      }
+
+      return organizationID!;
+    };
+
+    const nextReportNumber = async (
+      tx: any,
+      organizationID: string,
+    ): Promise<string> => {
+      const year = new Date().getUTCFullYear();
+      const organization = await tx.run(
+        SELECT.one
+          .from(db.Organizations)
+          .columns('ID', 'active')
+          .where({ ID: organizationID })
+          .forUpdate(),
+      );
+
+      if (!organization?.active) {
+        throw Object.assign(new Error('The assigned organization is inactive'), {
+          status: 403,
+        });
+      }
+
+      const range = await tx.run(
+        SELECT.one
+          .from(db.ReportNumberRanges)
+          .columns('nextNumber')
+          .where({ organization_ID: organizationID, year }),
+      );
+      const allocatedNumber = Number(range?.nextNumber ?? 1);
+
+      if (range) {
+        await tx.run(
+          UPDATE.entity(db.ReportNumberRanges)
+            .set({ nextNumber: allocatedNumber + 1 })
+            .where({ organization_ID: organizationID, year }),
+        );
+      } else {
+        await tx.run(
+          INSERT.into(db.ReportNumberRanges).entries({
+            organization_ID: organizationID,
+            year,
+            nextNumber: allocatedNumber + 1,
+          }),
+        );
+      }
+
+      return `FR-${year}-${String(allocatedNumber).padStart(6, '0')}`;
+    };
 
     const recalculateReportAuditStatus = async (
       tx: any,
@@ -158,27 +217,71 @@ export default class ExpenseService extends cds.ApplicationService {
       }
     };
 
+    const initializeFlightReport = async (req: Request) => {
+      const organizationID = organizationFor(req);
+      const tx = cds.tx(req);
+      const membership = await tx.run(
+        SELECT.one
+          .from(db.OrganizationMembers)
+          .columns('ID')
+          .where({
+            organization_ID: organizationID,
+            userId: req.user.id,
+            active: true,
+          }),
+      );
+
+      if (!membership) {
+        return req.reject(
+          403,
+          'The authenticated user is not an active member of this organization',
+        );
+      }
+
+      req.data.organization_ID = organizationID;
+    };
+
+    this.before('NEW', FlightReports.drafts, initializeFlightReport);
+
     this.before('SAVE', FlightReports, async (req: Request) => {
       const reportId = req.data.ID as string;
 
       const draftReport = (await SELECT.one
         .from(FlightReports.drafts)
-        .columns('reportNumber')
+        .columns('reportNumber', 'organization_ID', 'aircraft_ID')
         .where({ ID: reportId })) as FlightReportReference | undefined;
 
       if (draftReport) {
-        const duplicateReport = await SELECT.one
-          .from(db.FlightReports)
+        if (draftReport.reportNumber) {
+          const duplicateReport = await SELECT.one
+            .from(db.FlightReports)
+            .columns('ID')
+            .where({
+              organization_ID: draftReport.organization_ID,
+              reportNumber: draftReport.reportNumber,
+              ID: { '!=': reportId },
+            });
+
+          if (duplicateReport) {
+            req.reject(
+              409,
+              `Flight report number ${draftReport.reportNumber} already exists`,
+            );
+          }
+        }
+
+        const aircraft = await SELECT.one
+          .from(db.Aircraft)
           .columns('ID')
           .where({
-            reportNumber: draftReport.reportNumber,
-            ID: { '!=': reportId },
+            ID: draftReport.aircraft_ID,
+            organization_ID: draftReport.organization_ID,
           });
 
-        if (duplicateReport) {
+        if (!aircraft) {
           req.reject(
-            409,
-            `Flight report number ${draftReport.reportNumber} already exists`,
+            400,
+            'The selected aircraft does not belong to this organization',
           );
         }
       }
@@ -219,6 +322,25 @@ export default class ExpenseService extends cds.ApplicationService {
           409,
           `Crew member ${duplicateCrewMember} is assigned more than once`,
         );
+      }
+
+      if (draftReport) {
+        for (const assignment of crewAssignments) {
+          const crewMember = await SELECT.one
+            .from(db.CrewMembers)
+            .columns('ID')
+            .where({
+              ID: assignment.crewMember_ID,
+              organization_ID: draftReport.organization_ID,
+            });
+
+          if (!crewMember) {
+            req.reject(
+              400,
+              `Crew member ${assignment.crewMember_ID} does not belong to this organization`,
+            );
+          }
+        }
       }
 
       const validLegIds = new Set(legs.map((leg) => leg.ID));
@@ -284,7 +406,13 @@ export default class ExpenseService extends cds.ApplicationService {
       const report = (await tx.run(
         SELECT.one
           .from(db.FlightReports)
-          .columns('ID', 'reportNumber', 'status', 'auditStatus')
+          .columns(
+            'ID',
+            'organization_ID',
+            'reportNumber',
+            'status',
+            'auditStatus',
+          )
           .where({ ID: key.ID }),
       )) as FlightReportWorkflowData | undefined;
 
@@ -292,10 +420,12 @@ export default class ExpenseService extends cds.ApplicationService {
         return req.reject(404, `Flight report with ID ${key.ID} not found`);
       }
 
+      const reportLabel = report.reportNumber ?? 'Draft flight report';
+
       if (report.status !== 'DRAFT') {
         return req.reject(
           409,
-          `Flight report ${report.reportNumber} cannot be submitted because its status is ${report.status}`,
+          `${reportLabel} cannot be submitted because its status is ${report.status}`,
         );
       }
 
@@ -306,7 +436,7 @@ export default class ExpenseService extends cds.ApplicationService {
       if (legs.length === 0) {
         return req.reject(
           400,
-          `Flight report ${report.reportNumber} cannot be submitted because it has no flight legs`,
+          `${reportLabel} cannot be submitted because it has no flight legs`,
         );
       }
 
@@ -319,7 +449,7 @@ export default class ExpenseService extends cds.ApplicationService {
       if (expenses.length === 0) {
         return req.reject(
           400,
-          `Flight report ${report.reportNumber} cannot be submitted because it has no expenses`,
+          `${reportLabel} cannot be submitted because it has no expenses`,
         );
       }
 
@@ -333,10 +463,13 @@ export default class ExpenseService extends cds.ApplicationService {
       if (!captain) {
         return req.reject(
           400,
-          `Flight report ${report.reportNumber} cannot be submitted because it has no assigned captain`,
+          `${reportLabel} cannot be submitted because it has no assigned captain`,
         );
       }
 
+      const reportNumber =
+        report.reportNumber ??
+        (await nextReportNumber(tx, report.organization_ID));
       const submittedAt = new Date().toISOString();
       const submittedBy = req.user.id;
       const autoApprove =
@@ -346,6 +479,7 @@ export default class ExpenseService extends cds.ApplicationService {
       await tx.run(
         UPDATE.entity(db.FlightReports)
           .set({
+            reportNumber,
             status: 'SUBMITTED',
             auditStatus: autoApprove ? 'APPROVED' : 'PENDING',
             submittedAt,
@@ -390,7 +524,7 @@ export default class ExpenseService extends cds.ApplicationService {
 
       await this.emit('FlightReportSubmitted', {
         reportID: report.ID,
-        reportNumber: report.reportNumber,
+        reportNumber,
         submittedBy,
         submittedAt,
       });

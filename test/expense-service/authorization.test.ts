@@ -40,6 +40,7 @@ async function seedActiveReport(
   await db.run(
     INSERT.into(FlightReports).entries({
       ID,
+      organization_ID: masterDataIDs.organization,
       reportNumber,
       aircraft_ID: masterDataIDs.aircraft,
       requesterName: 'Authorization test',

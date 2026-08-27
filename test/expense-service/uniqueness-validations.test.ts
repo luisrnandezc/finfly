@@ -24,36 +24,35 @@ async function activate(
 }
 
 describe('ExpenseService uniqueness validations', () => {
-  it('rejects activation of a duplicate report number', async () => {
-    const reportNumber = 'FR-2026-DUPLICATE';
+  it('does not allocate report numbers while reports are drafts', async () => {
     const firstID = '70000000-0000-0000-0000-000000000001';
     const secondID = '70000000-0000-0000-0000-000000000002';
 
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: firstID,
-      reportNumber,
       aircraft_ID: masterDataIDs.aircraft,
       requesterName: 'First report',
       status: 'DRAFT',
     });
 
     expect(response.status).to.equal(201);
+    expect(response.data.reportNumber).to.equal(null);
 
     const firstDraftUrl = `${baseUrl}/FlightReports(ID=${firstID},IsActiveEntity=false)`;
     await activate(firstDraftUrl, 201);
 
     response = await POST(`${baseUrl}/FlightReports`, {
       ID: secondID,
-      reportNumber,
       aircraft_ID: masterDataIDs.aircraft,
       requesterName: 'Duplicate report',
       status: 'DRAFT',
     });
 
     expect(response.status).to.equal(201);
+    expect(response.data.reportNumber).to.equal(null);
 
     const secondDraftUrl = `${baseUrl}/FlightReports(ID=${secondID},IsActiveEntity=false)`;
-    await activate(secondDraftUrl, 409);
+    await activate(secondDraftUrl, 201);
   });
 
   it('rejects duplicate leg sequences within one report', async () => {

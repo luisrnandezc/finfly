@@ -9,7 +9,6 @@ describe('ExpenseService flight report lifecycle', () => {
   it('submits a report and approves all of its expenses', async () => {
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: flightReportIDs.report,
-      reportNumber: 'FR-2026-0001',
       aircraft_ID: masterDataIDs.aircraft,
       requesterName: 'Julián Sierra (FIBEX)',
       status: 'DRAFT',
@@ -18,6 +17,7 @@ describe('ExpenseService flight report lifecycle', () => {
 
     expect(response.status).to.equal(201);
     expect(response.data.IsActiveEntity).to.equal(false);
+    expect(response.data.reportNumber).to.equal(null);
 
     const draftUrl =
       `${baseUrl}/FlightReports(` +
@@ -150,6 +150,9 @@ describe('ExpenseService flight report lifecycle', () => {
 
     expect(response.status).to.equal(200);
     expect(response.data.status).to.equal('SUBMITTED');
+    expect(response.data.reportNumber).to.match(
+      new RegExp(`^FR-${new Date().getUTCFullYear()}-\\d{6}$`),
+    );
     expect(response.data.auditStatus).to.equal('PENDING');
     expect(response.data.submittedAt).to.exist;
     expect(response.data.submittedBy).to.equal('pilot');

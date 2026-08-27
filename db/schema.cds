@@ -36,14 +36,40 @@ type CrewRole : String enum {
 };
 
 @assert.unique: {
-    registration: [registration]
+    code: [code]
+}
+entity Organizations : cuid, managed {
+    code   : String(20) not null;
+    name   : String(120) not null;
+    active : Boolean not null default true;
+}
+
+@assert.unique: {
+    organizationUser: [organization, userId]
+}
+entity OrganizationMembers : cuid, managed {
+    organization : Association to Organizations not null;
+    userId       : String(255) not null;
+    active       : Boolean not null default true;
+}
+
+entity ReportNumberRanges {
+    key organization : Association to Organizations;
+    key year         : Integer;
+    nextNumber       : Integer not null default 1;
+}
+
+@assert.unique: {
+    organizationRegistration: [organization, registration]
 }
 entity Aircraft : cuid, managed {
+    organization : Association to Organizations not null;
     registration : String(20) not null;
     description  : String(100);
 }
 
 entity CrewMembers : cuid, managed {
+    organization : Association to Organizations not null;
     firstName : String(80) not null;
     lastName  : String(80) not null;
     active    : Boolean default true;
@@ -60,10 +86,12 @@ entity ExpenseCategories : cuid, managed {
 }
 
 @assert.unique: {
-    reportNumber: [reportNumber]
+    organizationReportNumber: [organization, reportNumber]
 }
 entity FlightReports : cuid, managed {
-    reportNumber    : String(30) not null;
+    organization   : Association to Organizations not null;
+    // Assigned transactionally when the report is submitted.
+    reportNumber    : String(30);
 
     @assert.target
     aircraft        : Association to Aircraft not null;

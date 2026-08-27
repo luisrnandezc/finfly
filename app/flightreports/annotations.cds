@@ -188,8 +188,12 @@ annotate service.Expenses with @(
 );
 
 annotate service.FlightReports with {
+    organization  @UI.Hidden;
     aircraft      @title : 'Aircraft';
-    reportNumber  @title : 'Report Number';
+    reportNumber  @(
+        title : 'Report Number',
+        Common.FieldControl : #ReadOnly
+    );
     requesterName @title : 'Flight Requester';
     status        @title : 'Report Status';
     auditStatus   @title : 'Expense Audit Status';
