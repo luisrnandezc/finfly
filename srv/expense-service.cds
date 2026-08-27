@@ -14,6 +14,19 @@ service ExpenseService {
         action approveAllExpenses() returns FlightReports;
 
         @requires: 'Pilot'
+        action addExpense(
+            expenseDate         : Date not null,
+            categoryID          : UUID not null,
+            originalAmount      : Decimal(15,2) not null,
+            originalCurrencyCode: String(3) not null,
+            legID               : UUID,
+            description         : String(255),
+            supplier            : String(160),
+            receiptNumber       : String(80),
+            fuelQuantityLiters  : Decimal(12,2)
+        ) returns Expenses;
+
+        @requires: 'Pilot'
         action refreshExchangeRates() returns FlightReports;
     };
 
@@ -37,7 +50,17 @@ service ExpenseService {
         ) returns Expenses;
 
         @requires: 'Pilot'
-        action resubmitExpense() returns Expenses;
+        action resubmitExpense(
+            expenseDate          : Date,
+            categoryID           : UUID,
+            originalAmount       : Decimal(15,2),
+            originalCurrencyCode : String(3),
+            legID                : UUID,
+            description          : String(255),
+            supplier             : String(160),
+            receiptNumber        : String(80),
+            fuelQuantityLiters   : Decimal(12,2)
+        ) returns Expenses;
     };
 
     @readonly
@@ -101,6 +124,7 @@ annotate ExpenseService.FlightReports with @restrict: [
     {
         grant: [
             'submit',
+            'addExpense',
             'refreshExchangeRates'
         ],
         to: [

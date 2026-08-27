@@ -104,7 +104,7 @@ describe('ExpenseService workflow actions', () => {
 
     response = await POST(
       `${activeExpenseUrl(expenseID)}/ExpenseService.resubmitExpense`,
-      {},
+      { description: 'Corrected receipt information' },
       pilotConfiguration,
     );
 
@@ -112,6 +112,7 @@ describe('ExpenseService workflow actions', () => {
     expect(response.data.auditStatus).to.equal('PENDING');
     expect(response.data.correctionReason).to.equal(null);
     expect(response.data.auditedBy).to.equal(null);
+    expect(response.data.description).to.equal('Corrected receipt information');
 
     response = await POST(
       `${activeExpenseUrl(expenseID)}/ExpenseService.approveExpense`,
@@ -311,5 +312,54 @@ describe('ExpenseService workflow actions', () => {
     response = await GET(activeExpenseUrl(expenseID), pilotAuditorConfiguration);
     expect(response.data.auditStatus).to.equal('APPROVED');
     expect(response.data.auditedBy).to.equal('admin');
+  });
+
+  it('queues an expense added after report submission for audit', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000007';
+
+    await seedReport(
+      reportID,
+      'FR-2026-LATE-EXPENSE',
+      'SUBMITTED',
+      'APPROVED',
+    );
+
+    let response = await POST(
+      `${activeReportUrl(reportID)}/ExpenseService.addExpense`,
+      {
+        categoryID: masterDataIDs.fboCategory,
+        expenseDate: '2026-08-21',
+        description: 'Receipt received after report submission',
+        originalAmount: 75,
+        originalCurrencyCode: 'USD',
+      },
+      pilotConfiguration,
+    );
+
+    expect(response.status).to.equal(200);
+    expect(response.data.auditStatus).to.equal('PENDING');
+    expect(response.data.addedAfterReportSubmission).to.equal(true);
+    expect(response.data.submittedForAuditAt).to.exist;
+
+    const expenseID = response.data.ID as string;
+
+    response = await GET(`${activeExpenseUrl(expenseID)}?$expand=auditHistory`);
+    expect(response.data.auditHistory).to.have.length(1);
+    expect(response.data.auditHistory[0].fromStatus).to.equal('DRAFT');
+    expect(response.data.auditHistory[0].toStatus).to.equal('PENDING');
+
+    response = await GET(activeReportUrl(reportID));
+    expect(response.data.status).to.equal('SUBMITTED');
+    expect(response.data.auditStatus).to.equal('PENDING');
+
+    response = await GET(
+      `${baseUrl}/Expenses?$filter=addedAfterReportSubmission eq true and auditStatus eq 'PENDING'`,
+      auditorConfiguration,
+    );
+    expect(
+      response.data.value.some(
+        (expense: { ID: string }) => expense.ID === expenseID,
+      ),
+    ).to.equal(true);
   });
 });

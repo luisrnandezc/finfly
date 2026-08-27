@@ -41,6 +41,24 @@ type ExpenseWorkflowData = {
   auditStatus: string;
 };
 
+type ParentReportData = {
+  ID: string;
+  reportNumber: string;
+  status: string;
+};
+
+type ExpenseActionInput = {
+  expenseDate?: string;
+  categoryID?: string;
+  originalAmount?: number | string;
+  originalCurrencyCode?: string;
+  legID?: string | null;
+  description?: string | null;
+  supplier?: string | null;
+  receiptNumber?: string | null;
+  fuelQuantityLiters?: number | string | null;
+};
+
 type ExpenseConversionData = {
   ID: string;
   expenseDate: string;
@@ -59,6 +77,7 @@ export default class ExpenseService extends cds.ApplicationService {
     const { FlightReports, FlightLegs, CrewAssignments, Expenses } = this
       .entities as any;
     const db = cds.entities('finfly');
+    const common = cds.entities('sap.common');
     const selfApprovalEnabled =
       (cds.env as any).finfly?.selfApprovalEnabled === true;
 
@@ -92,6 +111,51 @@ export default class ExpenseService extends cds.ApplicationService {
       );
 
       return auditStatus;
+    };
+
+    const validateExpenseReferences = async (
+      tx: any,
+      reportID: string,
+      input: ExpenseActionInput,
+      req: Request,
+    ): Promise<void> => {
+      if (input.categoryID) {
+        const category = await tx.run(
+          SELECT.one
+            .from(db.ExpenseCategories)
+            .columns('ID')
+            .where({ ID: input.categoryID, active: true }),
+        );
+
+        if (!category) req.reject(400, 'Select an active expense category');
+      }
+
+      if (input.originalCurrencyCode) {
+        const currency = await tx.run(
+          SELECT.one
+            .from(common.Currencies)
+            .columns('code')
+            .where({ code: input.originalCurrencyCode }),
+        );
+
+        if (!currency) req.reject(400, 'Select a valid currency');
+      }
+
+      if (input.legID) {
+        const leg = await tx.run(
+          SELECT.one
+            .from(db.FlightLegs)
+            .columns('ID')
+            .where({ ID: input.legID, report_ID: reportID }),
+        );
+
+        if (!leg) {
+          req.reject(
+            400,
+            'The selected flight leg does not belong to this report',
+          );
+        }
+      }
     };
 
     this.before('SAVE', FlightReports, async (req: Request) => {
@@ -334,6 +398,81 @@ export default class ExpenseService extends cds.ApplicationService {
       return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
     });
 
+    this.on('addExpense', FlightReports, async (req: Request) => {
+      const key = req.params[0] as BoundReportKey | undefined;
+
+      if (!key?.ID) {
+        return req.reject(400, 'The flight report ID is required');
+      }
+
+      if (key.IsActiveEntity === false) {
+        return req.reject(409, 'Save the flight report before adding an expense');
+      }
+
+      const tx = cds.tx(req);
+      const report = (await tx.run(
+        SELECT.one
+          .from(db.FlightReports)
+          .columns('ID', 'reportNumber', 'status')
+          .where({ ID: key.ID }),
+      )) as ParentReportData | undefined;
+
+      if (!report) {
+        return req.reject(404, `Flight report with ID ${key.ID} not found`);
+      }
+
+      if (report.status !== 'SUBMITTED') {
+        return req.reject(
+          409,
+          `An expense can only be added after flight report ${report.reportNumber} has been submitted`,
+        );
+      }
+
+      const input = req.data as ExpenseActionInput;
+      const originalAmount = Number(input.originalAmount);
+
+      if (!Number.isFinite(originalAmount) || originalAmount <= 0) {
+        return req.reject(400, 'Expense amount must be greater than zero');
+      }
+
+      await validateExpenseReferences(tx, report.ID, input, req);
+
+      const expenseID = cds.utils.uuid();
+      const submittedForAuditAt = new Date().toISOString();
+
+      await tx.run(
+        INSERT.into(db.Expenses).entries({
+          ID: expenseID,
+          report_ID: report.ID,
+          leg_ID: input.legID ?? null,
+          category_ID: input.categoryID,
+          expenseDate: input.expenseDate,
+          description: input.description ?? null,
+          supplier: input.supplier ?? null,
+          receiptNumber: input.receiptNumber ?? null,
+          originalAmount,
+          originalCurrency_code: input.originalCurrencyCode,
+          fuelQuantityLiters: input.fuelQuantityLiters ?? null,
+          auditStatus: 'PENDING',
+          submittedForAuditAt,
+          addedAfterReportSubmission: true,
+        }),
+      );
+
+      await tx.run(
+        INSERT.into(db.ExpenseAuditHistory).entries({
+          expense_ID: expenseID,
+          fromStatus: 'DRAFT',
+          toStatus: 'PENDING',
+          comment: 'Expense added after flight report submission',
+        }),
+      );
+
+      await recalculateReportAuditStatus(tx, report.ID);
+
+      return tx.run(SELECT.one.from(db.Expenses).where({ ID: expenseID }));
+    });
+
     this.on('approveAllExpenses', FlightReports, async (req: Request) => {
       const key = req.params[0] as BoundReportKey | undefined;
 
@@ -571,9 +710,39 @@ export default class ExpenseService extends cds.ApplicationService {
 
       const submittedForAuditAt = new Date().toISOString();
 
+      const input = req.data as ExpenseActionInput;
+      await validateExpenseReferences(tx, expense.report_ID, input, req);
+
+      const corrections: Record<string, unknown> = {};
+      const fieldMappings: Array<[keyof ExpenseActionInput, string]> = [
+        ['expenseDate', 'expenseDate'],
+        ['categoryID', 'category_ID'],
+        ['originalAmount', 'originalAmount'],
+        ['originalCurrencyCode', 'originalCurrency_code'],
+        ['legID', 'leg_ID'],
+        ['description', 'description'],
+        ['supplier', 'supplier'],
+        ['receiptNumber', 'receiptNumber'],
+        ['fuelQuantityLiters', 'fuelQuantityLiters'],
+      ];
+
+      for (const [actionField, entityField] of fieldMappings) {
+        if (Object.prototype.hasOwnProperty.call(input, actionField)) {
+          corrections[entityField] = input[actionField];
+        }
+      }
+
+      if (
+        corrections.originalAmount !== undefined &&
+        Number(corrections.originalAmount) <= 0
+      ) {
+        return req.reject(400, 'Expense amount must be greater than zero');
+      }
+
       await tx.run(
         UPDATE.entity(db.Expenses)
           .set({
+            ...corrections,
             auditStatus: 'PENDING',
             submittedForAuditAt,
             auditedAt: null,
