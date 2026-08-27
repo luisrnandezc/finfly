@@ -27,11 +27,6 @@ annotate service.FlightReports with @(
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
-            Label : 'Refresh Exchange Rates',
-            Action : 'ExpenseService.refreshExchangeRates',
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
             Label : 'Submit Report',
             Action : 'ExpenseService.submit',
             Criticality : #Positive,
@@ -46,11 +41,6 @@ annotate service.FlightReports with @(
     UI.FieldGroup #GeneratedGroup : {
         $Type : 'UI.FieldGroupType',
         Data : [
-            {
-                $Type : 'UI.DataField',
-                Label : 'Report Number',
-                Value : reportNumber,
-            },
             {
                 $Type : 'UI.DataField',
                 Label : 'Aircraft',
@@ -114,6 +104,11 @@ annotate service.FlightReports with @(
             $Type : 'UI.DataField',
             Label : 'Flight Requester',
             Value : requesterName,
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Aircraft',
+            Value : aircraft_ID,
         },
         {
             $Type : 'UI.DataField',
@@ -189,15 +184,36 @@ annotate service.Expenses with @(
 
 annotate service.FlightReports with {
     organization  @UI.Hidden;
-    aircraft      @title : 'Aircraft';
+    aircraft @(
+        title : 'Aircraft',
+        Common.Text : aircraft.registration,
+        Common.TextArrangement : #TextOnly
+    );
     reportNumber  @(
         title : 'Report Number',
         Common.FieldControl : #ReadOnly
     );
     requesterName @title : 'Flight Requester';
-    status        @title : 'Report Status';
-    auditStatus   @title : 'Expense Audit Status';
-    notes         @title : 'Notes';
+    status @(
+        title : 'Report Status',
+        UI.ValueCriticality : [
+            { Value : 'DRAFT', Criticality : #Information },
+            { Value : 'SUBMITTED', Criticality : #Positive },
+        ]
+    );
+    auditStatus @(
+        title : 'Expense Audit Status',
+        UI.ValueCriticality : [
+            { Value : 'NOT_STARTED', Criticality : #Neutral },
+            { Value : 'PENDING', Criticality : #Information },
+            { Value : 'ACTION_REQUIRED', Criticality : #Negative },
+            { Value : 'APPROVED', Criticality : #Positive },
+        ]
+    );
+    notes @(
+        title : 'Notes',
+        UI.MultiLineText
+    );
 };
 
 annotate service.FlightReports actions {
