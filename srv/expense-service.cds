@@ -11,14 +11,7 @@ service ExpenseService {
         action submit() returns FlightReports;
 
         @requires: 'Auditor'
-        action approve(
-            comment : String(1000)
-        ) returns FlightReports;
-
-        @requires: 'Auditor'
-        action rejectReport(
-            reason : String(1000) not null
-        ) returns FlightReports;
+        action approveAllExpenses() returns FlightReports;
 
         @requires: 'Pilot'
         action refreshExchangeRates() returns FlightReports;
@@ -27,9 +20,25 @@ service ExpenseService {
     @readonly
     entity FlightReportHistory as projection on db.FlightReportHistory;
 
+    @readonly
+    entity ExpenseAuditHistory as projection on db.ExpenseAuditHistory;
+
     entity FlightLegs as projection on db.FlightLegs;
     entity CrewAssignments as projection on db.CrewAssignments;
-    entity Expenses as projection on db.Expenses;
+
+    entity Expenses as projection on db.Expenses actions {
+
+        @requires: 'Auditor'
+        action approveExpense() returns Expenses;
+
+        @requires: 'Auditor'
+        action requestExpenseCorrection(
+            reason : String(1000) not null
+        ) returns Expenses;
+
+        @requires: 'Pilot'
+        action resubmitExpense() returns Expenses;
+    };
 
     @readonly
     entity Aircraft as projection on db.Aircraft;
@@ -52,13 +61,21 @@ service ExpenseService {
 }
 
 annotate ExpenseService.FlightReports with {
-    status          @readonly;
-    submittedAt     @readonly;
-    submittedBy     @readonly;
-    reviewedAt      @readonly;
-    reviewedBy      @readonly;
-    rejectionReason @readonly;
-    statusHistory   @readonly;
+    status        @readonly;
+    auditStatus   @readonly;
+    submittedAt   @readonly;
+    submittedBy   @readonly;
+    statusHistory @readonly;
+};
+
+annotate ExpenseService.Expenses with {
+    auditStatus                   @readonly;
+    submittedForAuditAt           @readonly;
+    auditedAt                     @readonly;
+    auditedBy                     @readonly;
+    correctionReason              @readonly;
+    addedAfterReportSubmission    @readonly;
+    auditHistory                  @readonly;
 };
 
 annotate ExpenseService.FlightReports with @restrict: [
@@ -93,8 +110,7 @@ annotate ExpenseService.FlightReports with @restrict: [
     },
     {
         grant: [
-            'approve',
-            'rejectReport'
+            'approveAllExpenses',
         ],
         to: [
             'Auditor',
@@ -154,10 +170,38 @@ annotate ExpenseService.Expenses with @restrict: [
             'Pilot',
             'Admin'
         ]
+    },
+    {
+        grant: [
+            'approveExpense',
+            'requestExpenseCorrection'
+        ],
+        to: [
+            'Auditor',
+            'Admin'
+        ]
+    },
+    {
+        grant: 'resubmitExpense',
+        to: [
+            'Pilot',
+            'Admin'
+        ]
     }
 ];
 
 annotate ExpenseService.FlightReportHistory with @restrict: [
+    {
+        grant: 'READ',
+        to: [
+            'Pilot',
+            'Auditor',
+            'Admin'
+        ]
+    }
+];
+
+annotate ExpenseService.ExpenseAuditHistory with @restrict: [
     {
         grant: 'READ',
         to: [

@@ -13,9 +13,20 @@ using {
 type FlightReportStatus : String enum {
     draft       = 'DRAFT';
     submitted   = 'SUBMITTED';
-    underReview = 'UNDER_REVIEW';
-    approved    = 'APPROVED';
-    rejected    = 'REJECTED';
+}
+
+type ReportAuditStatus : String enum {
+    notStarted     = 'NOT_STARTED';
+    pending        = 'PENDING';
+    actionRequired = 'ACTION_REQUIRED';
+    approved       = 'APPROVED';
+}
+
+type ExpenseAuditStatus : String enum {
+    draft           = 'DRAFT';
+    pending         = 'PENDING';
+    approved        = 'APPROVED';
+    needsCorrection = 'NEEDS_CORRECTION';
 }
 
 type CrewRole : String enum {
@@ -61,14 +72,11 @@ entity FlightReports : cuid, managed {
 
     // Business workflow state-not the Fiori draft state.
     status          : FlightReportStatus not null default #draft;
+    auditStatus     : ReportAuditStatus not null default #notStarted;
 
     submittedAt     : Timestamp;
     submittedBy     : String(255);
 
-    reviewedAt      : Timestamp;
-    reviewedBy      : String(255);
-
-    rejectionReason : String(1000);
     notes           : LargeString;
 
     legs            : Composition of many FlightLegs 
@@ -149,12 +157,39 @@ entity Expenses : cuid, managed {
     amountUSD    : Decimal(15,2);
     amountVES    : Decimal(15,2);
 
+    auditStatus  : ExpenseAuditStatus not null default #draft;
+
+    submittedForAuditAt : Timestamp;
+
+    auditedAt : Timestamp;
+    auditedBy : String(255);
+
+    correctionReason : String(1000);
+
+    addedAfterReportSubmission : Boolean not null default false;
+
+    auditHistory : Composition of many ExpenseAuditHistory
+                on auditHistory.expense = $self;
+
     @assert.range: [(0), _]
     fuelQuantityLiters : Decimal(12,2);
 
     attachments : Composition of many Attachments;
 }
 
+entity ExpenseAuditHistory : cuid, managed {
+    expense : Association to Expenses not null;
+
+    fromStatus : ExpenseAuditStatus;
+    toStatus   : ExpenseAuditStatus not null;
+
+    comment : String(1000);
+}
+
 annotate FlightReports with {
+    modifiedAt @odata.etag;
+};
+
+annotate Expenses with {
     modifiedAt @odata.etag;
 };
