@@ -48,27 +48,48 @@ async function seedActiveReport(
   );
 }
 
+async function seedExpense(ID: string, reportID: string): Promise<void> {
+  const db = await cds.connect.to('db');
+  const { Expenses } = cds.entities('finfly');
+
+  await db.run(
+    INSERT.into(Expenses).entries({
+      ID,
+      report_ID: reportID,
+      category_ID: masterDataIDs.fboCategory,
+      expenseDate: '2026-08-20',
+      originalAmount: 100,
+      originalCurrency_code: 'USD',
+      auditStatus: 'PENDING',
+    }),
+  );
+}
+
 function activeReportUrl(ID: string): string {
   return `${baseUrl}/FlightReports(` + `ID=${ID},IsActiveEntity=true)`;
 }
 
+function activeExpenseUrl(ID: string): string {
+  return `${baseUrl}/Expenses(ID=${ID},IsActiveEntity=true)`;
+}
+
 describe('ExpenseService authorization', () => {
-  it('prevents a pilot from approving a submitted report', async () => {
+  it('prevents a pilot from approving an expense', async () => {
     const reportID = '93000000-0000-0000-0000-000000000001';
+    const expenseID = '93100000-0000-0000-0000-000000000002';
 
     await seedActiveReport(
       reportID,
       'FR-2026-PILOT-CANNOT-APPROVE',
       'SUBMITTED',
     );
+    await seedExpense(expenseID, reportID);
 
-    const reportUrl = activeReportUrl(reportID);
+    const expenseUrl = activeExpenseUrl(expenseID);
 
     let response = await POST(
-      `${reportUrl}/ExpenseService.approve`,
-      {
-        comment: 'A pilot must not approve this report',
-      },
+      `${expenseUrl}/ExpenseService.approveExpense`,
+      {},
       {
         ...pilotConfiguration,
         validateStatus: (status: number) => status === 403,
@@ -77,14 +98,14 @@ describe('ExpenseService authorization', () => {
 
     expect(response.status).to.equal(403);
 
-    // Confirm that authorization rejected the request before
-    // the action handler changed the report.
-    response = await GET(reportUrl);
+    // Authorization must reject the request before the action handler
+    // changes the expense.
+    response = await GET(expenseUrl);
 
     expect(response.status).to.equal(200);
-    expect(response.data.status).to.equal('SUBMITTED');
-    expect(response.data.reviewedAt).to.equal(null);
-    expect(response.data.reviewedBy).to.equal(null);
+    expect(response.data.auditStatus).to.equal('PENDING');
+    expect(response.data.auditedAt).to.equal(null);
+    expect(response.data.auditedBy).to.equal(null);
   });
 
   it('prevents an auditor from refreshing exchange rates', async () => {

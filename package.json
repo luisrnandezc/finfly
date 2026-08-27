@@ -34,6 +34,9 @@
     "app/flightreports"
   ],
   "cds": {
+    "finfly": {
+      "selfApprovalEnabled": true
+    },
     "requires": {
       "ExchangeRateService": {
         "kind": "odata",

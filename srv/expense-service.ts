@@ -32,6 +32,13 @@ type FlightReportWorkflowData = {
   ID: string;
   reportNumber: string;
   status: string;
+  auditStatus: string;
+};
+
+type ExpenseWorkflowData = {
+  ID: string;
+  report_ID: string;
+  auditStatus: string;
 };
 
 type ExpenseConversionData = {
@@ -52,6 +59,40 @@ export default class ExpenseService extends cds.ApplicationService {
     const { FlightReports, FlightLegs, CrewAssignments, Expenses } = this
       .entities as any;
     const db = cds.entities('finfly');
+    const selfApprovalEnabled =
+      (cds.env as any).finfly?.selfApprovalEnabled === true;
+
+    const recalculateReportAuditStatus = async (
+      tx: any,
+      reportID: string,
+    ): Promise<string> => {
+      const expenses = (await tx.run(
+        SELECT.from(db.Expenses)
+          .columns('auditStatus')
+          .where({ report_ID: reportID }),
+      )) as Array<{ auditStatus: string }>;
+
+      const auditStatus =
+        expenses.length === 0
+          ? 'NOT_STARTED'
+          : expenses.some(
+                (expense) => expense.auditStatus === 'NEEDS_CORRECTION',
+              )
+            ? 'ACTION_REQUIRED'
+            : expenses.every(
+                  (expense) => expense.auditStatus === 'APPROVED',
+                )
+              ? 'APPROVED'
+              : 'PENDING';
+
+      await tx.run(
+        UPDATE.entity(db.FlightReports)
+          .set({ auditStatus })
+          .where({ ID: reportID }),
+      );
+
+      return auditStatus;
+    };
 
     this.before('SAVE', FlightReports, async (req: Request) => {
       const reportId = req.data.ID as string;
@@ -150,7 +191,7 @@ export default class ExpenseService extends cds.ApplicationService {
         return req.reject(404, `Flight report with ID ${reportID} not found`);
       }
 
-      if (!['DRAFT', 'REJECTED'].includes(report.status)) {
+      if (report.status !== 'DRAFT') {
         return req.reject(
           409,
           `Flight report ${report.reportNumber} cannot be edited because its status is ${report.status}`,
@@ -179,7 +220,7 @@ export default class ExpenseService extends cds.ApplicationService {
       const report = (await tx.run(
         SELECT.one
           .from(db.FlightReports)
-          .columns('ID', 'reportNumber', 'status')
+          .columns('ID', 'reportNumber', 'status', 'auditStatus')
           .where({ ID: key.ID }),
       )) as FlightReportWorkflowData | undefined;
 
@@ -187,7 +228,7 @@ export default class ExpenseService extends cds.ApplicationService {
         return req.reject(404, `Flight report with ID ${key.ID} not found`);
       }
 
-      if (!['DRAFT', 'REJECTED'].includes(report.status)) {
+      if (report.status !== 'DRAFT') {
         return req.reject(
           409,
           `Flight report ${report.reportNumber} cannot be submitted because its status is ${report.status}`,
@@ -205,9 +246,11 @@ export default class ExpenseService extends cds.ApplicationService {
         );
       }
 
-      const expenses = await tx.run(
-        SELECT.from(db.Expenses).columns('ID').where({ report_ID: key.ID }),
-      );
+      const expenses = (await tx.run(
+        SELECT.from(db.Expenses)
+          .columns('ID', 'auditStatus')
+          .where({ report_ID: key.ID }),
+      )) as Array<{ ID: string; auditStatus: string }>;
 
       if (expenses.length === 0) {
         return req.reject(
@@ -232,19 +275,45 @@ export default class ExpenseService extends cds.ApplicationService {
 
       const submittedAt = new Date().toISOString();
       const submittedBy = req.user.id;
+      const autoApprove =
+        selfApprovalEnabled && req.user.is('Auditor');
+      const expenseTargetStatus = autoApprove ? 'APPROVED' : 'PENDING';
 
       await tx.run(
         UPDATE.entity(db.FlightReports)
           .set({
             status: 'SUBMITTED',
+            auditStatus: autoApprove ? 'APPROVED' : 'PENDING',
             submittedAt,
             submittedBy,
-            reviewedAt: null,
-            reviewedBy: null,
-            rejectionReason: null,
           })
           .where({ ID: report.ID }),
       );
+
+      for (const expense of expenses) {
+        await tx.run(
+          UPDATE.entity(db.Expenses)
+            .set({
+              auditStatus: expenseTargetStatus,
+              submittedForAuditAt: submittedAt,
+              auditedAt: autoApprove ? submittedAt : null,
+              auditedBy: autoApprove ? submittedBy : null,
+              correctionReason: null,
+            })
+            .where({ ID: expense.ID }),
+        );
+
+        await tx.run(
+          INSERT.into(db.ExpenseAuditHistory).entries({
+            expense_ID: expense.ID,
+            fromStatus: expense.auditStatus,
+            toStatus: expenseTargetStatus,
+            comment: autoApprove
+              ? 'Expense automatically approved on report submission'
+              : 'Expense submitted for audit',
+          }),
+        );
+      }
 
       await tx.run(
         INSERT.into(db.FlightReportHistory).entries({
@@ -265,18 +334,21 @@ export default class ExpenseService extends cds.ApplicationService {
       return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
     });
 
-    this.on('approve', FlightReports, async (req: Request) => {
+    this.on('approveAllExpenses', FlightReports, async (req: Request) => {
       const key = req.params[0] as BoundReportKey | undefined;
 
       if (!key?.ID) {
         return req.reject(
           400,
-          'The flight report ID is required to approve a report',
+          'The flight report ID is required to approve its expenses',
         );
       }
 
       if (key.IsActiveEntity === false) {
-        return req.reject(409, 'Save the flight report before approving it');
+        return req.reject(
+          409,
+          'Save the flight report before approving its expenses',
+        );
       }
 
       const tx = cds.tx(req);
@@ -284,7 +356,7 @@ export default class ExpenseService extends cds.ApplicationService {
       const report = (await tx.run(
         SELECT.one
           .from(db.FlightReports)
-          .columns('ID', 'reportNumber', 'status')
+          .columns('ID', 'reportNumber', 'status', 'auditStatus')
           .where({ ID: key.ID }),
       )) as FlightReportWorkflowData | undefined;
 
@@ -295,94 +367,234 @@ export default class ExpenseService extends cds.ApplicationService {
       if (report.status !== 'SUBMITTED') {
         return req.reject(
           409,
-          `Flight report ${report.reportNumber} cannot be approved because its status is ${report.status}`,
+          `Expenses cannot be approved because flight report ${report.reportNumber} has status ${report.status}`,
         );
       }
 
-      const reviewedAt = new Date().toISOString();
-      const reviewedBy = req.user.id;
-      const comment = req.data.comment as string | undefined;
+      const pendingExpenses = (await tx.run(
+        SELECT.from(db.Expenses)
+          .columns('ID', 'auditStatus')
+          .where({
+            report_ID: report.ID,
+            auditStatus: 'PENDING',
+          }),
+      )) as Array<{ ID: string; auditStatus: string }>;
 
-      await tx.run(
-        UPDATE.entity(db.FlightReports)
-          .set({
-            status: 'APPROVED',
-            reviewedAt,
-            reviewedBy,
-            rejectionReason: null,
-          })
-          .where({ ID: report.ID }),
-      );
+      if (pendingExpenses.length === 0) {
+        return req.reject(
+          409,
+          `Flight report ${report.reportNumber} has no pending expenses`,
+        );
+      }
 
-      await tx.run(
-        INSERT.into(db.FlightReportHistory).entries({
-          report_ID: report.ID,
-          fromStatus: report.status,
-          toStatus: 'APPROVED',
-          comment: comment?.trim() || 'Flight report approved',
-        }),
-      );
+      const auditedAt = new Date().toISOString();
+      const auditedBy = req.user.id;
+
+      for (const expense of pendingExpenses) {
+        await tx.run(
+          UPDATE.entity(db.Expenses)
+            .set({
+              auditStatus: 'APPROVED',
+              auditedAt,
+              auditedBy,
+              correctionReason: null,
+            })
+            .where({ ID: expense.ID }),
+        );
+
+        await tx.run(
+          INSERT.into(db.ExpenseAuditHistory).entries({
+            expense_ID: expense.ID,
+            fromStatus: expense.auditStatus,
+            toStatus: 'APPROVED',
+            comment: 'Expense approved through report bulk action',
+          }),
+        );
+      }
+
+      await recalculateReportAuditStatus(tx, report.ID);
 
       return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
     });
 
-    this.on('rejectReport', FlightReports, async (req: Request) => {
+    this.on('approveExpense', Expenses, async (req: Request) => {
       const key = req.params[0] as BoundReportKey | undefined;
 
       if (!key?.ID) {
-        return req.reject(400, 'The flight report ID is required');
+        return req.reject(400, 'The expense ID is required');
       }
 
       if (key.IsActiveEntity === false) {
-        return req.reject(409, 'Save the flight report before rejecting it');
+        return req.reject(409, 'Save the expense before approving it');
       }
-
-      const reason = (req.data.reason as string | undefined)?.trim();
 
       const tx = cds.tx(req);
 
-      const report = (await tx.run(
+      const expense = (await tx.run(
         SELECT.one
-          .from(db.FlightReports)
-          .columns('ID', 'reportNumber', 'status')
+          .from(db.Expenses)
+          .columns('ID', 'report_ID', 'auditStatus')
           .where({ ID: key.ID }),
-      )) as FlightReportWorkflowData | undefined;
+      )) as ExpenseWorkflowData | undefined;
 
-      if (!report) {
-        return req.reject(404, 'Flight report not found');
+      if (!expense) {
+        return req.reject(404, `Expense with ID ${key.ID} not found`);
       }
 
-      if (report.status !== 'SUBMITTED') {
+      if (expense.auditStatus !== 'PENDING') {
         return req.reject(
           409,
-          `A report with status ${report.status} cannot be rejected`,
+          `Expense ${expense.ID} cannot be approved because its status is ${expense.auditStatus}`,
         );
       }
 
-      const reviewedAt = new Date().toISOString();
-      const reviewedBy = req.user.id;
+      const auditedAt = new Date().toISOString();
+      const auditedBy = req.user.id;
 
       await tx.run(
-        UPDATE.entity(db.FlightReports)
+        UPDATE.entity(db.Expenses)
           .set({
-            status: 'REJECTED',
-            reviewedAt,
-            reviewedBy,
-            rejectionReason: reason,
+            auditStatus: 'APPROVED',
+            auditedAt,
+            auditedBy,
+            correctionReason: null,
           })
-          .where({ ID: report.ID }),
+          .where({ ID: expense.ID }),
       );
 
       await tx.run(
-        INSERT.into(db.FlightReportHistory).entries({
-          report_ID: report.ID,
-          fromStatus: report.status,
-          toStatus: 'REJECTED',
+        INSERT.into(db.ExpenseAuditHistory).entries({
+          expense_ID: expense.ID,
+          fromStatus: expense.auditStatus,
+          toStatus: 'APPROVED',
+          comment: 'Expense approved',
+        }),
+      );
+
+      await recalculateReportAuditStatus(tx, expense.report_ID);
+
+      return tx.run(SELECT.one.from(db.Expenses).where({ ID: expense.ID }));
+    });
+
+    this.on('requestExpenseCorrection', Expenses, async (req: Request) => {
+      const key = req.params[0] as BoundReportKey | undefined;
+
+      if (!key?.ID) {
+        return req.reject(400, 'The expense ID is required');
+      }
+
+      if (key.IsActiveEntity === false) {
+        return req.reject(
+          409,
+          'Save the expense before requesting a correction',
+        );
+      }
+
+      const reason = (req.data.reason as string).trim();
+      const tx = cds.tx(req);
+
+      const expense = (await tx.run(
+        SELECT.one
+          .from(db.Expenses)
+          .columns('ID', 'report_ID', 'auditStatus')
+          .where({ ID: key.ID }),
+      )) as ExpenseWorkflowData | undefined;
+
+      if (!expense) {
+        return req.reject(404, `Expense with ID ${key.ID} not found`);
+      }
+
+      if (expense.auditStatus !== 'PENDING') {
+        return req.reject(
+          409,
+          `Expense ${expense.ID} cannot request correction because its status is ${expense.auditStatus}`,
+        );
+      }
+
+      const auditedAt = new Date().toISOString();
+
+      await tx.run(
+        UPDATE.entity(db.Expenses)
+          .set({
+            auditStatus: 'NEEDS_CORRECTION',
+            auditedAt,
+            auditedBy: req.user.id,
+            correctionReason: reason,
+          })
+          .where({ ID: expense.ID }),
+      );
+
+      await tx.run(
+        INSERT.into(db.ExpenseAuditHistory).entries({
+          expense_ID: expense.ID,
+          fromStatus: expense.auditStatus,
+          toStatus: 'NEEDS_CORRECTION',
           comment: reason,
         }),
       );
 
-      return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
+      await recalculateReportAuditStatus(tx, expense.report_ID);
+
+      return tx.run(SELECT.one.from(db.Expenses).where({ ID: expense.ID }));
+    });
+
+    this.on('resubmitExpense', Expenses, async (req: Request) => {
+      const key = req.params[0] as BoundReportKey | undefined;
+
+      if (!key?.ID) {
+        return req.reject(400, 'The expense ID is required');
+      }
+
+      if (key.IsActiveEntity === false) {
+        return req.reject(409, 'Save the expense before resubmitting it');
+      }
+
+      const tx = cds.tx(req);
+
+      const expense = (await tx.run(
+        SELECT.one
+          .from(db.Expenses)
+          .columns('ID', 'report_ID', 'auditStatus')
+          .where({ ID: key.ID }),
+      )) as ExpenseWorkflowData | undefined;
+
+      if (!expense) {
+        return req.reject(404, `Expense with ID ${key.ID} not found`);
+      }
+
+      if (expense.auditStatus !== 'NEEDS_CORRECTION') {
+        return req.reject(
+          409,
+          `Expense ${expense.ID} cannot be resubmitted because its status is ${expense.auditStatus}`,
+        );
+      }
+
+      const submittedForAuditAt = new Date().toISOString();
+
+      await tx.run(
+        UPDATE.entity(db.Expenses)
+          .set({
+            auditStatus: 'PENDING',
+            submittedForAuditAt,
+            auditedAt: null,
+            auditedBy: null,
+            correctionReason: null,
+          })
+          .where({ ID: expense.ID }),
+      );
+
+      await tx.run(
+        INSERT.into(db.ExpenseAuditHistory).entries({
+          expense_ID: expense.ID,
+          fromStatus: expense.auditStatus,
+          toStatus: 'PENDING',
+          comment: 'Expense corrected and resubmitted for audit',
+        }),
+      );
+
+      await recalculateReportAuditStatus(tx, expense.report_ID);
+
+      return tx.run(SELECT.one.from(db.Expenses).where({ ID: expense.ID }));
     });
 
     this.on('refreshExchangeRates', FlightReports, async (req: Request) => {
@@ -415,7 +627,7 @@ export default class ExpenseService extends cds.ApplicationService {
         return req.reject(404, `Flight report with ID ${key.ID} not found`);
       }
 
-      if (!['DRAFT', 'REJECTED'].includes(report.status)) {
+      if (report.status !== 'DRAFT') {
         return req.reject(
           409,
           `Flight report ${report.reportNumber} cannot refresh exchange rates because its status is ${report.status}`,

@@ -6,7 +6,7 @@ const { GET, POST, expect } = expenseServiceTest();
 const baseUrl = '/expenses';
 
 describe('ExpenseService flight report lifecycle', () => {
-  it('creates, submits, and approves a complete flight report', async () => {
+  it('submits a report and approves all of its expenses', async () => {
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: flightReportIDs.report,
       reportNumber: 'FR-2026-0001',
@@ -150,15 +150,13 @@ describe('ExpenseService flight report lifecycle', () => {
 
     expect(response.status).to.equal(200);
     expect(response.data.status).to.equal('SUBMITTED');
+    expect(response.data.auditStatus).to.equal('PENDING');
     expect(response.data.submittedAt).to.exist;
     expect(response.data.submittedBy).to.equal('pilot');
-    expect(response.data.rejectionReason).to.equal(null);
 
     response = await POST(
-      `${activeUrl}/ExpenseService.approve`,
-      {
-        comment: 'Receipts and amounts verified',
-      },
+      `${activeUrl}/ExpenseService.approveAllExpenses`,
+      {},
       {
         headers: {
           'If-Match': '*',
@@ -171,12 +169,26 @@ describe('ExpenseService flight report lifecycle', () => {
     );
 
     expect(response.status).to.equal(200);
-    expect(response.data.status).to.equal('APPROVED');
-    expect(response.data.reviewedAt).to.exist;
-    expect(response.data.reviewedBy).to.equal('auditor');
-    expect(response.data.rejectionReason).to.equal(null);
+    expect(response.data.status).to.equal('SUBMITTED');
+    expect(response.data.auditStatus).to.equal('APPROVED');
 
-    response = await GET(`${activeUrl}?$expand=statusHistory`);
+    response = await GET(
+      `${activeUrl}?$expand=statusHistory,expenses($expand=auditHistory)`,
+    );
+
+    expect(
+      response.data.expenses.every(
+        (expense: { auditStatus: string }) =>
+          expense.auditStatus === 'APPROVED',
+      ),
+    ).to.equal(true);
+
+    expect(
+      response.data.expenses.every(
+        (expense: { auditHistory: unknown[] }) =>
+          expense.auditHistory.length === 2,
+      ),
+    ).to.equal(true);
 
     const submittedHistory = response.data.statusHistory.find(
       (entry: { toStatus: string }) => entry.toStatus === 'SUBMITTED',
@@ -187,13 +199,6 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(submittedHistory.comment).to.equal(
       'Flight report submitted for audit',
     );
-
-    const approvedHistory = response.data.statusHistory.find(
-      (entry: { toStatus: string }) => entry.toStatus === 'APPROVED',
-    );
-
-    expect(approvedHistory).to.exist;
-    expect(approvedHistory.fromStatus).to.equal('SUBMITTED');
-    expect(approvedHistory.comment).to.equal('Receipts and amounts verified');
+    expect(response.data.statusHistory).to.have.length(1);
   });
 });
