@@ -1,3 +1,4 @@
+import { FlightLegs } from '#cds-models/finfly';
 import cds, { type Request } from '@sap/cds';
 
 const { SELECT, INSERT, UPDATE } = cds.ql;
@@ -88,7 +89,10 @@ export default class ExpenseService extends cds.ApplicationService {
       const organizationID = req.user.attr?.organization as string | undefined;
 
       if (!organizationID) {
-        req.reject(403, 'No organization is assigned to the authenticated user');
+        req.reject(
+          403,
+          'No organization is assigned to the authenticated user',
+        );
       }
 
       return organizationID!;
@@ -108,9 +112,12 @@ export default class ExpenseService extends cds.ApplicationService {
       );
 
       if (!organization?.active) {
-        throw Object.assign(new Error('The assigned organization is inactive'), {
-          status: 403,
-        });
+        throw Object.assign(
+          new Error('The assigned organization is inactive'),
+          {
+            status: 403,
+          },
+        );
       }
 
       const range = await tx.run(
@@ -157,9 +164,7 @@ export default class ExpenseService extends cds.ApplicationService {
                 (expense) => expense.auditStatus === 'NEEDS_CORRECTION',
               )
             ? 'ACTION_REQUIRED'
-            : expenses.every(
-                  (expense) => expense.auditStatus === 'APPROVED',
-                )
+            : expenses.every((expense) => expense.auditStatus === 'APPROVED')
               ? 'APPROVED'
               : 'PENDING';
 
@@ -221,14 +226,11 @@ export default class ExpenseService extends cds.ApplicationService {
       const organizationID = organizationFor(req);
       const tx = cds.tx(req);
       const membership = await tx.run(
-        SELECT.one
-          .from(db.OrganizationMembers)
-          .columns('ID')
-          .where({
-            organization_ID: organizationID,
-            userId: req.user.id,
-            active: true,
-          }),
+        SELECT.one.from(db.OrganizationMembers).columns('ID').where({
+          organization_ID: organizationID,
+          userId: req.user.id,
+          active: true,
+        }),
       );
 
       if (!membership) {
@@ -472,8 +474,7 @@ export default class ExpenseService extends cds.ApplicationService {
         (await nextReportNumber(tx, report.organization_ID));
       const submittedAt = new Date().toISOString();
       const submittedBy = req.user.id;
-      const autoApprove =
-        selfApprovalEnabled && req.user.is('Auditor');
+      const autoApprove = selfApprovalEnabled && req.user.is('Auditor');
       const expenseTargetStatus = autoApprove ? 'APPROVED' : 'PENDING';
 
       await tx.run(
@@ -540,7 +541,10 @@ export default class ExpenseService extends cds.ApplicationService {
       }
 
       if (key.IsActiveEntity === false) {
-        return req.reject(409, 'Save the flight report before adding an expense');
+        return req.reject(
+          409,
+          'Save the flight report before adding an expense',
+        );
       }
 
       const tx = cds.tx(req);
@@ -645,12 +649,10 @@ export default class ExpenseService extends cds.ApplicationService {
       }
 
       const pendingExpenses = (await tx.run(
-        SELECT.from(db.Expenses)
-          .columns('ID', 'auditStatus')
-          .where({
-            report_ID: report.ID,
-            auditStatus: 'PENDING',
-          }),
+        SELECT.from(db.Expenses).columns('ID', 'auditStatus').where({
+          report_ID: report.ID,
+          auditStatus: 'PENDING',
+        }),
       )) as Array<{ ID: string; auditStatus: string }>;
 
       if (pendingExpenses.length === 0) {
@@ -1023,6 +1025,25 @@ export default class ExpenseService extends cds.ApplicationService {
       }
 
       return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
+    });
+
+    this.before('NEW', FlightLegs.drafts, async (req: Request) => {
+      const reportID = req.data.report_ID as string | undefined;
+
+      if (!reportID) {
+        return req.reject(
+          400,
+          'The flight report ID is required to create a new flight leg',
+        );
+      }
+
+      const lastleg = (await SELECT.one
+        .from(FlightLegs.drafts)
+        .columns('sequence')
+        .where({ report_ID: reportID })
+        .orderBy('sequence desc')) as { sequence?: number } | undefined;
+
+      req.data.sequence = Number(lastleg?.sequence ?? 0) + 1;
     });
 
     return super.init();
