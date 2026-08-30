@@ -73,6 +73,9 @@ service ExpenseService {
     entity CrewMembers as projection on db.CrewMembers;
 
     @readonly
+    entity CrewRoles as projection on db.CrewRoles;
+
+    @readonly
     entity ExpenseCategories as projection on db.ExpenseCategories;
 
     @readonly

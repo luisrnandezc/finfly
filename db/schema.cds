@@ -30,10 +30,15 @@ type ExpenseAuditStatus : String enum {
 }
 
 type CrewRole : String enum {
-    captain      = 'CAPTAIN';
-    firstOfficer = 'FIRST_OFFICER';
-    crew         = 'CREW';
+    pic      = 'PIC';
+    sic      = 'SIC';
+    other    = 'OTHER';
 };
+
+entity CrewRoles {
+    key code : CrewRole;
+    name     : String(50) not null;
+}
 
 @assert.unique: {
     code: [code]

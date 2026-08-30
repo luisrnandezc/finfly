@@ -248,7 +248,24 @@ annotate service.CrewAssignments with {
             ],
         }
     );
-    role @title : 'Role';
+    role @(
+        title : 'Role',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'CrewRoles',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : role,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        }
+    );
 };
 
 annotate service.Expenses with {
