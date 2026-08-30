@@ -243,6 +243,8 @@ export default class ExpenseService extends cds.ApplicationService {
       req.data.organization_ID = organizationID;
     };
 
+    const currentDate = (): string => new Date().toISOString().slice(0, 10);
+
     this.before('NEW', FlightReports.drafts, initializeFlightReport);
 
     this.before('SAVE', FlightReports, async (req: Request) => {
@@ -1044,6 +1046,12 @@ export default class ExpenseService extends cds.ApplicationService {
         .orderBy('sequence desc')) as { sequence?: number } | undefined;
 
       req.data.sequence = Number(lastleg?.sequence ?? 0) + 1;
+
+      req.data.flightDate ??= currentDate();
+    });
+
+    this.before('NEW', Expenses.drafts, (req: Request) => {
+      req.data.expenseDate ??= currentDate();
     });
 
     return super.init();
