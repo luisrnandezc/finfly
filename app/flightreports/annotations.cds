@@ -158,8 +158,6 @@ annotate service.FlightLegs with @(
         { $Type : 'UI.DataField', Label : 'Origin', Value : originAirportCode },
         { $Type : 'UI.DataField', Label : 'Destination', Value : destinationAirportCode },
         { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours },
-        { $Type : 'UI.DataField', Label : 'Initial Hourmeter', Value : hourMeterStart },
-        { $Type : 'UI.DataField', Label : 'Final Hourmeter', Value : hourMeterEnd },
     ]
 );
 
@@ -228,8 +226,6 @@ annotate service.FlightLegs with {
     originAirportCode      @title : 'Origin (ICAO)';
     destinationAirportCode @title : 'Destination (ICAO)';
     flightHours            @title : 'Flight Hours';
-    hourMeterStart         @title : 'Initial Hourmeter';
-    hourMeterEnd           @title : 'Final Hourmeter';
 };
 
 annotate service.CrewAssignments with {
