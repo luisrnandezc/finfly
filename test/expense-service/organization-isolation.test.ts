@@ -39,7 +39,6 @@ async function createAndSubmitReport(
     `${draftUrl}/legs`,
     {
       ID: `${childIDPrefix}0000-0000-0000-000000000001`,
-      sequence: 1,
       flightDate: '2026-08-20',
       originAirportCode: 'SVMI',
       destinationAirportCode: 'SVVA',

@@ -74,24 +74,16 @@ describe('ExpenseService numeric validations', () => {
     }
   });
 
-  it('rejects activation for invalid leg sequence or flight hours', async () => {
+  it('rejects activation for non-positive flight hours', async () => {
     const cases = [
       {
         suffix: '01',
-        reportNumber: 'FR-2026-ZERO-SEQUENCE',
-        sequence: 0,
-        flightHours: 2.3,
-      },
-      {
-        suffix: '02',
         reportNumber: 'FR-2026-ZERO-HOURS',
-        sequence: 1,
         flightHours: 0,
       },
       {
-        suffix: '03',
+        suffix: '02',
         reportNumber: 'FR-2026-NEGATIVE-HOURS',
-        sequence: 1,
         flightHours: -1,
       },
     ];
@@ -103,7 +95,6 @@ describe('ExpenseService numeric validations', () => {
 
       const response = await POST(`${draftUrl}/legs`, {
         ID: legID,
-        sequence: testCase.sequence,
         flightDate: '2026-08-20',
         originAirportCode: 'SVVA',
         destinationAirportCode: 'SKRG',
@@ -138,7 +129,6 @@ describe('ExpenseService numeric validations', () => {
 
       const response = await POST(`${draftUrl}/legs`, {
         ID: legID,
-        sequence: 1,
         flightDate: '2026-08-20',
         originAirportCode: 'SVVA',
         destinationAirportCode: 'SKRG',

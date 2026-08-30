@@ -262,7 +262,6 @@ describe('ExpenseService workflow actions', () => {
       `${draftUrl}/legs`,
       {
         ID: legID,
-        sequence: 1,
         flightDate: '2026-08-20',
         originAirportCode: 'SVMI',
         destinationAirportCode: 'SVVA',

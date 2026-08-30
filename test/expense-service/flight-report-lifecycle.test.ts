@@ -25,7 +25,6 @@ describe('ExpenseService flight report lifecycle', () => {
 
     response = await POST(`${draftUrl}/legs`, {
       ID: flightReportIDs.outboundLeg,
-      sequence: 1,
       flightDate: '2026-08-12',
       originAirportCode: 'SVVA',
       destinationAirportCode: 'SKRG',
@@ -33,10 +32,10 @@ describe('ExpenseService flight report lifecycle', () => {
     });
 
     expect(response.status).to.equal(201);
+    expect(response.data.sequence).to.equal(1);
 
     response = await POST(`${draftUrl}/legs`, {
       ID: flightReportIDs.returnLeg,
-      sequence: 2,
       flightDate: '2026-08-15',
       originAirportCode: 'SKRG',
       destinationAirportCode: 'SVVA',
@@ -44,6 +43,7 @@ describe('ExpenseService flight report lifecycle', () => {
     });
 
     expect(response.status).to.equal(201);
+    expect(response.data.sequence).to.equal(2);
 
     response = await POST(`${draftUrl}/crew`, {
       ID: flightReportIDs.captainAssignment,

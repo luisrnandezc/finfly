@@ -55,35 +55,39 @@ describe('ExpenseService uniqueness validations', () => {
     await activate(secondDraftUrl, 201);
   });
 
-  it('rejects duplicate leg sequences within one report', async () => {
+  it('allocates consecutive leg sequences within one report', async () => {
     const reportID = '71000000-0000-0000-0000-000000000001';
     const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
 
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: reportID,
-      reportNumber: 'FR-2026-DUPLICATE-LEG-SEQUENCE',
+      reportNumber: 'FR-2026-AUTOMATIC-LEG-SEQUENCE',
       aircraft_ID: masterDataIDs.aircraft,
-      requesterName: 'Duplicate sequence test',
+      requesterName: 'Automatic sequence test',
       status: 'DRAFT',
     });
 
     expect(response.status).to.equal(201);
 
-    for (const leg of [
+    const legs = [
       {
         ID: '71100000-0000-0000-0000-000000000001',
         origin: 'SVVA',
         destination: 'SKRG',
+        expectedSequence: 1,
       },
       {
         ID: '71100000-0000-0000-0000-000000000002',
         origin: 'SKRG',
         destination: 'SVVA',
+        expectedSequence: 2,
       },
-    ]) {
+    ];
+
+    for (const leg of legs) {
+      // Clients omit sequence because the service owns creation-order numbering.
       response = await POST(`${draftUrl}/legs`, {
         ID: leg.ID,
-        sequence: 1,
         flightDate: '2026-08-20',
         originAirportCode: leg.origin,
         destinationAirportCode: leg.destination,
@@ -91,9 +95,10 @@ describe('ExpenseService uniqueness validations', () => {
       });
 
       expect(response.status).to.equal(201);
+      expect(response.data.sequence).to.equal(leg.expectedSequence);
     }
 
-    await activate(draftUrl, 409);
+    await activate(draftUrl, 201);
   });
 
   it('rejects assigning the same crew member twice to one report', async () => {

@@ -28,7 +28,6 @@ describe('ExpenseService relationship validations', () => {
 
     response = await POST(`${draftUrl}/legs`, {
       ID: IDs.validLeg,
-      sequence: 1,
       flightDate: '2026-08-20',
       originAirportCode: 'SVVA',
       destinationAirportCode: 'SKRG',

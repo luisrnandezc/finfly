@@ -223,7 +223,7 @@ annotate service.FlightReports actions {
 };
 
 annotate service.FlightLegs with {
-    sequence               @title : 'Leg Number';
+    sequence               @(title : 'Leg Number', Common.FieldControl : #ReadOnly);
     flightDate             @title : 'Flight Date';
     originAirportCode      @title : 'Origin (ICAO)';
     destinationAirportCode @title : 'Destination (ICAO)';
