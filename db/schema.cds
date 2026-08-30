@@ -72,6 +72,7 @@ entity CrewMembers : cuid, managed {
     organization : Association to Organizations not null;
     firstName : String(80) not null;
     lastName  : String(80) not null;
+    fullName  : String(161) = firstName || ' ' || lastName;
     active    : Boolean default true;
 }
 

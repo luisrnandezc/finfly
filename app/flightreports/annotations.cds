@@ -231,6 +231,8 @@ annotate service.FlightLegs with {
 annotate service.CrewAssignments with {
     crewMember @(
         title : 'Crew Member',
+        Common.Text: crewMember.fullName,
+        Common.TextArrangement : #TextOnly,
         Common.ValueList : {
             CollectionPath : 'CrewMembers',
             Parameters : [
@@ -241,11 +243,7 @@ annotate service.CrewAssignments with {
                 },
                 {
                     $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'firstName',
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'lastName',
+                    ValueListProperty : 'fullName',
                 },
             ],
         }
