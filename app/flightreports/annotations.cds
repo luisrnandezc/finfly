@@ -153,29 +153,28 @@ annotate service.FlightReports with {
 
 annotate service.FlightLegs with @(
     UI.LineItem : [
-        { $Type : 'UI.DataField', Label : 'Leg', Value : sequence },
-        { $Type : 'UI.DataField', Label : 'Date', Value : flightDate },
-        { $Type : 'UI.DataField', Label : 'Origin', Value : originAirportCode },
-        { $Type : 'UI.DataField', Label : 'Destination', Value : destinationAirportCode },
-        { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours },
+        { $Type : 'UI.DataField', Label : 'Leg', Value : sequence, ![@UI.Importance] : #Medium },
+        { $Type : 'UI.DataField', Label : 'Date', Value : flightDate, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'From', Value : originAirportCode, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'To', Value : destinationAirportCode, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Hours', Value : flightHours, ![@UI.Importance] : #High },
     ]
 );
 
 annotate service.CrewAssignments with @(
     UI.LineItem : [
-        { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID },
-        { $Type : 'UI.DataField', Label : 'Role', Value : role },
+        { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Role', Value : role, ![@UI.Importance] : #High },
     ]
 );
 
 annotate service.Expenses with @(
     UI.LineItem : [
-        { $Type : 'UI.DataField', Label : 'Date', Value : expenseDate },
-        { $Type : 'UI.DataField', Label : 'Category', Value : category_ID },
-        { $Type : 'UI.DataField', Label : 'Description', Value : description },
-        { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount },
-        { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code },
-        { $Type : 'UI.DataField', Label : 'Audit Status', Value : auditStatus },
+        { $Type : 'UI.DataField', Label : 'Date', Value : expenseDate, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Category', Value : category_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Description', Value : description, ![@UI.Importance] : #Medium },
+        { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code, ![@UI.Importance] : #High },
     ]
 );
 
@@ -252,20 +251,28 @@ annotate service.CrewAssignments with {
         Common.ValueListWithFixedValues : true,
         Common.ValueList : {
             CollectionPath : 'CrewRoles',
+            PresentationVariantQualifier : 'RoleOrder',
             Parameters : [
                 {
                     $Type : 'Common.ValueListParameterInOut',
                     LocalDataProperty : role,
                     ValueListProperty : 'code'
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'name'
                 }
             ]
         }
     );
 };
+
+annotate service.CrewRoles with @(
+    UI.PresentationVariant #RoleOrder : {
+        SortOrder : [
+            {
+                Property : sortOrder,
+                Descending : false
+            }
+        ]
+    }
+);
 
 annotate service.Expenses with {
     expenseDate                  @title : 'Expense Date';
@@ -294,12 +301,24 @@ annotate service.Expenses with {
     supplier                     @title : 'Supplier';
     receiptNumber                @title : 'Receipt Number';
     originalAmount               @title : 'Amount';
-    originalCurrency @title : 'Currency';
+    originalCurrency             @title : 'Currency';
     exchangeRate                 @title : 'Exchange Rate';
     amountUSD                    @title : 'Amount (USD)';
     amountVES                    @title : 'Amount (VES)';
     auditStatus                  @title : 'Audit Status';
     fuelQuantityLiters           @title : 'Fuel Quantity (L)';
     addedAfterReportSubmission   @title : 'Added After Submission';
+};
+
+annotate service.Aircraft with {
+    ID @UI.Hidden;
+};
+
+annotate service.CrewMembers with {
+    ID @UI.Hidden;
+};
+
+annotate service.ExpenseCategories with {
+    ID @UI.Hidden;
 };
 

@@ -1,4 +1,4 @@
-code,name
-PIC,Pilot in Command
-SIC,Second in Command
-OTHER,Other
+code,name,sortOrder
+PIC,Pilot in Command,1
+SIC,Second in Command,2
+OTHER,Other,3

@@ -38,6 +38,7 @@ type CrewRole : String enum {
 entity CrewRoles {
     key code : CrewRole;
     name     : String(50) not null;
+    sortOrder : Integer not null;
 }
 
 @assert.unique: {
