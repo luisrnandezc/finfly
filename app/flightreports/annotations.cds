@@ -175,7 +175,6 @@ annotate service.Expenses with @(
         { $Type : 'UI.DataField', Label : 'Description', Value : description },
         { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount },
         { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code },
-        { $Type : 'UI.DataField', Label : 'Amount (USD)', Value : amountUSD },
         { $Type : 'UI.DataField', Label : 'Audit Status', Value : auditStatus },
     ]
 );
