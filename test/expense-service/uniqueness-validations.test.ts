@@ -118,11 +118,11 @@ describe('ExpenseService uniqueness validations', () => {
     for (const assignment of [
       {
         ID: '72100000-0000-0000-0000-000000000001',
-        role: 'CAPTAIN',
+        role: 'PIC',
       },
       {
         ID: '72100000-0000-0000-0000-000000000002',
-        role: 'FIRST_OFFICER',
+        role: 'SIC',
       },
     ]) {
       response = await POST(`${draftUrl}/crew`, {

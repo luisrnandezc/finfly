@@ -275,7 +275,7 @@ describe('ExpenseService workflow actions', () => {
       {
         ID: crewAssignmentID,
         crewMember_ID: masterDataIDs.captain,
-        role: 'CAPTAIN',
+        role: 'PIC',
       },
       pilotAuditorConfiguration,
     );

@@ -1,6 +1,7 @@
 {
   "name": "finfly",
   "version": "1.0.0",
+  "type": "module",
   "description": "A simple CAP project.",
   "dependencies": {
     "@sap/cds": "^9",

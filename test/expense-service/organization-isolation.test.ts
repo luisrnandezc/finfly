@@ -55,7 +55,7 @@ async function createAndSubmitReport(
         aircraftID === masterDataIDs.otherAircraft
           ? masterDataIDs.otherCrewMember
           : masterDataIDs.captain,
-      role: 'CAPTAIN',
+      role: 'PIC',
     },
     configuration,
   );

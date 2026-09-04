@@ -55,7 +55,7 @@ describe('ExpenseService reference validations', () => {
     response = await POST(`${draftUrl}/crew`, {
       ID: '82000000-0000-0000-0000-000000000001',
       crewMember_ID: nonexistentID,
-      role: 'CAPTAIN',
+      role: 'PIC',
     });
 
     expect(response.status).to.equal(201);

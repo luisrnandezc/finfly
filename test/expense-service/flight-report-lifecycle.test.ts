@@ -48,7 +48,7 @@ describe('ExpenseService flight report lifecycle', () => {
     response = await POST(`${draftUrl}/crew`, {
       ID: flightReportIDs.captainAssignment,
       crewMember_ID: masterDataIDs.captain,
-      role: 'CAPTAIN',
+      role: 'PIC',
     });
 
     expect(response.status).to.equal(201);
@@ -56,7 +56,7 @@ describe('ExpenseService flight report lifecycle', () => {
     response = await POST(`${draftUrl}/crew`, {
       ID: flightReportIDs.firstOfficerAssignment,
       crewMember_ID: masterDataIDs.firstOfficer,
-      role: 'FIRST_OFFICER',
+      role: 'SIC',
     });
 
     expect(response.status).to.equal(201);
