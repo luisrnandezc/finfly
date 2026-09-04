@@ -325,6 +325,8 @@ annotate service.Expenses with {
     expenseDate                  @title : 'Expense Date';
     category @(
         title : 'Category',
+        Common.Text : category.name,
+        Common.TextArrangement : #TextOnly,
         Common.ValueList : {
             CollectionPath : 'ExpenseCategories',
             Parameters : [
