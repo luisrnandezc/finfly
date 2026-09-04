@@ -68,12 +68,38 @@ annotate service.FlightReports with @(
             },
         ],
     },
+    UI.FieldGroup #TripSummary : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            {
+                $Type : 'UI.DataField',
+                Label : 'First Flight',
+                Value : firstFlightDate,
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Last Flight',
+                Value : lastFlightDate,
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Total Flight Hours',
+                Value : totalFlightHours,
+            },
+        ],
+    },
     UI.Facets : [
         {
             $Type : 'UI.ReferenceFacet',
             ID : 'GeneralInformation',
             Label : 'General Information',
             Target : '@UI.FieldGroup#GeneratedGroup',
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'TripSummary',
+            Label : 'Trip Summary',
+            Target : '@UI.FieldGroup#TripSummary',
         },
         {
             $Type : 'UI.ReferenceFacet',
@@ -99,31 +125,49 @@ annotate service.FlightReports with @(
             $Type : 'UI.DataField',
             Label : 'Report Number',
             Value : reportNumber,
-        },
-        {
-            $Type : 'UI.DataField',
-            Label : 'Flight Requester',
-            Value : requesterName,
+            ![@UI.Importance] : #High,
         },
         {
             $Type : 'UI.DataField',
             Label : 'Aircraft',
             Value : aircraft_ID,
+            ![@UI.Importance] : #High,
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'First Flight',
+            Value : firstFlightDate,
+            ![@UI.Importance] : #Medium,
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Last Flight',
+            Value : lastFlightDate,
+            ![@UI.Importance] : #Medium,
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Total Hours',
+            Value : totalFlightHours,
+            ![@UI.Importance] : #Medium,
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Flight Requester',
+            Value : requesterName,
+            ![@UI.Importance] : #Low,
         },
         {
             $Type : 'UI.DataField',
             Label : 'Status',
             Value : status,
+            ![@UI.Importance] : #High,
         },
         {
             $Type : 'UI.DataField',
             Label : 'Expense Audit Status',
             Value : auditStatus,
-        },
-        {
-            $Type : 'UI.DataField',
-            Label : 'Notes',
-            Value : notes,
+            ![@UI.Importance] : #Medium,
         },
     ],
 );
@@ -190,6 +234,9 @@ annotate service.FlightReports with {
         Common.FieldControl : #ReadOnly
     );
     requesterName @title : 'Flight Requester';
+    firstFlightDate  @title : 'First Flight';
+    lastFlightDate   @title : 'Last Flight';
+    totalFlightHours @title : 'Total Flight Hours';
     status @(
         title : 'Report Status',
         UI.ValueCriticality : [
