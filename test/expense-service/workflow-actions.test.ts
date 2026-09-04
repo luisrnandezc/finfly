@@ -3,7 +3,7 @@ import cds from '@sap/cds';
 import { masterDataIDs } from '../support/ids';
 import { expenseServiceTest } from '../support/expense-service-test';
 
-const { GET, POST, expect } = expenseServiceTest();
+const { DELETE, GET, POST, expect } = expenseServiceTest();
 const { INSERT, SELECT } = cds.ql;
 
 const baseUrl = '/expenses';
@@ -237,6 +237,49 @@ describe('ExpenseService workflow actions', () => {
     expect(response.data.error.message).to.equal(
       'Flight report FR-2026-SUBMITTED-LOCKED cannot be edited because its status is SUBMITTED',
     );
+  });
+
+  it('allows deleting a draft report', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000010';
+
+    const response = await POST(`${baseUrl}/FlightReports`, {
+      ID: reportID,
+      aircraft_ID: masterDataIDs.aircraft,
+      requesterName: 'Discarded draft test',
+    });
+
+    expect(response.status).to.equal(201);
+
+    const deleteResponse = await DELETE(
+      `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`,
+      pilotConfiguration,
+    );
+
+    expect(deleteResponse.status).to.equal(204);
+  });
+
+  it('prevents deleting a submitted report', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000011';
+
+    await seedReport(
+      reportID,
+      'FR-2026-SUBMITTED-NOT-DELETABLE',
+      'SUBMITTED',
+      'PENDING',
+    );
+
+    const response = await DELETE(activeReportUrl(reportID), {
+      ...pilotConfiguration,
+      validateStatus: (status: number) => status === 409,
+    });
+
+    expect(response.status).to.equal(409);
+    expect(response.data.error.message).to.equal(
+      'Flight report FR-2026-SUBMITTED-NOT-DELETABLE cannot be deleted because its status is SUBMITTED',
+    );
+
+    const persistedReport = await GET(activeReportUrl(reportID));
+    expect(persistedReport.status).to.equal(200);
   });
 
   it('automatically approves expenses when the submitter is also an auditor', async () => {

@@ -163,6 +163,19 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(response.data.submittedAt).to.exist;
     expect(response.data.submittedBy).to.equal('pilot');
 
+    const submissionMessages = JSON.parse(
+      response.headers['sap-messages'] as string,
+    ) as Array<{ message: string; numericSeverity: number }>;
+
+    const submissionMessage = submissionMessages.find(
+      ({ message }) =>
+        message ===
+        `Flight report ${response.data.reportNumber} submitted successfully`,
+    );
+
+    expect(submissionMessage).to.exist;
+    expect(submissionMessage?.numericSeverity).to.equal(1);
+
     response = await POST(
       `${activeUrl}/ExpenseService.approveAllExpenses`,
       {},

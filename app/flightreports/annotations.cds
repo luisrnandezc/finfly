@@ -2,6 +2,15 @@ using ExpenseService as service from '../../srv/expense-service';
 
 annotate service.FlightReports with @(
 
+    Capabilities.UpdateRestrictions : {
+        Updatable : (status = 'DRAFT')
+    },
+    Capabilities.DeleteRestrictions : {
+        Deletable : (status = 'DRAFT')
+    },
+    UI.UpdateHidden : (status <> 'DRAFT'),
+    UI.DeleteHidden : (status <> 'DRAFT'),
+
     UI.HeaderInfo : {
         $Type : 'UI.HeaderInfoType',
         TypeName : 'Flight Report',
@@ -273,7 +282,19 @@ annotate service.FlightReports with {
 
 annotate service.FlightReports actions {
     refreshExchangeRates @Core.OperationAvailable : ($self.status = 'DRAFT');
-    submit               @Core.OperationAvailable : ($self.status = 'DRAFT');
+    submit @(
+        Core.OperationAvailable : ($self.status = 'DRAFT'),
+        Common.SideEffects : {
+            TargetProperties : [
+                'in/status',
+                'in/auditStatus',
+                'in/reportNumber',
+                'in/displayTitle',
+                'in/submittedAt',
+                'in/submittedBy'
+            ]
+        }
+    );
     addExpense           @Core.OperationAvailable : ($self.status = 'SUBMITTED');
 };
 

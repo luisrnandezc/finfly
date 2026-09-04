@@ -221,6 +221,37 @@ export function registerFlightReportHandlers(
     }
   });
 
+  service.before('DELETE', FlightReports, async (req: Request) => {
+    const key = req.params[0] as BoundReportKey | undefined;
+
+    // Deleting a draft is how Fiori discards an unfinished creation or edit.
+    if (key?.IsActiveEntity === false || req.data.IsActiveEntity === false) {
+      return;
+    }
+
+    const reportID = key?.ID ?? (req.data.ID as string | undefined);
+    if (!reportID) {
+      return req.reject(
+        400,
+        'The flight report ID is required to delete a report',
+      );
+    }
+
+    const report = (await SELECT.one
+      .from(db.FlightReports)
+      .columns('ID', 'reportNumber', 'status')
+      .where({ ID: reportID })) as ReportWorkflowData | undefined;
+    if (!report) {
+      return req.reject(404, `Flight report with ID ${reportID} not found`);
+    }
+    if (report.status !== 'DRAFT') {
+      return req.reject(
+        409,
+        `Flight report ${report.reportNumber} cannot be deleted because its status is ${report.status}`,
+      );
+    }
+  });
+
   service.on('submit', FlightReports, async (req: Request) => {
     const key = req.params[0] as BoundReportKey | undefined;
     if (!key?.ID) {
@@ -345,6 +376,8 @@ export function registerFlightReportHandlers(
       submittedBy,
       submittedAt,
     });
+
+    req.notify(`Flight report ${reportNumber} submitted successfully`);
 
     return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
   });
