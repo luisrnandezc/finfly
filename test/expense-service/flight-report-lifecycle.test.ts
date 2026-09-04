@@ -23,6 +23,11 @@ describe('ExpenseService flight report lifecycle', () => {
       `${baseUrl}/FlightReports(` +
       `ID=${flightReportIDs.report},IsActiveEntity=false)`;
 
+    response = await GET(`${draftUrl}?$select=displayTitle`);
+
+    expect(response.status).to.equal(200);
+    expect(response.data.displayTitle).to.equal('Draft - YV3364');
+
     response = await POST(`${draftUrl}/legs`, {
       ID: flightReportIDs.outboundLeg,
       flightDate: '2026-08-12',
@@ -153,6 +158,7 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(response.data.reportNumber).to.match(
       new RegExp(`^FR-${new Date().getUTCFullYear()}-\\d{6}$`),
     );
+    expect(response.data.displayTitle).to.equal(response.data.reportNumber);
     expect(response.data.auditStatus).to.equal('PENDING');
     expect(response.data.submittedAt).to.exist;
     expect(response.data.submittedBy).to.equal('pilot');

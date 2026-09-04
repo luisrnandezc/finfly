@@ -100,6 +100,13 @@ entity FlightReports : cuid, managed {
     // Assigned transactionally when the report is submitted.
     reportNumber    : String(30);
 
+    // UI identifier available before the official number is assigned.
+    displayTitle    : String(160) = case
+        when reportNumber is not null then reportNumber
+        when aircraft.registration is not null then concat('Draft - ', aircraft.registration)
+        else 'Draft Flight Report'
+    end;
+
     @assert.target
     aircraft        : Association to Aircraft not null;
 

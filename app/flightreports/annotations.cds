@@ -8,10 +8,7 @@ annotate service.FlightReports with @(
         TypeNamePlural : 'Flight Reports',
         Title : {
             $Type : 'UI.DataField',
-            Value : (case
-                when reportNumber is null then 'New Flight Report'
-                else reportNumber
-            end),
+            Value : displayTitle,
         },
         Description : {
             $Type : 'UI.DataField',
@@ -126,8 +123,8 @@ annotate service.FlightReports with @(
     UI.LineItem : [
         {
             $Type : 'UI.DataField',
-            Label : 'Report Number',
-            Value : reportNumber,
+            Label : 'Report',
+            Value : displayTitle,
             ![@UI.Importance] : #High,
         },
         {

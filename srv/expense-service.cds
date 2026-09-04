@@ -91,6 +91,7 @@ service ExpenseService {
 
 annotate ExpenseService.FlightReports with {
     status        @readonly;
+    displayTitle  @readonly;
     auditStatus   @readonly;
     firstFlightDate  @readonly;
     lastFlightDate   @readonly;
