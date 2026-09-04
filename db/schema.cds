@@ -105,6 +105,11 @@ entity FlightReports : cuid, managed {
 
     requesterName   : String(160);
 
+    // Persisted operational summary, calculated from the report's flight legs.
+    firstFlightDate  : Date;
+    lastFlightDate   : Date;
+    totalFlightHours : Decimal(8,2) not null default 0;
+
     // Business workflow state-not the Fiori draft state.
     status          : FlightReportStatus not null default #draft;
     auditStatus     : ReportAuditStatus not null default #notStarted;
