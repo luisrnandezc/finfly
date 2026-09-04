@@ -1,8 +1,13 @@
 import cds, { type Request } from '@sap/cds';
+import { calculateFlightReportSummary } from '../domain/flight-report-summary.ts';
 
 const { SELECT, INSERT, UPDATE } = cds.ql;
 
-type LegReference = { ID: string };
+type LegReference = {
+  ID: string;
+  flightDate?: string | null;
+  flightHours?: number | string | null;
+};
 type ExpenseReference = { ID: string; leg_ID?: string | null };
 type LegSequenceReference = { sequence: number };
 type CrewMemberReference = { crewMember_ID: string };
@@ -129,7 +134,7 @@ export function registerFlightReportHandlers(
     }
 
     const legs = (await SELECT.from(FlightLegs.drafts)
-      .columns('ID')
+      .columns('ID', 'flightDate', 'flightHours')
       .where({ report_ID: reportID })) as LegReference[];
     const expenses = (await SELECT.from(Expenses.drafts)
       .columns('ID', 'leg_ID')
@@ -189,6 +194,9 @@ export function registerFlightReportHandlers(
         `Expense ${invalidExpense.ID} references a flight leg that does not belong to this report`,
       );
     }
+
+    // The service owns these persisted values; clients only maintain flight legs.
+    Object.assign(req.data, calculateFlightReportSummary(legs));
   });
 
   service.before('EDIT', FlightReports, async (req: Request) => {
