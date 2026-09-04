@@ -127,7 +127,8 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/FlightReports"
+              "contextPath": "/FlightReports",
+              "enhanceI18n": "i18n/i18n.properties"
             }
           }
         }

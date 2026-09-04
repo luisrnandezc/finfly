@@ -8,7 +8,10 @@ annotate service.FlightReports with @(
         TypeNamePlural : 'Flight Reports',
         Title : {
             $Type : 'UI.DataField',
-            Value : reportNumber,
+            Value : (case
+                when reportNumber is null then 'New Flight Report'
+                else reportNumber
+            end),
         },
         Description : {
             $Type : 'UI.DataField',
@@ -199,8 +202,20 @@ annotate service.FlightLegs with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Leg', Value : sequence, ![@UI.Importance] : #Medium },
         { $Type : 'UI.DataField', Label : 'Date', Value : flightDate, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'From', Value : originAirportCode, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'To', Value : destinationAirportCode, ![@UI.Importance] : #High },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Origin',
+            Value : originAirportCode,
+            ![@UI.Importance] : #High,
+            ![@HTML5.CssDefaults.width] : '8rem'
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Destination',
+            Value : destinationAirportCode,
+            ![@UI.Importance] : #High,
+            ![@HTML5.CssDefaults.width] : '8rem'
+        },
         { $Type : 'UI.DataField', Label : 'Hours', Value : flightHours, ![@UI.Importance] : #High },
     ]
 );
