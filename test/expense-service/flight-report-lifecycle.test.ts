@@ -110,6 +110,9 @@ describe('ExpenseService flight report lifecycle', () => {
 
     expect(response.status).to.equal(200);
     expect(response.data.legs).to.have.length(2);
+    expect(
+      response.data.legs.map((leg: { sequenceText: string }) => leg.sequenceText),
+    ).to.deep.equal(['1', '2']);
     expect(response.data.crew).to.have.length(2);
     expect(response.data.expenses).to.have.length(2);
 

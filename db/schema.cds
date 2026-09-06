@@ -156,6 +156,7 @@ entity FlightLegs : cuid, managed {
 
     @assert.range: [(0), _]
     sequence               : Integer not null;
+    sequenceText           : String(10) = cast(sequence as String);
 
     flightDate             : Date not null;
     originAirportCode      : String(4) not null;

@@ -10,6 +10,10 @@ annotate service.FlightReports with @(
     },
     UI.UpdateHidden : (status <> 'DRAFT'),
     UI.DeleteHidden : (status <> 'DRAFT'),
+    Common.SideEffects #RefreshFlightLegValueHelp : {
+        SourceEntities : [legs],
+        TargetEntities : ['/ExpenseService.EntityContainer/FlightLegs']
+    },
 
     UI.HeaderInfo : {
         $Type : 'UI.HeaderInfoType',
@@ -237,6 +241,7 @@ annotate service.Expenses with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Date', Value : expenseDate, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Category', Value : category_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Flight Leg', Value : leg_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Description', Value : description, ![@UI.Importance] : #Medium },
         { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code, ![@UI.Importance] : #High },
@@ -299,10 +304,15 @@ annotate service.FlightReports actions {
 };
 
 annotate service.FlightLegs with {
+    ID @(
+        UI.Hidden,
+        Common.Text : sequenceText,
+        Common.TextArrangement : #TextOnly
+    );
     sequence               @(title : 'Leg Number', Common.FieldControl : #ReadOnly);
     flightDate             @title : 'Flight Date';
-    originAirportCode      @title : 'Origin (ICAO)';
-    destinationAirportCode @title : 'Destination (ICAO)';
+    originAirportCode      @title : 'Origin';
+    destinationAirportCode @title : 'Destination';
     flightHours            @title : 'Flight Hours';
 };
 
@@ -356,6 +366,47 @@ annotate service.CrewRoles with @(
 
 annotate service.Expenses with {
     expenseDate                  @title : 'Expense Date';
+    leg @(
+        title : 'Flight Leg',
+        Common.Text : leg.sequenceText,
+        Common.TextArrangement : #TextOnly,
+        Common.ValueList : {
+            CollectionPath : 'FlightLegs',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterIn',
+                    LocalDataProperty : report_ID,
+                    ValueListProperty : 'report_ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterIn',
+                    LocalDataProperty : IsActiveEntity,
+                    ValueListProperty : 'IsActiveEntity'
+                },
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : leg_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'sequence'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'flightDate'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'originAirportCode'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'destinationAirportCode'
+                }
+            ]
+        }
+    );
     category @(
         title : 'Category',
         Common.Text : category.name,
