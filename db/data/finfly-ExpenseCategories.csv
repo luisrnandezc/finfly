@@ -1,11 +1,11 @@
 ID,code,name,description,active
-10000000-0000-0000-0000-000000000001,FUEL,Combustible,Combustible para la aeronave,true
-10000000-0000-0000-0000-000000000002,HOTEL,Hotel,Alojamiento de la tripulación,true
-10000000-0000-0000-0000-000000000003,FBO,FBO y handling,Servicios FBO y asistencia en tierra,true
-10000000-0000-0000-0000-000000000004,PER_DIEM,Viáticos,Viáticos de la tripulación,true
-10000000-0000-0000-0000-000000000005,TRANSPORT,Transporte,Taxis y transporte terrestre,true
-10000000-0000-0000-0000-000000000006,FEES,Tasas,Tasas aeroportuarias y administrativas,true
-10000000-0000-0000-0000-000000000007,CATERING,Catering,Bebidas alimentos y catering,true
-10000000-0000-0000-0000-000000000008,TIPS,Propinas,Propinas operacionales,true
-10000000-0000-0000-0000-000000000009,TOWING,Remolque,Servicios de remolque,true
-10000000-0000-0000-0000-000000000010,MISC,Varios,Gastos no incluidos en otra categoría,true
+10000000-0000-0000-0000-000000000001,FUEL,Fuel,Aircraft fuel,true
+10000000-0000-0000-0000-000000000002,HOTEL,Hotel,Crew accommodation,true
+10000000-0000-0000-0000-000000000003,FBO,FBO and Ground Handling,FBO and ground handling services,true
+10000000-0000-0000-0000-000000000004,PER_DIEM,Per Diem,Crew per diem expenses,true
+10000000-0000-0000-0000-000000000005,TRANSPORT,Transportation,Taxis and ground transportation,true
+10000000-0000-0000-0000-000000000006,FEES,Fees,Airport and administrative fees,true
+10000000-0000-0000-0000-000000000007,CATERING,Catering,Food beverages and catering,true
+10000000-0000-0000-0000-000000000008,TIPS,Tips,Operational tips,true
+10000000-0000-0000-0000-000000000009,TOWING,Towing,Aircraft towing services,true
+10000000-0000-0000-0000-000000000010,MISC,Miscellaneous,Expenses not included in another category,true

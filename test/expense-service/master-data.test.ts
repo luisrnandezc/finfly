@@ -22,8 +22,8 @@ describe('ExpenseService master data', () => {
     }
 
     expect(fuelCategory.ID).to.equal(masterDataIDs.fuelCategory);
-    expect(fuelCategory.name).to.equal('Combustible');
-    expect(fuelCategory.description).to.equal('Combustible para la aeronave');
+    expect(fuelCategory.name).to.equal('Fuel');
+    expect(fuelCategory.description).to.equal('Aircraft fuel');
     expect(fuelCategory.active).to.equal(true);
   });
 });

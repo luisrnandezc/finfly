@@ -71,7 +71,7 @@ describe('ExpenseService flight report lifecycle', () => {
       leg_ID: flightReportIDs.outboundLeg,
       category_ID: masterDataIDs.fboCategory,
       expenseDate: '2026-08-12',
-      description: 'FBO y/o DOSA',
+      description: 'FBO and ground handling',
       supplier: 'Valencia Aviation Services',
       receiptNumber: 'REC-2026-0812',
       originalAmount: 180000,

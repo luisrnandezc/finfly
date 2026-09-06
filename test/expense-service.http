@@ -83,7 +83,7 @@ Content-Type: application/json
   "leg_ID": "{{outboundLegId}}",
   "category_ID": "10000000-0000-0000-0000-000000000003",
   "expenseDate": "2026-08-12",
-  "description": "FBO y/o DOSA",
+  "description": "FBO and ground handling",
   "originalAmount": 180000,
   "originalCurrency_code": "VES"
 }
