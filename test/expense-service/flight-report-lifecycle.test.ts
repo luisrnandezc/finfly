@@ -72,6 +72,8 @@ describe('ExpenseService flight report lifecycle', () => {
       category_ID: masterDataIDs.fboCategory,
       expenseDate: '2026-08-12',
       description: 'FBO y/o DOSA',
+      supplier: 'Valencia Aviation Services',
+      receiptNumber: 'REC-2026-0812',
       originalAmount: 180000,
       originalCurrency_code: 'VES',
     });
@@ -132,6 +134,8 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(vesExpense.leg_ID).to.equal(flightReportIDs.outboundLeg);
     expect(vesExpense.originalAmount).to.equal(180000);
     expect(vesExpense.originalCurrency_code).to.equal('VES');
+    expect(vesExpense.supplier).to.equal('Valencia Aviation Services');
+    expect(vesExpense.receiptNumber).to.equal('REC-2026-0812');
 
     const usdExpense = response.data.expenses.find(
       (expense: { ID: string }) => expense.ID === flightReportIDs.usdExpense,

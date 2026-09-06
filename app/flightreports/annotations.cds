@@ -240,11 +240,25 @@ annotate service.CrewAssignments with @(
 annotate service.Expenses with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Date', Value : expenseDate, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Category', Value : category_ID, ![@UI.Importance] : #High },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Category',
+            Value : category_ID,
+            ![@UI.Importance] : #High,
+            ![@HTML5.CssDefaults.width] : '8rem'
+        },
         { $Type : 'UI.DataField', Label : 'Flight Leg', Value : leg_ID, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Description', Value : description, ![@UI.Importance] : #Medium },
         { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code, ![@UI.Importance] : #High },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Receipt Number',
+            Value : receiptNumber,
+            ![@UI.Importance] : #High,
+            ![@HTML5.CssDefaults.width] : '9rem'
+        },
+        { $Type : 'UI.DataField', Label : 'Supplier', Value : supplier, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Description', Value : description, ![@UI.Importance] : #Medium },
     ]
 );
 
