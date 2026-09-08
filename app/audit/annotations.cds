@@ -32,8 +32,20 @@ annotate audit.Expenses with @(
     },
     UI.SelectionPresentationVariant #PendingExpenses : {
         Text : 'Pending Expenses',
-        SelectionVariant : '@UI.SelectionVariant#PendingExpenses',
-        PresentationVariant : '@UI.PresentationVariant#AuditQueue'
+        SelectionVariant : {
+            Text : 'Pending Expenses',
+            SelectOptions : [{
+                PropertyName : auditStatus,
+                Ranges : [{
+                    Sign : #I,
+                    Option : #EQ,
+                    Low : 'PENDING'
+                }]
+            }]
+        },
+        PresentationVariant : {
+            SortOrder : [{ Property : submittedForAuditAt, Descending : true }]
+        }
     },
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Report', Value : report_ID, ![@UI.Importance] : #High },

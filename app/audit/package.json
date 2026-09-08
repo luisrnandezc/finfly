@@ -1,0 +1,25 @@
+{
+  "name": "audit",
+  "version": "0.0.1",
+  "description": "Fiori app for reviewing and auditing flight expenses.",
+  "keywords": [
+    "ui5",
+    "sapui5",
+    "fiori-elements"
+  ],
+  "main": "webapp/index.html",
+  "dependencies": {},
+  "devDependencies": {
+    "@ui5/cli": "^4.0.33",
+    "@sap/ux-ui5-tooling": "1",
+    "@sap-ux/eslint-plugin-fiori-tools": "^9.0.0",
+    "eslint": "^9",
+    "@sapui5/types": "~1.151.0",
+    "ui5-tooling-transpile": "^3.10.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ui5 build"
+  },
+  "private": true
+}

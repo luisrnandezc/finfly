@@ -32,7 +32,8 @@
     "app/*"
   ],
   "sapux": [
-    "app/flightreports"
+    "app/flightreports",
+    "app/audit"
   ],
   "cds": {
     "finfly": {
