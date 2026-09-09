@@ -1,5 +1,13 @@
 using AuditService as audit from '../../srv/audit-service';
 
+// =============================================================================
+// Expense UI
+// These annotations are reused by the report-specific table and the future
+// cross-report expense queue.
+// =============================================================================
+
+// Entity identity is reusable metadata. Fiori can consume it in Object Page
+// headers, navigation context, dialogs, and singular/plural entity labels.
 annotate audit.Expenses with @(
     UI.HeaderInfo : {
         $Type : 'UI.HeaderInfoType',
@@ -7,7 +15,12 @@ annotate audit.Expenses with @(
         TypeNamePlural : 'Expenses',
         Title : { $Type : 'UI.DataField', Value : category.name },
         Description : { $Type : 'UI.DataField', Value : report.reportNumber }
-    },
+    }
+);
+
+// Page-specific metadata for the future global expense queue: SelectionFields
+// builds its filter bar, while the qualified variant supplies its initial view.
+annotate audit.Expenses with @(
     UI.SelectionFields : [
         auditStatus,
         report_ID,
@@ -16,20 +29,6 @@ annotate audit.Expenses with @(
         originalCurrency_code,
         addedAfterReportSubmission
     ],
-    UI.PresentationVariant #AuditQueue : {
-        SortOrder : [{ Property : submittedForAuditAt, Descending : true }]
-    },
-    UI.SelectionVariant #PendingExpenses : {
-        Text : 'Pending Expenses',
-        SelectOptions : [{
-            PropertyName : auditStatus,
-            Ranges : [{
-                Sign : #I,
-                Option : #EQ,
-                Low : 'PENDING'
-            }]
-        }]
-    },
     UI.SelectionPresentationVariant #PendingExpenses : {
         Text : 'Pending Expenses',
         SelectionVariant : {
@@ -46,7 +45,13 @@ annotate audit.Expenses with @(
         PresentationVariant : {
             SortOrder : [{ Property : submittedForAuditAt, Descending : true }]
         }
-    },
+    }
+);
+
+// The unqualified LineItem is Fiori's default table for Expenses.
+// The #ReportExpenses qualifier is explicitly selected by the report facet,
+// allowing that embedded table to use a more focused column set.
+annotate audit.Expenses with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Report', Value : report_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Aircraft', Value : report.aircraft_ID, ![@UI.Importance] : #High },
@@ -100,7 +105,12 @@ annotate audit.Expenses with @(
             Criticality : #Negative,
             ![@UI.Importance] : #High
         }
-    ],
+    ]
+);
+
+// Identification renders Object Page header actions. FieldGroup defines the
+// detail fields, and Facets places that group and history into page sections.
+annotate audit.Expenses with @(
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
@@ -148,6 +158,13 @@ annotate audit.Expenses with @(
     ]
 );
 
+// =============================================================================
+// Flight Report UI
+// Flight Reports are the auditor application's main work queue.
+// =============================================================================
+
+// Entity identity is kept separate because HeaderInfo is reusable Fiori
+// metadata, even though its most visible use is the Object Page header.
 annotate audit.FlightReports with @(
     UI.HeaderInfo : {
         $Type : 'UI.HeaderInfoType',
@@ -155,7 +172,12 @@ annotate audit.FlightReports with @(
         TypeNamePlural : 'Flight Reports',
         Title : { $Type : 'UI.DataField', Value : reportNumber },
         Description : { $Type : 'UI.DataField', Value : requesterName }
-    },
+    }
+);
+
+// Page-specific metadata for the landing queue: SelectionFields builds the
+// filter bar; the qualified variant applies the initial filter and sort order.
+annotate audit.FlightReports with @(
     UI.SelectionFields : [
         auditStatus,
         aircraft_ID,
@@ -174,7 +196,12 @@ annotate audit.FlightReports with @(
         PresentationVariant : {
             SortOrder : [{ Property : submittedAt, Descending : true }]
         }
-    },
+    }
+);
+
+// Identification supplies the Object Page header action. FieldGroup contains
+// the summary, while Facets determines the visible sections and their order.
+annotate audit.FlightReports with @(
     UI.Identification : [{
         $Type : 'UI.DataFieldForAction',
         Label : 'Approve All Expenses',
@@ -221,7 +248,11 @@ annotate audit.FlightReports with @(
             Label : 'Crew',
             Target : 'crew/@UI.LineItem'
         }
-    ],
+    ]
+);
+
+// Defines the landing-page table and its inline bulk-approval action.
+annotate audit.FlightReports with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Report', Value : reportNumber },
         { $Type : 'UI.DataField', Label : 'Aircraft', Value : aircraft_ID },
@@ -240,6 +271,12 @@ annotate audit.FlightReports with @(
     ]
 );
 
+// =============================================================================
+// Supporting tables
+// These LineItems render compositions embedded in the report/expense pages.
+// =============================================================================
+
+// Read-only operational legs shown inside the Flight Report Object Page.
 annotate audit.FlightLegs with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Leg', Value : sequence, ![@UI.Importance] : #High },
@@ -250,6 +287,7 @@ annotate audit.FlightLegs with @(
     ]
 );
 
+// Read-only crew assignments shown inside the Flight Report Object Page.
 annotate audit.CrewAssignments with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID, ![@UI.Importance] : #High },
@@ -257,6 +295,7 @@ annotate audit.CrewAssignments with @(
     ]
 );
 
+// Status changes and auditor comments shown on the Expense Object Page.
 annotate audit.ExpenseAuditHistory with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'From', Value : fromStatus },
@@ -266,6 +305,12 @@ annotate audit.ExpenseAuditHistory with @(
         { $Type : 'UI.DataField', Label : 'Changed By', Value : createdBy }
     ]
 );
+
+// =============================================================================
+// Display semantics
+// Common.Text replaces technical keys with meaningful business values wherever
+// Fiori displays the association. ValueCriticality maps statuses to UI colors.
+// =============================================================================
 
 annotate audit.Expenses with {
     report @(
@@ -322,6 +367,7 @@ annotate audit.FlightReports with {
 };
 
 annotate audit.FlightLegs with {
+    // The technical UUID stays hidden while sequenceText represents the leg.
     ID @(
         UI.Hidden,
         Common.Text : sequenceText,
@@ -338,7 +384,14 @@ annotate audit.CrewAssignments with {
     role @title : 'Role';
 };
 
+// =============================================================================
+// Action behavior
+// OperationAvailable controls button visibility. SideEffects tell Fiori which
+// properties and child collections must be refreshed after an action finishes.
+// =============================================================================
+
 annotate audit.Expenses actions {
+    // Only pending expenses expose the two mutually exclusive audit decisions.
     approveExpense @(
         Core.OperationAvailable : ($self.auditStatus = 'PENDING'),
         Common.SideEffects : {
@@ -364,6 +417,7 @@ annotate audit.Expenses actions {
 };
 
 annotate audit.FlightReports actions {
+    // IsActionCritical requests confirmation before the bulk action executes.
     approveAllExpenses @(
         Common.IsActionCritical : true,
         Core.OperationAvailable : (
