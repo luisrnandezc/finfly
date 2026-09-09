@@ -45,6 +45,17 @@ annotate audit.Expenses with @(
         PresentationVariant : {
             SortOrder : [{ Property : submittedForAuditAt, Descending : true }]
         }
+    },
+    // Cross-report history without a status restriction. The filter bar lets
+    // the auditor narrow this complete set as needed.
+    UI.SelectionPresentationVariant #AllExpenses : {
+        Text : 'All Expenses',
+        SelectionVariant : {
+            Text : 'All Expenses'
+        },
+        PresentationVariant : {
+            SortOrder : [{ Property : submittedForAuditAt, Descending : true }]
+        }
     }
 );
 
