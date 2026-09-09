@@ -54,15 +54,71 @@ service ExpenseService {
 
         @requires: 'Pilot'
         action resubmitExpense(
-            expenseDate          : Date,
-            categoryID           : UUID,
-            originalAmount       : Decimal(15,2),
-            originalCurrencyCode : String(3),
-            legID                : UUID,
-            description          : String(255),
-            supplier             : String(160),
-            receiptNumber        : String(80),
-            fuelQuantityLiters   : Decimal(12,2)
+            expenseDate          @(title: 'Expense Date')      : Date,
+            categoryID @(
+                title : 'Category',
+                Common.ValueListWithFixedValues : true,
+                Common.ValueList : {
+                    CollectionPath : 'ExpenseCategories',
+                    Parameters : [
+                        {
+                            $Type : 'Common.ValueListParameterInOut',
+                            LocalDataProperty : categoryID,
+                            ValueListProperty : 'ID'
+                        },
+                        {
+                            $Type : 'Common.ValueListParameterDisplayOnly',
+                            ValueListProperty : 'name'
+                        }
+                    ]
+                }
+            ) : UUID,
+            originalAmount       @(title: 'Amount')            : Decimal(15,2),
+            originalCurrencyCode @(
+                title : 'Currency',
+                Common.ValueListWithFixedValues : true,
+                Common.ValueList : {
+                    CollectionPath : 'Currencies',
+                    Parameters : [{
+                        $Type : 'Common.ValueListParameterInOut',
+                        LocalDataProperty : originalCurrencyCode,
+                        ValueListProperty : 'code'
+                    }]
+                }
+            ) : String(3),
+            legID @(
+                title : 'Flight Leg',
+                Common.ValueList : {
+                    CollectionPath : 'FlightLegs',
+                    Parameters : [
+                        {
+                            $Type : 'Common.ValueListParameterInOut',
+                            LocalDataProperty : legID,
+                            ValueListProperty : 'ID'
+                        },
+                        {
+                            $Type : 'Common.ValueListParameterDisplayOnly',
+                            ValueListProperty : 'sequence'
+                        },
+                        {
+                            $Type : 'Common.ValueListParameterDisplayOnly',
+                            ValueListProperty : 'flightDate'
+                        },
+                        {
+                            $Type : 'Common.ValueListParameterDisplayOnly',
+                            ValueListProperty : 'originAirportCode'
+                        },
+                        {
+                            $Type : 'Common.ValueListParameterDisplayOnly',
+                            ValueListProperty : 'destinationAirportCode'
+                        }
+                    ]
+                }
+            ) : UUID,
+            description          @(title: 'Description')       : String(255),
+            supplier             @(title: 'Supplier')          : String(160),
+            receiptNumber        @(title: 'Receipt Number')    : String(80),
+            fuelQuantityLiters   @(title: 'Fuel Quantity (L)') : Decimal(12,2)
         ) returns Expenses;
     };
 

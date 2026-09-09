@@ -259,6 +259,13 @@ annotate service.Expenses with @(
             Value : correctionReason,
             ![@UI.Importance] : #High
         },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Label : 'Correct and Resubmit',
+            Action : 'ExpenseService.resubmitExpense',
+            Inline : true,
+            ![@UI.Importance] : #High
+        },
         { $Type : 'UI.DataField', Label : 'Flight Leg', Value : leg_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code, ![@UI.Importance] : #High },
@@ -327,6 +334,34 @@ annotate service.FlightReports actions {
         }
     );
     addExpense           @Core.OperationAvailable : ($self.status = 'SUBMITTED');
+};
+
+annotate service.Expenses actions {
+    // Submitted reports stay locked. Pilots correct only the affected expense
+    // through this bound action, which is available exclusively when requested.
+    resubmitExpense @(
+        Core.OperationAvailable : ($self.auditStatus = 'NEEDS_CORRECTION'),
+        Common.SideEffects : {
+            TargetProperties : [
+                'in/expenseDate',
+                'in/category_ID',
+                'in/originalAmount',
+                'in/originalCurrency_code',
+                'in/leg_ID',
+                'in/description',
+                'in/supplier',
+                'in/receiptNumber',
+                'in/fuelQuantityLiters',
+                'in/auditStatus',
+                'in/correctionReason',
+                'in/submittedForAuditAt'
+            ],
+            TargetEntities : [
+                'in/report',
+                '/ExpenseService.EntityContainer/FlightReports'
+            ]
+        }
+    );
 };
 
 annotate service.FlightLegs with {
