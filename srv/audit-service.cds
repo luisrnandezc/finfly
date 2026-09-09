@@ -6,12 +6,21 @@ using { sap.common as common } from '@sap/cds/common';
 service AuditService {
 
     @readonly
-    entity FlightReports as projection on db.FlightReports actions {
+    entity FlightReports as projection on db.FlightReports {
+        *,
+        auditStatus as reviewStatus : String(30)
+    } actions {
         action approveAllExpenses() returns FlightReports;
     };
 
     @readonly
-    entity Expenses as projection on db.Expenses actions {
+    entity Expenses as projection on db.Expenses {
+        *,
+        case
+            when auditStatus = 'NEEDS_CORRECTION' then 'ACTION_REQUIRED'
+            else auditStatus
+        end as reviewStatus : String(30)
+    } actions {
         action approveExpense() returns Expenses;
         action requestExpenseCorrection(
             reason : String(1000) not null
@@ -42,10 +51,6 @@ service AuditService {
     @readonly
     entity ReportAuditStatuses as projection on db.ReportAuditStatuses
         where code <> 'NOT_STARTED';
-
-    @readonly
-    entity ExpenseAuditStatuses as projection on db.ExpenseAuditStatuses
-        where code <> 'DRAFT';
 
     @readonly
     entity Currencies as projection on common.Currencies;

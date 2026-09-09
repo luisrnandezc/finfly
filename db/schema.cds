@@ -42,13 +42,6 @@ entity ReportAuditStatuses {
     sortOrder : Integer not null;
 }
 
-// UI-facing labels and ordering for expense audit-status value helps.
-entity ExpenseAuditStatuses {
-    key code : ExpenseAuditStatus;
-    name      : String(80) not null;
-    sortOrder : Integer not null;
-}
-
 entity CrewRoles {
     key code : CrewRole;
     name     : String(50) not null;

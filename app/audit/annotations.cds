@@ -22,7 +22,7 @@ annotate audit.Expenses with @(
 // builds its filter bar, while the qualified variant supplies its initial view.
 annotate audit.Expenses with @(
     UI.SelectionFields : [
-        auditStatus,
+        reviewStatus,
         report_ID,
         expenseDate,
         category_ID,
@@ -193,7 +193,7 @@ annotate audit.FlightReports with @(
 annotate audit.FlightReports with @(
     UI.SelectionFields : [
         reportNumber,
-        auditStatus,
+        reviewStatus,
         aircraft_ID,
         requesterName,
         firstFlightDate,
@@ -417,13 +417,21 @@ annotate audit.Expenses with {
     addedAfterReportSubmission @title : 'Added After Submission';
     auditStatus @(
         title : 'Audit Status',
+        UI.ValueCriticality : [
+            { Value : 'PENDING', Criticality : #Information },
+            { Value : 'NEEDS_CORRECTION', Criticality : #Negative },
+            { Value : 'APPROVED', Criticality : #Positive }
+        ]
+    );
+    reviewStatus @(
+        title : 'Audit Status',
         Common.ValueListWithFixedValues : true,
         Common.ValueList : {
-            CollectionPath : 'ExpenseAuditStatuses',
+            CollectionPath : 'ReportAuditStatuses',
             Parameters : [
                 {
                     $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : auditStatus,
+                    LocalDataProperty : reviewStatus,
                     ValueListProperty : 'code'
                 },
                 {
@@ -431,12 +439,7 @@ annotate audit.Expenses with {
                     ValueListProperty : 'name'
                 }
             ]
-        },
-        UI.ValueCriticality : [
-            { Value : 'PENDING', Criticality : #Information },
-            { Value : 'NEEDS_CORRECTION', Criticality : #Negative },
-            { Value : 'APPROVED', Criticality : #Positive }
-        ]
+        }
     );
 };
 
@@ -516,16 +519,28 @@ annotate audit.FlightReports with {
             { Value : 'APPROVED', Criticality : #Positive }
         ]
     );
+    reviewStatus @(
+        title : 'Audit Status',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'ReportAuditStatuses',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : reviewStatus,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        }
+    );
 };
 
 // Keeps fixed status values in their intended business order.
 annotate audit.ReportAuditStatuses with @(
-    UI.PresentationVariant : {
-        SortOrder : [{ Property : sortOrder, Descending : false }]
-    }
-);
-
-annotate audit.ExpenseAuditStatuses with @(
     UI.PresentationVariant : {
         SortOrder : [{ Property : sortOrder, Descending : false }]
     }
