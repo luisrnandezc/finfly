@@ -22,6 +22,7 @@
   "scripts": {
     "start": "cds-serve",
     "test": "vitest run",
+    "seed:demo": "tsx scripts/seed-demo-data.ts",
     "watch-flightreports": "cds watch --open finfly.flightreports/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "private": true,

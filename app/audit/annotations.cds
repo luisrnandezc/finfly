@@ -128,6 +128,25 @@ annotate audit.FlightReports with @(
         Title : { $Type : 'UI.DataField', Value : reportNumber },
         Description : { $Type : 'UI.DataField', Value : requesterName }
     },
+    UI.SelectionFields : [
+        auditStatus,
+        aircraft_ID,
+        firstFlightDate,
+        lastFlightDate
+    ],
+    UI.SelectionPresentationVariant #RequiringAudit : {
+        Text : 'Reports Requiring Audit',
+        SelectionVariant : {
+            Text : 'Reports Requiring Audit',
+            SelectOptions : [{
+                PropertyName : auditStatus,
+                Ranges : [{ Sign : #I, Option : #NE, Low : 'APPROVED' }]
+            }]
+        },
+        PresentationVariant : {
+            SortOrder : [{ Property : submittedAt, Descending : true }]
+        }
+    },
     UI.Identification : [{
         $Type : 'UI.DataFieldForAction',
         Label : 'Approve All Expenses',

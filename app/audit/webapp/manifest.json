@@ -68,36 +68,36 @@
       "routes": [
         {
           "pattern": ":?query:",
-          "name": "ExpensesList",
-          "target": "ExpensesList"
+          "name": "FlightReportsList",
+          "target": "FlightReportsList"
         },
         {
-          "pattern": "Expenses({key}):?query:",
-          "name": "ExpenseObjectPage",
-          "target": "ExpenseObjectPage"
+          "pattern": "FlightReports({key}):?query:",
+          "name": "FlightReportObjectPage",
+          "target": "FlightReportObjectPage"
         }
       ],
       "targets": {
-        "ExpensesList": {
+        "FlightReportsList": {
           "type": "Component",
-          "id": "ExpensesList",
+          "id": "FlightReportsList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "contextPath": "/Expenses",
+              "contextPath": "/FlightReports",
               "variantManagement": "Page",
               "views": {
                 "paths": [
                   {
-                    "key": "pendingExpenses",
-                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#PendingExpenses"
+                    "key": "reportsRequiringAudit",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#RequiringAudit"
                   }
                 ]
               },
               "navigation": {
-                "Expenses": {
+                "FlightReports": {
                   "detail": {
-                    "route": "ExpenseObjectPage"
+                    "route": "FlightReportObjectPage"
                   }
                 }
               },
@@ -111,14 +111,14 @@
             }
           }
         },
-        "ExpenseObjectPage": {
+        "FlightReportObjectPage": {
           "type": "Component",
-          "id": "ExpenseObjectPage",
+          "id": "FlightReportObjectPage",
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/Expenses",
+              "contextPath": "/FlightReports",
               "enhanceI18n": "i18n/i18n.properties"
             }
           }

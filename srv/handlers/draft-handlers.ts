@@ -20,7 +20,8 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
 
   const currentDate = (): string => new Date().toISOString().slice(0, 10);
 
-  service.before('NEW', FlightReports.drafts, async (req: Request) => {
+  // Fiori draft creation emits NEW, while direct OData clients can emit CREATE.
+  service.before(['NEW', 'CREATE'], FlightReports.drafts, async (req: Request) => {
     const organizationID = organizationFor(req);
     const tx = cds.tx(req);
     const membership = await tx.run(
@@ -41,7 +42,7 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
     req.data.organization_ID = organizationID;
   });
 
-  service.before('NEW', FlightLegs.drafts, async (req: Request) => {
+  service.before(['NEW', 'CREATE'], FlightLegs.drafts, async (req: Request) => {
     const reportID = req.data.report_ID as string | undefined;
 
     if (!reportID) {
@@ -61,7 +62,7 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
     req.data.flightDate ??= currentDate();
   });
 
-  service.before('NEW', Expenses.drafts, (req: Request) => {
+  service.before(['NEW', 'CREATE'], Expenses.drafts, (req: Request) => {
     req.data.expenseDate ??= currentDate();
   });
 }

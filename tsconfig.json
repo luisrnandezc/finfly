@@ -15,8 +15,13 @@
       "@sap/cds": ["./node_modules/@cap-js/cds-types"],
       "#cds-models/*": ["./@cds-models/*"]
     },
-    "types": ["vitest/globals"]
+    "types": ["node", "vitest/globals"]
   },
-  "include": ["srv/**/*.ts", "test/**/*.ts", "@cds-models/**/*.ts"],
+  "include": [
+    "srv/**/*.ts",
+    "scripts/**/*.ts",
+    "test/**/*.ts",
+    "@cds-models/**/*.ts"
+  ],
   "exclude": ["app/**", "node_modules"]
 }
