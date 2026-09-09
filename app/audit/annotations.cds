@@ -196,6 +196,20 @@ annotate audit.FlightReports with @(
         PresentationVariant : {
             SortOrder : [{ Property : submittedAt, Descending : true }]
         }
+    },
+    // Historical view: only fully approved reports, newest audit changes first.
+    UI.SelectionPresentationVariant #ApprovedReports : {
+        Text : 'Approved Reports',
+        SelectionVariant : {
+            Text : 'Approved Reports',
+            SelectOptions : [{
+                PropertyName : auditStatus,
+                Ranges : [{ Sign : #I, Option : #EQ, Low : 'APPROVED' }]
+            }]
+        },
+        PresentationVariant : {
+            SortOrder : [{ Property : modifiedAt, Descending : true }]
+        }
     }
 );
 
