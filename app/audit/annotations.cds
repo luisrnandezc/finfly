@@ -27,7 +27,9 @@ annotate audit.Expenses with @(
         expenseDate,
         category_ID,
         originalCurrency_code,
-        addedAfterReportSubmission
+        addedAfterReportSubmission,
+        receiptNumber,
+        supplier
     ],
     UI.SelectionPresentationVariant #PendingExpenses : {
         Text : 'Pending Expenses',
@@ -343,7 +345,29 @@ annotate audit.Expenses with {
     report @(
         title : 'Flight Report',
         Common.Text : report.reportNumber,
-        Common.TextArrangement : #TextOnly
+        Common.TextArrangement : #TextOnly,
+        Common.ValueList : {
+            CollectionPath : 'FlightReports',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : report_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'reportNumber'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'aircraft_ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'firstFlightDate'
+                }
+            ]
+        }
     );
     leg @(
         title : 'Flight Leg',
@@ -353,12 +377,36 @@ annotate audit.Expenses with {
     category @(
         title : 'Category',
         Common.Text : category.name,
-        Common.TextArrangement : #TextOnly
+        Common.TextArrangement : #TextOnly,
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'ExpenseCategories',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : category_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        }
     );
     originalCurrency @(
         title : 'Currency',
         Common.Text : originalCurrency.name,
-        Common.TextArrangement : #TextOnly
+        Common.TextArrangement : #TextOnly,
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'Currencies',
+            Parameters : [{
+                $Type : 'Common.ValueListParameterInOut',
+                LocalDataProperty : originalCurrency_code,
+                ValueListProperty : 'code'
+            }]
+        }
     );
     expenseDate                @title : 'Expense Date';
     originalAmount             @title : 'Amount';
@@ -369,6 +417,21 @@ annotate audit.Expenses with {
     addedAfterReportSubmission @title : 'Added After Submission';
     auditStatus @(
         title : 'Audit Status',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'ExpenseAuditStatuses',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : auditStatus,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        },
         UI.ValueCriticality : [
             { Value : 'PENDING', Criticality : #Information },
             { Value : 'NEEDS_CORRECTION', Criticality : #Negative },
@@ -457,6 +520,12 @@ annotate audit.FlightReports with {
 
 // Keeps fixed status values in their intended business order.
 annotate audit.ReportAuditStatuses with @(
+    UI.PresentationVariant : {
+        SortOrder : [{ Property : sortOrder, Descending : false }]
+    }
+);
+
+annotate audit.ExpenseAuditStatuses with @(
     UI.PresentationVariant : {
         SortOrder : [{ Property : sortOrder, Descending : false }]
     }

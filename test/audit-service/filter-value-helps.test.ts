@@ -21,4 +21,18 @@ describe('AuditService filter value helps', () => {
       { code: 'APPROVED', name: 'Approved' },
     ]);
   });
+
+  it('exposes the expense audit statuses relevant to auditors', async () => {
+    const response = await GET(
+      `${baseUrl}/ExpenseAuditStatuses?$select=code,name&$orderby=sortOrder`,
+      auditorConfiguration,
+    );
+
+    expect(response.status).to.equal(200);
+    expect(response.data.value).to.deep.equal([
+      { code: 'PENDING', name: 'Pending' },
+      { code: 'NEEDS_CORRECTION', name: 'Needs Correction' },
+      { code: 'APPROVED', name: 'Approved' },
+    ]);
+  });
 });

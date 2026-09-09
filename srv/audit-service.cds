@@ -44,6 +44,10 @@ service AuditService {
         where code <> 'NOT_STARTED';
 
     @readonly
+    entity ExpenseAuditStatuses as projection on db.ExpenseAuditStatuses
+        where code <> 'DRAFT';
+
+    @readonly
     entity Currencies as projection on common.Currencies;
 }
 
