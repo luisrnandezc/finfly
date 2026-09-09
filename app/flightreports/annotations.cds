@@ -180,7 +180,7 @@ annotate service.FlightReports with @(
             $Type : 'UI.DataField',
             Label : 'Expense Audit Status',
             Value : auditStatus,
-            ![@UI.Importance] : #Medium,
+            ![@UI.Importance] : #High,
         },
     ],
 );
@@ -246,6 +246,18 @@ annotate service.Expenses with @(
             Value : category_ID,
             ![@UI.Importance] : #High,
             ![@HTML5.CssDefaults.width] : '8rem'
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Audit Status',
+            Value : auditStatus,
+            ![@UI.Importance] : #High
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Correction Reason',
+            Value : correctionReason,
+            ![@UI.Importance] : #High
         },
         { $Type : 'UI.DataField', Label : 'Flight Leg', Value : leg_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount, ![@UI.Importance] : #High },
@@ -452,7 +464,16 @@ annotate service.Expenses with {
     exchangeRate                 @title : 'Exchange Rate';
     amountUSD                    @title : 'Amount (USD)';
     amountVES                    @title : 'Amount (VES)';
-    auditStatus                  @title : 'Audit Status';
+    auditStatus @(
+        title : 'Audit Status',
+        UI.ValueCriticality : [
+            { Value : 'DRAFT', Criticality : #Neutral },
+            { Value : 'PENDING', Criticality : #Information },
+            { Value : 'NEEDS_CORRECTION', Criticality : #Negative },
+            { Value : 'APPROVED', Criticality : #Positive }
+        ]
+    );
+    correctionReason             @title : 'Correction Reason';
     fuelQuantityLiters           @title : 'Fuel Quantity (L)';
     addedAfterReportSubmission   @title : 'Added After Submission';
 };
