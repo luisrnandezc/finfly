@@ -75,6 +75,11 @@
           "pattern": "FlightReports({key}):?query:",
           "name": "FlightReportObjectPage",
           "target": "FlightReportObjectPage"
+        },
+        {
+          "pattern": "Expenses({key}):?query:",
+          "name": "ExpenseObjectPage",
+          "target": "ExpenseObjectPage"
         }
       ],
       "targets": {
@@ -95,6 +100,11 @@
                   {
                     "key": "approvedReports",
                     "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#ApprovedReports"
+                  },
+                  {
+                    "key": "allExpenses",
+                    "entitySet": "Expenses",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllExpenses"
                   }
                 ]
               },
@@ -102,6 +112,11 @@
                 "FlightReports": {
                   "detail": {
                     "route": "FlightReportObjectPage"
+                  }
+                },
+                "Expenses": {
+                  "detail": {
+                    "route": "ExpenseObjectPage"
                   }
                 }
               },
@@ -123,6 +138,18 @@
             "settings": {
               "editableHeaderContent": false,
               "contextPath": "/FlightReports",
+              "enhanceI18n": "i18n/i18n.properties"
+            }
+          }
+        },
+        "ExpenseObjectPage": {
+          "type": "Component",
+          "id": "ExpenseObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/Expenses",
               "enhanceI18n": "i18n/i18n.properties"
             }
           }
