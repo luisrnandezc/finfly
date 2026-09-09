@@ -91,6 +91,10 @@
                   {
                     "key": "reportsRequiringAudit",
                     "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#RequiringAudit"
+                  },
+                  {
+                    "key": "approvedReports",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#ApprovedReports"
                   }
                 ]
               },

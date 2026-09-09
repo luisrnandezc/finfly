@@ -416,7 +416,10 @@ annotate audit.Expenses actions {
                 'in/auditedBy',
                 'in/correctionReason'
             ],
-            TargetEntities : ['in/report']
+            TargetEntities : [
+                'in/report',
+                '/AuditService.EntityContainer/FlightReports'
+            ]
         }
     );
     requestExpenseCorrection @(
@@ -428,7 +431,10 @@ annotate audit.Expenses actions {
                 'in/auditedBy',
                 'in/correctionReason'
             ],
-            TargetEntities : ['in/report']
+            TargetEntities : [
+                'in/report',
+                '/AuditService.EntityContainer/FlightReports'
+            ]
         }
     );
 };
@@ -445,7 +451,10 @@ annotate audit.FlightReports actions {
                 'in/auditStatus',
                 'in/pendingExpenseCount'
             ],
-            TargetEntities : ['in/expenses']
+            TargetEntities : [
+                'in/expenses',
+                '/AuditService.EntityContainer/FlightReports'
+            ]
         }
     );
 };
