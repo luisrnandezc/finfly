@@ -73,6 +73,34 @@ annotate audit.Expenses with @(
             Criticality : #Negative
         }
     ],
+    UI.LineItem #ReportExpenses : [
+        { $Type : 'UI.DataField', Label : 'Date', Value : expenseDate, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Category', Value : category_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Flight Leg', Value : leg_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Supplier', Value : supplier, ![@UI.Importance] : #Medium },
+        { $Type : 'UI.DataField', Label : 'Receipt Number', Value : receiptNumber, ![@UI.Importance] : #Medium },
+        { $Type : 'UI.DataField', Label : 'Audit Status', Value : auditStatus, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Correction Reason', Value : correctionReason, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Late Addition', Value : addedAfterReportSubmission, ![@UI.Importance] : #Medium },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Label : 'Approve',
+            Action : 'AuditService.approveExpense',
+            Inline : true,
+            Criticality : #Positive,
+            ![@UI.Importance] : #High
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Label : 'Request Correction',
+            Action : 'AuditService.requestExpenseCorrection',
+            Inline : true,
+            Criticality : #Negative,
+            ![@UI.Importance] : #High
+        }
+    ],
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
@@ -153,13 +181,79 @@ annotate audit.FlightReports with @(
         Action : 'AuditService.approveAllExpenses',
         Criticality : #Positive
     }],
+    UI.FieldGroup #ReportDetails : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Report Number', Value : reportNumber },
+            { $Type : 'UI.DataField', Label : 'Audit Status', Value : auditStatus },
+            { $Type : 'UI.DataField', Label : 'Aircraft', Value : aircraft_ID },
+            { $Type : 'UI.DataField', Label : 'Flight Requester', Value : requesterName },
+            { $Type : 'UI.DataField', Label : 'First Flight', Value : firstFlightDate },
+            { $Type : 'UI.DataField', Label : 'Last Flight', Value : lastFlightDate },
+            { $Type : 'UI.DataField', Label : 'Total Flight Hours', Value : totalFlightHours },
+            { $Type : 'UI.DataField', Label : 'Submitted At', Value : submittedAt },
+            { $Type : 'UI.DataField', Label : 'Submitted By', Value : submittedBy },
+            { $Type : 'UI.DataField', Label : 'Notes', Value : notes }
+        ]
+    },
+    UI.Facets : [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'ReportDetails',
+            Label : 'Report Details',
+            Target : '@UI.FieldGroup#ReportDetails'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'Expenses',
+            Label : 'Expenses',
+            Target : 'expenses/@UI.LineItem#ReportExpenses'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'FlightLegs',
+            Label : 'Flight Legs',
+            Target : 'legs/@UI.LineItem'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'Crew',
+            Label : 'Crew',
+            Target : 'crew/@UI.LineItem'
+        }
+    ],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Report', Value : reportNumber },
         { $Type : 'UI.DataField', Label : 'Aircraft', Value : aircraft_ID },
         { $Type : 'UI.DataField', Label : 'First Flight', Value : firstFlightDate },
         { $Type : 'UI.DataField', Label : 'Last Flight', Value : lastFlightDate },
         { $Type : 'UI.DataField', Label : 'Total Hours', Value : totalFlightHours },
-        { $Type : 'UI.DataField', Label : 'Audit Status', Value : auditStatus }
+        { $Type : 'UI.DataField', Label : 'Audit Status', Value : auditStatus },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Label : 'Approve All Expenses',
+            Action : 'AuditService.approveAllExpenses',
+            Inline : true,
+            Criticality : #Positive,
+            ![@UI.Importance] : #High
+        }
+    ]
+);
+
+annotate audit.FlightLegs with @(
+    UI.LineItem : [
+        { $Type : 'UI.DataField', Label : 'Leg', Value : sequence, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Date', Value : flightDate, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Origin', Value : originAirportCode, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Destination', Value : destinationAirportCode, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours, ![@UI.Importance] : #High }
+    ]
+);
+
+annotate audit.CrewAssignments with @(
+    UI.LineItem : [
+        { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Role', Value : role, ![@UI.Importance] : #High }
     ]
 );
 
@@ -235,6 +329,15 @@ annotate audit.FlightLegs with {
     );
 };
 
+annotate audit.CrewAssignments with {
+    crewMember @(
+        title : 'Crew Member',
+        Common.Text : crewMember.fullName,
+        Common.TextArrangement : #TextOnly
+    );
+    role @title : 'Role';
+};
+
 annotate audit.Expenses actions {
     approveExpense @(
         Core.OperationAvailable : ($self.auditStatus = 'PENDING'),
@@ -262,6 +365,7 @@ annotate audit.Expenses actions {
 
 annotate audit.FlightReports actions {
     approveAllExpenses @(
+        Common.IsActionCritical : true,
         Core.OperationAvailable : (
             $self.auditStatus = 'PENDING' or
             $self.auditStatus = 'ACTION_REQUIRED'
