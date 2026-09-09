@@ -92,6 +92,11 @@ service ExpenseService {
                     CollectionPath : 'FlightLegs',
                     Parameters : [
                         {
+                            $Type : 'Common.ValueListParameterIn',
+                            LocalDataProperty : in.report_ID,
+                            ValueListProperty : 'report_ID'
+                        },
+                        {
                             $Type : 'Common.ValueListParameterInOut',
                             LocalDataProperty : legID,
                             ValueListProperty : 'ID'
