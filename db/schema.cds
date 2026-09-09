@@ -35,6 +35,13 @@ type CrewRole : String enum {
     other    = 'OTHER';
 };
 
+// UI-facing labels and ordering for report audit-status value helps.
+entity ReportAuditStatuses {
+    key code : ReportAuditStatus;
+    name     : String(80) not null;
+    sortOrder : Integer not null;
+}
+
 entity CrewRoles {
     key code : CrewRole;
     name     : String(50) not null;

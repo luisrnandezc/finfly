@@ -1,0 +1,5 @@
+code,name,sortOrder
+NOT_STARTED,Not Started,1
+PENDING,Pending,2
+ACTION_REQUIRED,Action Required,3
+APPROVED,Approved,4

@@ -190,8 +190,10 @@ annotate audit.FlightReports with @(
 // filter bar; the qualified variant applies the initial filter and sort order.
 annotate audit.FlightReports with @(
     UI.SelectionFields : [
+        reportNumber,
         auditStatus,
         aircraft_ID,
+        requesterName,
         firstFlightDate,
         lastFlightDate
     ],
@@ -380,10 +382,71 @@ annotate audit.FlightReports with {
     aircraft @(
         title : 'Aircraft',
         Common.Text : aircraft.registration,
-        Common.TextArrangement : #TextOnly
+        Common.TextArrangement : #TextOnly,
+        Common.ValueList : {
+            CollectionPath : 'Aircraft',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : aircraft_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'registration'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'description'
+                }
+            ]
+        }
     );
+    reportNumber @(
+        title : 'Report Number',
+        Common.ValueList : {
+            CollectionPath : 'FlightReports',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : reportNumber,
+                    ValueListProperty : 'reportNumber'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'aircraft_ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'firstFlightDate'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'lastFlightDate'
+                }
+            ]
+        }
+    );
+    requesterName @title : 'Flight Requester';
+    firstFlightDate @title : 'First Flight Date';
+    lastFlightDate  @title : 'Last Flight Date';
     auditStatus @(
         title : 'Audit Status',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'ReportAuditStatuses',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : auditStatus,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        },
         UI.ValueCriticality : [
             { Value : 'PENDING', Criticality : #Information },
             { Value : 'ACTION_REQUIRED', Criticality : #Negative },
@@ -391,6 +454,13 @@ annotate audit.FlightReports with {
         ]
     );
 };
+
+// Keeps fixed status values in their intended business order.
+annotate audit.ReportAuditStatuses with @(
+    UI.PresentationVariant : {
+        SortOrder : [{ Property : sortOrder, Descending : false }]
+    }
+);
 
 annotate audit.FlightLegs with {
     // The technical UUID stays hidden while sequenceText represents the leg.
