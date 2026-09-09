@@ -115,6 +115,26 @@ describe('AuditService authorization', () => {
     expect(response.data.auditedBy).to.equal('auditor');
   });
 
+  it('uses the expense key for actions invoked from a report Object Page', async () => {
+    const reportID = '97000000-0000-0000-0000-000000000006';
+    const expenseID = '97100000-0000-0000-0000-000000000004';
+    const reason = 'The receipt total is unclear';
+
+    await seedReport(reportID, 'FR-2026-AUDIT-NESTED');
+    await seedExpense(expenseID, reportID);
+
+    const response = await POST(
+      `${baseUrl}/FlightReports(ID=${reportID})/expenses(ID=${expenseID})/AuditService.requestExpenseCorrection`,
+      { reason },
+      auditorConfiguration,
+    );
+
+    expect(response.status).to.equal(200);
+    expect(response.data.ID).to.equal(expenseID);
+    expect(response.data.auditStatus).to.equal('NEEDS_CORRECTION');
+    expect(response.data.correctionReason).to.equal(reason);
+  });
+
   it('allows an auditor to approve all pending report expenses', async () => {
     const reportID = '97000000-0000-0000-0000-000000000005';
     const firstExpenseID = '97100000-0000-0000-0000-000000000002';
@@ -132,6 +152,7 @@ describe('AuditService authorization', () => {
 
     expect(response.status).to.equal(200);
     expect(response.data.auditStatus).to.equal('APPROVED');
+    expect(response.data.pendingExpenseCount).to.equal(0);
 
     const expenses = await GET(
       `${baseUrl}/Expenses?$filter=report_ID eq ${reportID}`,

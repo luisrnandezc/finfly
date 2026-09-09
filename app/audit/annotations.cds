@@ -351,6 +351,7 @@ annotate audit.Expenses with {
 };
 
 annotate audit.FlightReports with {
+    pendingExpenseCount @UI.Hidden;
     aircraft @(
         title : 'Aircraft',
         Common.Text : aircraft.registration,
@@ -400,7 +401,8 @@ annotate audit.Expenses actions {
                 'in/auditedAt',
                 'in/auditedBy',
                 'in/correctionReason'
-            ]
+            ],
+            TargetEntities : ['in/report']
         }
     );
     requestExpenseCorrection @(
@@ -411,7 +413,8 @@ annotate audit.Expenses actions {
                 'in/auditedAt',
                 'in/auditedBy',
                 'in/correctionReason'
-            ]
+            ],
+            TargetEntities : ['in/report']
         }
     );
 };
@@ -421,11 +424,13 @@ annotate audit.FlightReports actions {
     approveAllExpenses @(
         Common.IsActionCritical : true,
         Core.OperationAvailable : (
-            $self.auditStatus = 'PENDING' or
-            $self.auditStatus = 'ACTION_REQUIRED'
+            $self.pendingExpenseCount > 0
         ),
         Common.SideEffects : {
-            TargetProperties : ['in/auditStatus'],
+            TargetProperties : [
+                'in/auditStatus',
+                'in/pendingExpenseCount'
+            ],
             TargetEntities : ['in/expenses']
         }
     );

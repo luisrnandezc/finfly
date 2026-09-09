@@ -139,6 +139,7 @@ describe('ExpenseService workflow actions', () => {
     response = await GET(activeReportUrl(reportID));
     expect(response.data.status).to.equal('SUBMITTED');
     expect(response.data.auditStatus).to.equal('APPROVED');
+    expect(response.data.pendingExpenseCount).to.equal(0);
   });
 
   it('approves all pending expenses without changing report status', async () => {
@@ -159,6 +160,16 @@ describe('ExpenseService workflow actions', () => {
     expect(response.status).to.equal(200);
     expect(response.data.status).to.equal('SUBMITTED');
     expect(response.data.auditStatus).to.equal('APPROVED');
+    expect(response.data.pendingExpenseCount).to.equal(0);
+
+    const messages = JSON.parse(
+      response.headers['sap-messages'] as string,
+    ) as Array<{ message: string }>;
+    expect(
+      messages.some(
+        ({ message }) => message === '2 pending expenses approved',
+      ),
+    ).to.equal(true);
 
     const db = await cds.connect.to('db');
     const { Expenses } = cds.entities('finfly');

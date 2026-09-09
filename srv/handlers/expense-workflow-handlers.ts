@@ -6,6 +6,10 @@ type BoundKey = { ID: string; IsActiveEntity?: boolean };
 type ReportData = { ID: string; reportNumber?: string | null; status: string };
 type ExpenseData = { ID: string; report_ID: string; auditStatus: string };
 
+// Nested bindings contain the parent report key before the expense key.
+const expenseKeyFrom = (req: Request): BoundKey | undefined =>
+  req.params[req.params.length - 1] as BoundKey | undefined;
+
 type ExpenseActionInput = {
   expenseDate?: string;
   categoryID?: string;
@@ -46,10 +50,13 @@ export function registerExpenseWorkflowHandlers(
           : expenses.every((expense) => expense.auditStatus === 'APPROVED')
             ? 'APPROVED'
             : 'PENDING';
+    const pendingExpenseCount = expenses.filter(
+      (expense) => expense.auditStatus === 'PENDING',
+    ).length;
 
     await tx.run(
       UPDATE.entity(db.FlightReports)
-        .set({ auditStatus })
+        .set({ auditStatus, pendingExpenseCount })
         .where({ ID: reportID }),
     );
 
@@ -239,11 +246,15 @@ export function registerExpenseWorkflowHandlers(
     }
 
     await recalculateReportAuditStatus(tx, report.ID);
+
+    req.notify(
+      `${pendingExpenses.length} pending ${pendingExpenses.length === 1 ? 'expense' : 'expenses'} approved`,
+    );
     return tx.run(SELECT.one.from(db.FlightReports).where({ ID: report.ID }));
   });
 
   service.on('approveExpense', Expenses, async (req: Request) => {
-    const key = req.params[0] as BoundKey | undefined;
+    const key = expenseKeyFrom(req);
     if (!key?.ID) return req.reject(400, 'The expense ID is required');
     if (key.IsActiveEntity === false) {
       return req.reject(409, 'Save the expense before approving it');
@@ -286,11 +297,13 @@ export function registerExpenseWorkflowHandlers(
     );
     await recalculateReportAuditStatus(tx, expense.report_ID);
 
+    req.notify('Expense approved successfully');
+
     return tx.run(SELECT.one.from(db.Expenses).where({ ID: expense.ID }));
   });
 
   service.on('requestExpenseCorrection', Expenses, async (req: Request) => {
-    const key = req.params[0] as BoundKey | undefined;
+    const key = expenseKeyFrom(req);
     if (!key?.ID) return req.reject(400, 'The expense ID is required');
     if (key.IsActiveEntity === false) {
       return req.reject(
@@ -337,11 +350,13 @@ export function registerExpenseWorkflowHandlers(
     );
     await recalculateReportAuditStatus(tx, expense.report_ID);
 
+    req.notify('Expense correction requested successfully');
+
     return tx.run(SELECT.one.from(db.Expenses).where({ ID: expense.ID }));
   });
 
   service.on('resubmitExpense', Expenses, async (req: Request) => {
-    const key = req.params[0] as BoundKey | undefined;
+    const key = expenseKeyFrom(req);
     if (!key?.ID) return req.reject(400, 'The expense ID is required');
     if (key.IsActiveEntity === false) {
       return req.reject(409, 'Save the expense before resubmitting it');
@@ -412,6 +427,8 @@ export function registerExpenseWorkflowHandlers(
       }),
     );
     await recalculateReportAuditStatus(tx, expense.report_ID);
+
+    req.notify('Expense resubmitted for audit');
 
     return tx.run(SELECT.one.from(db.Expenses).where({ ID: expense.ID }));
   });

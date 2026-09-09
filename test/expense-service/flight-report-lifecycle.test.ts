@@ -167,6 +167,7 @@ describe('ExpenseService flight report lifecycle', () => {
     );
     expect(response.data.displayTitle).to.equal(response.data.reportNumber);
     expect(response.data.auditStatus).to.equal('PENDING');
+    expect(response.data.pendingExpenseCount).to.equal(2);
     expect(response.data.submittedAt).to.exist;
     expect(response.data.submittedBy).to.equal('pilot');
 
@@ -200,6 +201,7 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(response.status).to.equal(200);
     expect(response.data.status).to.equal('SUBMITTED');
     expect(response.data.auditStatus).to.equal('APPROVED');
+    expect(response.data.pendingExpenseCount).to.equal(0);
 
     response = await GET(
       `${activeUrl}?$expand=statusHistory,expenses($expand=auditHistory)`,

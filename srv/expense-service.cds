@@ -93,6 +93,7 @@ annotate ExpenseService.FlightReports with {
     status        @readonly;
     displayTitle  @readonly;
     auditStatus   @readonly;
+    pendingExpenseCount @readonly;
     firstFlightDate  @readonly;
     lastFlightDate   @readonly;
     totalFlightHours @readonly;

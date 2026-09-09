@@ -332,6 +332,7 @@ export function registerFlightReportHandlers(
           reportNumber,
           status: 'SUBMITTED',
           auditStatus: autoApprove ? 'APPROVED' : 'PENDING',
+          pendingExpenseCount: autoApprove ? 0 : expenses.length,
           submittedAt,
           submittedBy,
         })
