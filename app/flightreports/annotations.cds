@@ -339,14 +339,14 @@ annotate service.Expenses with @(
             $Type : 'UI.DataField',
             Label : 'Fuel Quantity',
             Value : fuelQuantity,
-            ![@UI.Importance] : #Medium,
+            ![@UI.Importance] : #High,
             ![@UI.Hidden] : (category.code <> 'FUEL')
         },
         {
             $Type : 'UI.DataField',
             Label : 'Fuel Unit',
             Value : fuelUnit,
-            ![@UI.Importance] : #Medium,
+            ![@UI.Importance] : #High,
             ![@UI.Hidden] : (category.code <> 'FUEL')
         },
         {
