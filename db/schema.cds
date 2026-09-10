@@ -90,6 +90,12 @@ entity Aircraft : cuid, managed {
     organization : Association to Organizations not null;
     registration : String(20) not null;
     description  : String(100);
+
+    // Cumulative utilization. Workflow handlers are the only writers.
+    @assert.range: [(0), _]
+    currentFlightHours : Decimal(12,2) not null default 0;
+    @assert.range: [(0), _]
+    totalCycles        : Integer not null default 0;
 }
 
 entity CrewMembers : cuid, managed {
@@ -134,6 +140,13 @@ entity FlightReports : cuid, managed {
     firstFlightDate  : Date;
     lastFlightDate   : Date;
     totalFlightHours : Decimal(8,2) not null default 0;
+
+    // Snapshot of this report's contribution to aircraft utilization.
+    // Keeping it on the report makes later adjustments idempotent.
+    postedFlightHours   : Decimal(12,2) not null default 0;
+    postedCycles        : Integer not null default 0;
+    utilizationPosted   : Boolean not null default false;
+    utilizationPostedAt : Timestamp;
 
     // Business workflow state-not the Fiori draft state.
     status          : FlightReportStatus not null default #draft;

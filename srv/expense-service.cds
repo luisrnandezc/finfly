@@ -208,6 +208,10 @@ annotate ExpenseService.FlightReports with {
     firstFlightDate  @readonly;
     lastFlightDate   @readonly;
     totalFlightHours @readonly;
+    postedFlightHours   @readonly;
+    postedCycles        @readonly;
+    utilizationPosted   @readonly;
+    utilizationPostedAt @readonly;
     submittedAt   @readonly;
     submittedBy   @readonly;
     statusHistory @readonly;
