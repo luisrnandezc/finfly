@@ -103,6 +103,26 @@
             "settings": {
               "contextPath": "/FlightReports",
               "variantManagement": "Page",
+              "views": {
+                "paths": [
+                  {
+                    "key": "needsAttention",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#NeedsAttention"
+                  },
+                  {
+                    "key": "pendingAudit",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#PendingAudit"
+                  },
+                  {
+                    "key": "approved",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#Approved"
+                  },
+                  {
+                    "key": "allReports",
+                    "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllReports"
+                  }
+                ]
+              },
               "navigation": {
                 "FlightReports": {
                   "detail": {

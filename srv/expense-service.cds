@@ -8,7 +8,19 @@ service ExpenseService {
     entity Organizations as projection on db.Organizations;
 
     @odata.draft.enabled
-    entity FlightReports as projection on db.FlightReports actions {
+    entity FlightReports as projection on db.FlightReports {
+        *,
+        case
+            when auditStatus = 'ACTION_REQUIRED' then true
+            when status = 'DRAFT' then true
+            else false
+        end as requiresPilotAttention : Boolean,
+        case
+            when auditStatus = 'ACTION_REQUIRED' then 1
+            when status = 'DRAFT' then 2
+            else 3
+        end as pilotAttentionPriority : Integer
+    } actions {
 
         @requires: 'Pilot'
         action submit() returns FlightReports;

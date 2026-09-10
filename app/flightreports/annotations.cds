@@ -1,5 +1,71 @@
 using ExpenseService as service from '../../srv/expense-service';
 
+// Pilot work queues. All views use FlightReports, so they can safely share
+// one filter bar and the same object-page navigation.
+annotate service.FlightReports with @(
+    UI.SelectionPresentationVariant #NeedsAttention : {
+        Text : 'Needs Attention',
+        SelectionVariant : {
+            Text : 'Needs Attention',
+            SelectOptions : [{
+                PropertyName : requiresPilotAttention,
+                Ranges : [{ Sign : #I, Option : #EQ, Low : true }]
+            }]
+        },
+        PresentationVariant : {
+            SortOrder : [
+                { Property : pilotAttentionPriority, Descending : false },
+                { Property : modifiedAt, Descending : true }
+            ]
+        }
+    },
+    UI.SelectionPresentationVariant #PendingAudit : {
+        Text : 'Pending Audit',
+        SelectionVariant : {
+            Text : 'Pending Audit',
+            SelectOptions : [
+                {
+                    PropertyName : status,
+                    Ranges : [{ Sign : #I, Option : #EQ, Low : 'SUBMITTED' }]
+                },
+                {
+                    PropertyName : auditStatus,
+                    Ranges : [{ Sign : #I, Option : #EQ, Low : 'PENDING' }]
+                }
+            ]
+        },
+        PresentationVariant : {
+            SortOrder : [{ Property : submittedAt, Descending : true }]
+        }
+    },
+    UI.SelectionPresentationVariant #Approved : {
+        Text : 'Approved',
+        SelectionVariant : {
+            Text : 'Approved',
+            SelectOptions : [
+                {
+                    PropertyName : status,
+                    Ranges : [{ Sign : #I, Option : #EQ, Low : 'SUBMITTED' }]
+                },
+                {
+                    PropertyName : auditStatus,
+                    Ranges : [{ Sign : #I, Option : #EQ, Low : 'APPROVED' }]
+                }
+            ]
+        },
+        PresentationVariant : {
+            SortOrder : [{ Property : modifiedAt, Descending : true }]
+        }
+    },
+    UI.SelectionPresentationVariant #AllReports : {
+        Text : 'All Reports',
+        SelectionVariant : { Text : 'All Reports' },
+        PresentationVariant : {
+            SortOrder : [{ Property : modifiedAt, Descending : true }]
+        }
+    }
+);
+
 annotate service.FlightReports with @(
 
     Capabilities.UpdateRestrictions : {
@@ -283,6 +349,8 @@ annotate service.Expenses with @(
 
 annotate service.FlightReports with {
     organization  @UI.Hidden;
+    requiresPilotAttention @UI.Hidden;
+    pilotAttentionPriority @UI.Hidden;
     aircraft @(
         title : 'Aircraft',
         Common.Text : aircraft.registration,
