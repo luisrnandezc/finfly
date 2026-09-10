@@ -152,6 +152,28 @@ describe('ExpenseService expense correction lifecycle', () => {
     );
   });
 
+  it('resolves the readable category code to its technical association key', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000015';
+    const expenseID = '90100000-0000-0000-0000-000000000015';
+
+    await seedSubmittedReport(
+      reportID,
+      'FR-2026-CATEGORY-CORRECTION',
+      'ACTION_REQUIRED',
+    );
+    await seedExpense(expenseID, reportID, 'NEEDS_CORRECTION');
+
+    const response = await POST(
+      `${expenseUrl(expenseID)}/ExpenseService.resubmitExpense`,
+      { categoryCode: 'FUEL' },
+      pilotConfiguration,
+    );
+
+    expect(response.status).to.equal(200);
+    expect(response.data.category_ID).to.equal(masterDataIDs.fuelCategory);
+    expect(response.data.auditStatus).to.equal('PENDING');
+  });
+
   it('keeps the report actionable until every corrected expense is resubmitted', async () => {
     const reportID = '90000000-0000-0000-0000-000000000013';
     const firstExpenseID = '90100000-0000-0000-0000-000000000013';

@@ -13,6 +13,7 @@ const expenseKeyFrom = (req: Request): BoundKey | undefined =>
 type ExpenseActionInput = {
   expenseDate?: string;
   categoryID?: string;
+  categoryCode?: string;
   originalAmount?: number | string;
   originalCurrencyCode?: string;
   legID?: string | null;
@@ -392,6 +393,18 @@ export function registerExpenseWorkflowHandlers(
       ['receiptNumber', 'receiptNumber'],
       ['fuelQuantityLiters', 'fuelQuantityLiters'],
     ];
+
+    if (Object.prototype.hasOwnProperty.call(input, 'categoryCode')) {
+      const category = await tx.run(
+        SELECT.one
+          .from(db.ExpenseCategories)
+          .columns('ID')
+          .where({ code: input.categoryCode, active: true }),
+      );
+
+      if (!category) return req.reject(400, 'Select an active expense category');
+      corrections.category_ID = category.ID;
+    }
 
     for (const [actionField, entityField] of fieldMappings) {
       if (Object.prototype.hasOwnProperty.call(input, actionField)) {

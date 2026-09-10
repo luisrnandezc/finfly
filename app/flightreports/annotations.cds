@@ -591,5 +591,9 @@ annotate service.CrewMembers with {
 
 annotate service.ExpenseCategories with {
     ID @UI.Hidden;
+    code @(
+        Common.Text : name,
+        Common.TextArrangement : #TextOnly
+    );
 };
 

@@ -70,17 +70,17 @@ service ExpenseService {
                 title : 'Expense Date',
                 UI.ParameterDefaultValue : in.expenseDate
             ) : Date,
-            categoryID @(
+            categoryCode @(
                 title : 'Category',
-                UI.ParameterDefaultValue : in.category_ID,
+                UI.ParameterDefaultValue : in.category.code,
                 Common.ValueListWithFixedValues : true,
                 Common.ValueList : {
                     CollectionPath : 'ExpenseCategories',
                     Parameters : [
                         {
                             $Type : 'Common.ValueListParameterInOut',
-                            LocalDataProperty : categoryID,
-                            ValueListProperty : 'ID'
+                            LocalDataProperty : categoryCode,
+                            ValueListProperty : 'code'
                         },
                         {
                             $Type : 'Common.ValueListParameterDisplayOnly',
@@ -88,7 +88,7 @@ service ExpenseService {
                         }
                     ]
                 }
-            ) : UUID,
+            ) : String(30),
             originalAmount @(
                 title : 'Amount',
                 UI.ParameterDefaultValue : in.originalAmount
