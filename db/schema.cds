@@ -29,6 +29,11 @@ type ExpenseAuditStatus : String enum {
     needsCorrection = 'NEEDS_CORRECTION';
 }
 
+type FuelUnit : String enum {
+    liters    = 'L';
+    usGallons = 'US_GAL';
+}
+
 type CrewRole : String enum {
     pic      = 'PIC';
     sic      = 'SIC';
@@ -45,6 +50,12 @@ entity ReportAuditStatuses {
 entity CrewRoles {
     key code : CrewRole;
     name     : String(50) not null;
+    sortOrder : Integer not null;
+}
+
+entity FuelUnits {
+    key code : FuelUnit;
+    name      : String(30) not null;
     sortOrder : Integer not null;
 }
 
@@ -229,6 +240,8 @@ entity Expenses : cuid, managed {
                 on auditHistory.expense = $self;
 
     @assert.range: [(0), _]
+    fuelQuantity       : Decimal(12,2);
+    fuelUnit           : FuelUnit;
     fuelQuantityLiters : Decimal(12,2);
 
     attachments : Composition of many Attachments;

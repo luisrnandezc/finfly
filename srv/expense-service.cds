@@ -38,7 +38,8 @@ service ExpenseService {
             description         : String(255),
             supplier            : String(160),
             receiptNumber       : String(80),
-            fuelQuantityLiters  : Decimal(12,2)
+            fuelQuantity        : Decimal(12,2),
+            fuelUnit            : db.FuelUnit
         ) returns Expenses;
 
         @requires: 'Pilot'
@@ -153,10 +154,23 @@ service ExpenseService {
                 title : 'Receipt Number',
                 UI.ParameterDefaultValue : in.receiptNumber
             ) : String(80),
-            fuelQuantityLiters @(
-                title : 'Fuel Quantity (L)',
-                UI.ParameterDefaultValue : in.fuelQuantityLiters
-            ) : Decimal(12,2)
+            fuelQuantity @(
+                title : 'Fuel Quantity',
+                UI.ParameterDefaultValue : in.fuelQuantity
+            ) : Decimal(12,2),
+            fuelUnit @(
+                title : 'Fuel Unit',
+                UI.ParameterDefaultValue : in.fuelUnit,
+                Common.ValueListWithFixedValues : true,
+                Common.ValueList : {
+                    CollectionPath : 'FuelUnits',
+                    Parameters : [{
+                        $Type : 'Common.ValueListParameterInOut',
+                        LocalDataProperty : fuelUnit,
+                        ValueListProperty : 'code'
+                    }]
+                }
+            ) : db.FuelUnit
         ) returns Expenses;
     };
 
@@ -168,6 +182,9 @@ service ExpenseService {
 
     @readonly
     entity CrewRoles as projection on db.CrewRoles;
+
+    @readonly
+    entity FuelUnits as projection on db.FuelUnits;
 
     @readonly
     entity ExpenseCategories as projection on db.ExpenseCategories;
@@ -204,6 +221,7 @@ annotate ExpenseService.Expenses with {
     correctionReason              @readonly;
     addedAfterReportSubmission    @readonly;
     auditHistory                  @readonly;
+    fuelQuantityLiters            @readonly;
 };
 
 annotate ExpenseService.FlightReports with @restrict: [

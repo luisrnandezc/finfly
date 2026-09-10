@@ -337,6 +337,20 @@ annotate service.Expenses with @(
         { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code, ![@UI.Importance] : #High },
         {
             $Type : 'UI.DataField',
+            Label : 'Fuel Quantity',
+            Value : fuelQuantity,
+            ![@UI.Importance] : #Medium,
+            ![@UI.Hidden] : (category.code <> 'FUEL')
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Fuel Unit',
+            Value : fuelUnit,
+            ![@UI.Importance] : #Medium,
+            ![@UI.Hidden] : (category.code <> 'FUEL')
+        },
+        {
+            $Type : 'UI.DataField',
             Label : 'Receipt Number',
             Value : receiptNumber,
             ![@UI.Importance] : #High,
@@ -419,6 +433,8 @@ annotate service.Expenses actions {
                 'in/description',
                 'in/supplier',
                 'in/receiptNumber',
+                'in/fuelQuantity',
+                'in/fuelUnit',
                 'in/fuelQuantityLiters',
                 'in/auditStatus',
                 'in/correctionReason',
@@ -577,7 +593,20 @@ annotate service.Expenses with {
         ]
     );
     correctionReason             @title : 'Correction Reason';
-    fuelQuantityLiters           @title : 'Fuel Quantity (L)';
+    fuelQuantity                 @title : 'Fuel Quantity';
+    fuelUnit @(
+        title : 'Fuel Unit',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'FuelUnits',
+            Parameters : [{
+                $Type : 'Common.ValueListParameterInOut',
+                LocalDataProperty : fuelUnit,
+                ValueListProperty : 'code'
+            }]
+        }
+    );
+    fuelQuantityLiters           @(title : 'Fuel Quantity (L)', UI.Hidden);
     addedAfterReportSubmission   @title : 'Added After Submission';
 };
 
@@ -591,6 +620,19 @@ annotate service.CrewMembers with {
 
 annotate service.ExpenseCategories with {
     ID @UI.Hidden;
+    code @(
+        Common.Text : name,
+        Common.TextArrangement : #TextOnly
+    );
+};
+
+annotate service.FuelUnits with @(
+    UI.PresentationVariant : {
+        SortOrder : [{ Property : sortOrder, Descending : false }]
+    }
+);
+
+annotate service.FuelUnits with {
     code @(
         Common.Text : name,
         Common.TextArrangement : #TextOnly

@@ -1,10 +1,19 @@
 import cds, { type Request } from '@sap/cds';
 
+import { normalizeFuelQuantity } from '../domain/fuel-quantity.ts';
+
 const { SELECT, INSERT, UPDATE } = cds.ql;
 
 type BoundKey = { ID: string; IsActiveEntity?: boolean };
 type ReportData = { ID: string; reportNumber?: string | null; status: string };
-type ExpenseData = { ID: string; report_ID: string; auditStatus: string };
+type ExpenseData = {
+  ID: string;
+  report_ID: string;
+  auditStatus: string;
+  category_ID?: string | null;
+  fuelQuantity?: number | string | null;
+  fuelUnit?: string | null;
+};
 
 // Nested bindings contain the parent report key before the expense key.
 const expenseKeyFrom = (req: Request): BoundKey | undefined =>
@@ -20,7 +29,8 @@ type ExpenseActionInput = {
   description?: string | null;
   supplier?: string | null;
   receiptNumber?: string | null;
-  fuelQuantityLiters?: number | string | null;
+  fuelQuantity?: number | string | null;
+  fuelUnit?: string | null;
 };
 
 /** Registers late creation, approval, correction, and resubmission of expenses. */
@@ -69,16 +79,18 @@ export function registerExpenseWorkflowHandlers(
     reportID: string,
     input: ExpenseActionInput,
     req: Request,
-  ): Promise<void> => {
+  ): Promise<{ categoryCode?: string }> => {
+    let categoryCode: string | undefined;
     if (input.categoryID) {
       const category = await tx.run(
         SELECT.one
           .from(db.ExpenseCategories)
-          .columns('ID')
+          .columns('ID', 'code')
           .where({ ID: input.categoryID, active: true }),
       );
 
       if (!category) req.reject(400, 'Select an active expense category');
+      categoryCode = category.code;
     }
 
     if (input.originalCurrencyCode) {
@@ -106,6 +118,21 @@ export function registerExpenseWorkflowHandlers(
           'The selected flight leg does not belong to this report',
         );
       }
+    }
+
+    return { categoryCode };
+  };
+
+  const normalizedFuelQuantity = (
+    categoryCode: string | undefined,
+    quantity: number | string | null | undefined,
+    unit: string | null | undefined,
+    req: Request,
+  ): number | null => {
+    try {
+      return normalizeFuelQuantity(categoryCode ?? '', quantity, unit);
+    } catch (error) {
+      return req.reject(400, (error as Error).message);
     }
   };
 
@@ -141,7 +168,18 @@ export function registerExpenseWorkflowHandlers(
       return req.reject(400, 'Expense amount must be greater than zero');
     }
 
-    await validateExpenseReferences(tx, report.ID, input, req);
+    const { categoryCode } = await validateExpenseReferences(
+      tx,
+      report.ID,
+      input,
+      req,
+    );
+    const fuelQuantityLiters = normalizedFuelQuantity(
+      categoryCode,
+      input.fuelQuantity,
+      input.fuelUnit,
+      req,
+    );
     const expenseID = cds.utils.uuid();
     const submittedForAuditAt = new Date().toISOString();
 
@@ -157,7 +195,9 @@ export function registerExpenseWorkflowHandlers(
         receiptNumber: input.receiptNumber ?? null,
         originalAmount,
         originalCurrency_code: input.originalCurrencyCode,
-        fuelQuantityLiters: input.fuelQuantityLiters ?? null,
+        fuelQuantity: input.fuelQuantity ?? null,
+        fuelUnit: input.fuelUnit ?? null,
+        fuelQuantityLiters,
         auditStatus: 'PENDING',
         submittedForAuditAt,
         addedAfterReportSubmission: true,
@@ -367,7 +407,14 @@ export function registerExpenseWorkflowHandlers(
     const expense = (await tx.run(
       SELECT.one
         .from(db.Expenses)
-        .columns('ID', 'report_ID', 'auditStatus')
+        .columns(
+          'ID',
+          'report_ID',
+          'auditStatus',
+          'category_ID',
+          'fuelQuantity',
+          'fuelUnit',
+        )
         .where({ ID: key.ID }),
     )) as ExpenseData | undefined;
 
@@ -384,32 +431,81 @@ export function registerExpenseWorkflowHandlers(
     const corrections: Record<string, unknown> = {};
     const fieldMappings: Array<[keyof ExpenseActionInput, string]> = [
       ['expenseDate', 'expenseDate'],
-      ['categoryID', 'category_ID'],
       ['originalAmount', 'originalAmount'],
       ['originalCurrencyCode', 'originalCurrency_code'],
       ['legID', 'leg_ID'],
       ['description', 'description'],
       ['supplier', 'supplier'],
       ['receiptNumber', 'receiptNumber'],
-      ['fuelQuantityLiters', 'fuelQuantityLiters'],
     ];
 
+    let categoryID = expense.category_ID;
+    let categoryCode: string | undefined;
     if (Object.prototype.hasOwnProperty.call(input, 'categoryCode')) {
       const category = await tx.run(
         SELECT.one
           .from(db.ExpenseCategories)
-          .columns('ID')
+          .columns('ID', 'code')
           .where({ code: input.categoryCode, active: true }),
       );
 
       if (!category) return req.reject(400, 'Select an active expense category');
+      categoryID = category.ID;
+      categoryCode = category.code;
       corrections.category_ID = category.ID;
+    } else if (categoryID) {
+      const category = await tx.run(
+        SELECT.one
+          .from(db.ExpenseCategories)
+          .columns('code')
+          .where({ ID: categoryID }),
+      );
+      categoryCode = category?.code;
     }
 
     for (const [actionField, entityField] of fieldMappings) {
       if (Object.prototype.hasOwnProperty.call(input, actionField)) {
         corrections[entityField] = input[actionField];
       }
+    }
+
+    const hasFuelQuantity = Object.prototype.hasOwnProperty.call(
+      input,
+      'fuelQuantity',
+    );
+    const hasFuelUnit = Object.prototype.hasOwnProperty.call(input, 'fuelUnit');
+    const categoryChanged = Object.prototype.hasOwnProperty.call(
+      input,
+      'categoryCode',
+    );
+
+    let effectiveFuelQuantity = hasFuelQuantity
+      ? input.fuelQuantity
+      : expense.fuelQuantity;
+    let effectiveFuelUnit = hasFuelUnit ? input.fuelUnit : expense.fuelUnit;
+
+    // A category correction from fuel to non-fuel removes now-inapplicable data.
+    if (
+      categoryChanged &&
+      categoryCode !== 'FUEL' &&
+      !hasFuelQuantity &&
+      !hasFuelUnit
+    ) {
+      effectiveFuelQuantity = null;
+      effectiveFuelUnit = null;
+      req.notify('Fuel quantity was cleared because the expense is not fuel');
+    }
+
+    const fuelQuantityLiters = normalizedFuelQuantity(
+      categoryCode,
+      effectiveFuelQuantity,
+      effectiveFuelUnit,
+      req,
+    );
+    if (hasFuelQuantity || hasFuelUnit || categoryChanged) {
+      corrections.fuelQuantity = effectiveFuelQuantity ?? null;
+      corrections.fuelUnit = effectiveFuelUnit ?? null;
+      corrections.fuelQuantityLiters = fuelQuantityLiters;
     }
     if (
       corrections.originalAmount !== undefined &&

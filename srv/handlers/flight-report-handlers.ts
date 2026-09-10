@@ -1,5 +1,6 @@
 import cds, { type Request } from '@sap/cds';
 import { calculateFlightReportSummary } from '../domain/flight-report-summary.ts';
+import { normalizeFuelQuantity } from '../domain/fuel-quantity.ts';
 
 const { SELECT, INSERT, UPDATE } = cds.ql;
 
@@ -8,7 +9,13 @@ type LegReference = {
   flightDate?: string | null;
   flightHours?: number | string | null;
 };
-type ExpenseReference = { ID: string; leg_ID?: string | null };
+type ExpenseReference = {
+  ID: string;
+  leg_ID?: string | null;
+  category_ID: string;
+  fuelQuantity?: number | string | null;
+  fuelUnit?: string | null;
+};
 type LegSequenceReference = { sequence: number };
 type CrewMemberReference = { crewMember_ID: string };
 type BoundReportKey = { ID: string; IsActiveEntity?: boolean };
@@ -137,7 +144,7 @@ export function registerFlightReportHandlers(
       .columns('ID', 'flightDate', 'flightHours')
       .where({ report_ID: reportID })) as LegReference[];
     const expenses = (await SELECT.from(Expenses.drafts)
-      .columns('ID', 'leg_ID')
+      .columns('ID', 'leg_ID', 'category_ID', 'fuelQuantity', 'fuelUnit')
       .where({ report_ID: reportID })) as ExpenseReference[];
     const legSequences = (await SELECT.from(FlightLegs.drafts)
       .columns('sequence')
@@ -193,6 +200,29 @@ export function registerFlightReportHandlers(
         400,
         `Expense ${invalidExpense.ID} references a flight leg that does not belong to this report`,
       );
+    }
+
+    for (const expense of expenses) {
+      const category = await SELECT.one
+        .from(db.ExpenseCategories)
+        .columns('code')
+        .where({ ID: expense.category_ID, active: true });
+      if (!category) {
+        req.reject(400, 'Select an active expense category');
+      }
+
+      try {
+        const fuelQuantityLiters = normalizeFuelQuantity(
+          category.code,
+          expense.fuelQuantity,
+          expense.fuelUnit,
+        );
+        await UPDATE.entity(Expenses.drafts)
+          .set({ fuelQuantityLiters })
+          .where({ ID: expense.ID });
+      } catch (error) {
+        req.reject(400, (error as Error).message);
+      }
     }
 
     // The service owns these persisted values; clients only maintain flight legs.

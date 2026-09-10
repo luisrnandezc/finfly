@@ -147,12 +147,12 @@ describe('ExpenseService numeric validations', () => {
       {
         suffix: '01',
         reportNumber: 'FR-2026-ZERO-FUEL',
-        fuelQuantityLiters: 0,
+        fuelQuantity: 0,
       },
       {
         suffix: '02',
         reportNumber: 'FR-2026-NEGATIVE-FUEL',
-        fuelQuantityLiters: -1,
+        fuelQuantity: -1,
       },
     ];
 
@@ -168,7 +168,8 @@ describe('ExpenseService numeric validations', () => {
         description: 'Invalid fuel quantity test',
         originalAmount: 100,
         originalCurrency_code: 'USD',
-        fuelQuantityLiters: testCase.fuelQuantityLiters,
+        fuelQuantity: testCase.fuelQuantity,
+        fuelUnit: 'L',
       });
 
       expect(response.status).to.equal(201);
