@@ -97,6 +97,12 @@ describe('ExpenseService aircraft utilization', () => {
     expect(response.status).to.equal(200);
     expect(response.data.postedFlightHours).to.equal(3.75);
     expect(response.data.postedCycles).to.equal(2);
+    expect(response.data.aircraftHoursAfterPosting).to.equal(
+      Number(before.currentFlightHours) + 3.75,
+    );
+    expect(response.data.aircraftCyclesAfterPosting).to.equal(
+      Number(before.totalCycles) + 2,
+    );
     expect(response.data.utilizationPosted).to.equal(true);
     expect(response.data.utilizationPostedAt).to.exist;
 
@@ -114,12 +120,12 @@ describe('ExpenseService aircraft utilization', () => {
     await seedCompleteDraftReport(firstReportID, [1.1]);
     await seedCompleteDraftReport(secondReportID, [2.2, 1.3]);
 
-    await POST(
+    const firstResponse = await POST(
       `${reportUrl(firstReportID)}/ExpenseService.submit`,
       {},
       pilotConfiguration,
     );
-    await POST(
+    const secondResponse = await POST(
       `${reportUrl(secondReportID)}/ExpenseService.submit`,
       {},
       pilotConfiguration,
@@ -130,6 +136,12 @@ describe('ExpenseService aircraft utilization', () => {
       Number(before.currentFlightHours) + 4.6,
     );
     expect(after.totalCycles).to.equal(Number(before.totalCycles) + 3);
+    expect(secondResponse.data.aircraftHoursAfterPosting).to.be.greaterThan(
+      firstResponse.data.aircraftHoursAfterPosting,
+    );
+    expect(secondResponse.data.aircraftCyclesAfterPosting).to.be.greaterThan(
+      firstResponse.data.aircraftCyclesAfterPosting,
+    );
   });
 
   it('does not post utilization twice when submission is repeated', async () => {

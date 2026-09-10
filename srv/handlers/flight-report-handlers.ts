@@ -416,6 +416,8 @@ export function registerFlightReportHandlers(
           pendingExpenseCount: autoApprove ? 0 : expenses.length,
           postedFlightHours: utilization.postedFlightHours,
           postedCycles: utilization.postedCycles,
+          aircraftHoursAfterPosting: utilization.currentFlightHours,
+          aircraftCyclesAfterPosting: utilization.totalCycles,
           utilizationPosted: true,
           utilizationPostedAt: submittedAt,
           submittedAt,

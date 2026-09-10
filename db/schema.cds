@@ -145,6 +145,9 @@ entity FlightReports : cuid, managed {
     // Keeping it on the report makes later adjustments idempotent.
     postedFlightHours   : Decimal(12,2) not null default 0;
     postedCycles        : Integer not null default 0;
+    // Historical cumulative aircraft values immediately after this posting.
+    aircraftHoursAfterPosting  : Decimal(12,2);
+    aircraftCyclesAfterPosting : Integer;
     utilizationPosted   : Boolean not null default false;
     utilizationPostedAt : Timestamp;
 

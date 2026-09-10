@@ -165,6 +165,39 @@ annotate service.FlightReports with @(
                 Label : 'Total Flight Hours',
                 Value : totalFlightHours,
             },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Trip Cycles',
+                Value : postedCycles,
+                ![@UI.Hidden] : (utilizationPosted = false),
+            },
+        ],
+    },
+    UI.FieldGroup #AircraftUtilization : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            {
+                $Type : 'UI.DataField',
+                Label : 'Aircraft Hours After Report',
+                Value : aircraftHoursAfterPosting,
+                ![@UI.Hidden] : (utilizationPosted = false),
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Aircraft Cycles After Report',
+                Value : aircraftCyclesAfterPosting,
+                ![@UI.Hidden] : (utilizationPosted = false),
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Current Aircraft Hours',
+                Value : aircraft.currentFlightHours,
+            },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Aircraft Total Cycles',
+                Value : aircraft.totalCycles,
+            },
         ],
     },
     UI.Facets : [
@@ -179,6 +212,12 @@ annotate service.FlightReports with @(
             ID : 'TripSummary',
             Label : 'Trip Summary',
             Target : '@UI.FieldGroup#TripSummary',
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'AircraftUtilization',
+            Label : 'Aircraft Utilization',
+            Target : '@UI.FieldGroup#AircraftUtilization',
         },
         {
             $Type : 'UI.ReferenceFacet',
@@ -411,7 +450,15 @@ annotate service.FlightReports actions {
                 'in/reportNumber',
                 'in/displayTitle',
                 'in/submittedAt',
-                'in/submittedBy'
+                'in/submittedBy',
+                'in/postedFlightHours',
+                'in/postedCycles',
+                'in/aircraftHoursAfterPosting',
+                'in/aircraftCyclesAfterPosting',
+                'in/utilizationPosted',
+                'in/utilizationPostedAt',
+                'in/aircraft/currentFlightHours',
+                'in/aircraft/totalCycles'
             ]
         }
     );
@@ -612,6 +659,8 @@ annotate service.Expenses with {
 
 annotate service.Aircraft with {
     ID @UI.Hidden;
+    currentFlightHours @title : 'Current Flight Hours';
+    totalCycles        @title : 'Total Cycles';
 };
 
 annotate service.CrewMembers with {

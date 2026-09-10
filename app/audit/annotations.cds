@@ -247,6 +247,11 @@ annotate audit.FlightReports with @(
             { $Type : 'UI.DataField', Label : 'First Flight', Value : firstFlightDate },
             { $Type : 'UI.DataField', Label : 'Last Flight', Value : lastFlightDate },
             { $Type : 'UI.DataField', Label : 'Total Flight Hours', Value : totalFlightHours },
+            { $Type : 'UI.DataField', Label : 'Trip Cycles', Value : postedCycles },
+            { $Type : 'UI.DataField', Label : 'Aircraft Hours After Report', Value : aircraftHoursAfterPosting },
+            { $Type : 'UI.DataField', Label : 'Aircraft Cycles After Report', Value : aircraftCyclesAfterPosting },
+            { $Type : 'UI.DataField', Label : 'Current Aircraft Hours', Value : aircraft.currentFlightHours },
+            { $Type : 'UI.DataField', Label : 'Aircraft Total Cycles', Value : aircraft.totalCycles },
             { $Type : 'UI.DataField', Label : 'Submitted At', Value : submittedAt },
             { $Type : 'UI.DataField', Label : 'Submitted By', Value : submittedBy },
             { $Type : 'UI.DataField', Label : 'Notes', Value : notes }
@@ -537,6 +542,12 @@ annotate audit.FlightReports with {
             ]
         }
     );
+};
+
+annotate audit.Aircraft with {
+    ID                 @UI.Hidden;
+    currentFlightHours @title : 'Current Flight Hours';
+    totalCycles        @title : 'Total Cycles';
 };
 
 // Keeps fixed status values in their intended business order.
