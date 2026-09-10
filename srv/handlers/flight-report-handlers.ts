@@ -1,4 +1,5 @@
 import cds, { type Request } from '@sap/cds';
+import { calculateAircraftUtilizationUpdate } from '../domain/aircraft-utilization.ts';
 import { calculateFlightReportSummary } from '../domain/flight-report-summary.ts';
 import { normalizeFuelQuantity } from '../domain/fuel-quantity.ts';
 
@@ -29,9 +30,14 @@ type DraftReportData = {
 type ReportWorkflowData = {
   ID: string;
   organization_ID: string;
+  aircraft_ID: string;
   reportNumber?: string | null;
   status: string;
   auditStatus: string;
+  totalFlightHours: number | string;
+  postedFlightHours: number | string;
+  postedCycles: number;
+  utilizationPosted: boolean;
 };
 
 const findDuplicate = <T>(values: T[]): T | undefined => {
@@ -298,7 +304,18 @@ export function registerFlightReportHandlers(
     const report = (await tx.run(
       SELECT.one
         .from(db.FlightReports)
-        .columns('ID', 'organization_ID', 'reportNumber', 'status', 'auditStatus')
+        .columns(
+          'ID',
+          'organization_ID',
+          'aircraft_ID',
+          'reportNumber',
+          'status',
+          'auditStatus',
+          'totalFlightHours',
+          'postedFlightHours',
+          'postedCycles',
+          'utilizationPosted',
+        )
         .where({ ID: key.ID }),
     )) as ReportWorkflowData | undefined;
     if (!report) {
@@ -356,6 +373,40 @@ export function registerFlightReportHandlers(
     const autoApprove = selfApprovalEnabled && req.user.is('Auditor');
     const expenseTargetStatus = autoApprove ? 'APPROVED' : 'PENDING';
 
+    // Serialize updates for reports submitted concurrently for one aircraft.
+    const aircraft = await tx.run(
+      SELECT.one
+        .from(db.Aircraft)
+        .columns('ID', 'currentFlightHours', 'totalCycles')
+        .where({
+          ID: report.aircraft_ID,
+          organization_ID: report.organization_ID,
+        })
+        .forUpdate(),
+    );
+    if (!aircraft) {
+      return req.reject(400, 'The assigned aircraft is unavailable');
+    }
+
+    const utilization = calculateAircraftUtilizationUpdate({
+      aircraftFlightHours: aircraft.currentFlightHours,
+      aircraftCycles: aircraft.totalCycles,
+      reportFlightHours: report.totalFlightHours,
+      reportCycles: legs.length,
+      postedFlightHours: report.postedFlightHours,
+      postedCycles: report.postedCycles,
+      utilizationPosted: report.utilizationPosted,
+    });
+
+    await tx.run(
+      UPDATE.entity(db.Aircraft)
+        .set({
+          currentFlightHours: utilization.currentFlightHours,
+          totalCycles: utilization.totalCycles,
+        })
+        .where({ ID: aircraft.ID }),
+    );
+
     await tx.run(
       UPDATE.entity(db.FlightReports)
         .set({
@@ -363,6 +414,10 @@ export function registerFlightReportHandlers(
           status: 'SUBMITTED',
           auditStatus: autoApprove ? 'APPROVED' : 'PENDING',
           pendingExpenseCount: autoApprove ? 0 : expenses.length,
+          postedFlightHours: utilization.postedFlightHours,
+          postedCycles: utilization.postedCycles,
+          utilizationPosted: true,
+          utilizationPostedAt: submittedAt,
           submittedAt,
           submittedBy,
         })
