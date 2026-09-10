@@ -54,9 +54,13 @@ service ExpenseService {
 
         @requires: 'Pilot'
         action resubmitExpense(
-            expenseDate          @(title: 'Expense Date')      : Date,
+            expenseDate @(
+                title : 'Expense Date',
+                UI.ParameterDefaultValue : in.expenseDate
+            ) : Date,
             categoryID @(
                 title : 'Category',
+                UI.ParameterDefaultValue : in.category_ID,
                 Common.ValueListWithFixedValues : true,
                 Common.ValueList : {
                     CollectionPath : 'ExpenseCategories',
@@ -73,9 +77,13 @@ service ExpenseService {
                     ]
                 }
             ) : UUID,
-            originalAmount       @(title: 'Amount')            : Decimal(15,2),
+            originalAmount @(
+                title : 'Amount',
+                UI.ParameterDefaultValue : in.originalAmount
+            ) : Decimal(15,2),
             originalCurrencyCode @(
                 title : 'Currency',
+                UI.ParameterDefaultValue : in.originalCurrency_code,
                 Common.ValueListWithFixedValues : true,
                 Common.ValueList : {
                     CollectionPath : 'Currencies',
@@ -88,6 +96,7 @@ service ExpenseService {
             ) : String(3),
             legID @(
                 title : 'Flight Leg',
+                UI.ParameterDefaultValue : in.leg_ID,
                 Common.ValueList : {
                     CollectionPath : 'FlightLegs',
                     Parameters : [
@@ -120,10 +129,22 @@ service ExpenseService {
                     ]
                 }
             ) : UUID,
-            description          @(title: 'Description')       : String(255),
-            supplier             @(title: 'Supplier')          : String(160),
-            receiptNumber        @(title: 'Receipt Number')    : String(80),
-            fuelQuantityLiters   @(title: 'Fuel Quantity (L)') : Decimal(12,2)
+            description @(
+                title : 'Description',
+                UI.ParameterDefaultValue : in.description
+            ) : String(255),
+            supplier @(
+                title : 'Supplier',
+                UI.ParameterDefaultValue : in.supplier
+            ) : String(160),
+            receiptNumber @(
+                title : 'Receipt Number',
+                UI.ParameterDefaultValue : in.receiptNumber
+            ) : String(80),
+            fuelQuantityLiters @(
+                title : 'Fuel Quantity (L)',
+                UI.ParameterDefaultValue : in.fuelQuantityLiters
+            ) : Decimal(12,2)
         ) returns Expenses;
     };
 

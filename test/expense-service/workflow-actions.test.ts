@@ -114,6 +114,12 @@ describe('ExpenseService workflow actions', () => {
     expect(response.data.correctionReason).to.equal(null);
     expect(response.data.auditedBy).to.equal(null);
     expect(response.data.description).to.equal('Corrected receipt information');
+    // Optional action parameters behave like a patch: correcting one field
+    // must not erase or require resending already valid expense information.
+    expect(response.data.expenseDate).to.equal('2026-08-20');
+    expect(response.data.category_ID).to.equal(masterDataIDs.fboCategory);
+    expect(Number(response.data.originalAmount)).to.equal(100);
+    expect(response.data.originalCurrency_code).to.equal('USD');
 
     response = await POST(
       `${activeExpenseUrl(expenseID)}/ExpenseService.approveExpense`,
