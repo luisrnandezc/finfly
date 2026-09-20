@@ -153,7 +153,7 @@ export function registerExpenseWorkflowHandlers(
     )) as ReportData | undefined;
 
     if (!report) {
-      return req.reject(404, `Flight report with ID ${key.ID} not found`);
+      return req.reject(404, 'This flight report is no longer available');
     }
     if (report.status !== 'SUBMITTED') {
       return req.reject(
@@ -240,12 +240,12 @@ export function registerExpenseWorkflowHandlers(
     )) as ReportData | undefined;
 
     if (!report) {
-      return req.reject(404, `Flight report with ID ${key.ID} not found`);
+      return req.reject(404, 'This flight report is no longer available');
     }
     if (report.status !== 'SUBMITTED') {
       return req.reject(
         409,
-        `Expenses cannot be approved because flight report ${report.reportNumber} has status ${report.status}`,
+        'Expenses can only be approved for submitted flight reports',
       );
     }
 
@@ -309,11 +309,11 @@ export function registerExpenseWorkflowHandlers(
         .where({ ID: key.ID }),
     )) as ExpenseData | undefined;
 
-    if (!expense) return req.reject(404, `Expense with ID ${key.ID} not found`);
+    if (!expense) return req.reject(404, 'This expense is no longer available');
     if (expense.auditStatus !== 'PENDING') {
       return req.reject(
         409,
-        `Expense ${expense.ID} cannot be approved because its status is ${expense.auditStatus}`,
+        'Only expenses awaiting audit can be approved',
       );
     }
 
@@ -362,11 +362,11 @@ export function registerExpenseWorkflowHandlers(
         .where({ ID: key.ID }),
     )) as ExpenseData | undefined;
 
-    if (!expense) return req.reject(404, `Expense with ID ${key.ID} not found`);
+    if (!expense) return req.reject(404, 'This expense is no longer available');
     if (expense.auditStatus !== 'PENDING') {
       return req.reject(
         409,
-        `Expense ${expense.ID} cannot request correction because its status is ${expense.auditStatus}`,
+        'A correction can only be requested for an expense awaiting audit',
       );
     }
 
@@ -418,11 +418,11 @@ export function registerExpenseWorkflowHandlers(
         .where({ ID: key.ID }),
     )) as ExpenseData | undefined;
 
-    if (!expense) return req.reject(404, `Expense with ID ${key.ID} not found`);
+    if (!expense) return req.reject(404, 'This expense is no longer available');
     if (expense.auditStatus !== 'NEEDS_CORRECTION') {
       return req.reject(
         409,
-        `Expense ${expense.ID} cannot be resubmitted because its status is ${expense.auditStatus}`,
+        'Only expenses awaiting correction can be resubmitted',
       );
     }
 

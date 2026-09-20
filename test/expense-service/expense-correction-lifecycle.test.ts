@@ -148,7 +148,7 @@ describe('ExpenseService expense correction lifecycle', () => {
 
     expect(response.status).to.equal(409);
     expect(response.data.error.message).to.equal(
-      `Expense ${expenseID} cannot be resubmitted because its status is PENDING`,
+      'Only expenses awaiting correction can be resubmitted',
     );
   });
 

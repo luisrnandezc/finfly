@@ -61,13 +61,13 @@ export function registerExchangeRateHandlers(
     )) as ReportData | undefined;
 
     if (!report) {
-      return req.reject(404, `Flight report with ID ${key.ID} not found`);
+      return req.reject(404, 'This flight report is no longer available');
     }
 
     if (report.status !== 'DRAFT') {
       return req.reject(
         409,
-        `Flight report ${report.reportNumber} cannot refresh exchange rates because its status is ${report.status}`,
+        'Exchange rates can only be refreshed for draft flight reports',
       );
     }
 

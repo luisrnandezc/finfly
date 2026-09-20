@@ -179,7 +179,7 @@ export function registerFlightReportHandlers(
     if (duplicateCrewMember !== undefined) {
       req.reject(
         409,
-        `Crew member ${duplicateCrewMember} is assigned more than once`,
+        'The selected crew member is assigned more than once',
       );
     }
 
@@ -195,7 +195,7 @@ export function registerFlightReportHandlers(
         if (!crewMember) {
           req.reject(
             400,
-            `Crew member ${assignment.crewMember_ID} does not belong to this organization`,
+            'The selected crew member does not belong to this organization',
           );
         }
       }
@@ -208,7 +208,7 @@ export function registerFlightReportHandlers(
     if (invalidExpense) {
       req.reject(
         400,
-        `Expense ${invalidExpense.ID} references a flight leg that does not belong to this report`,
+        'An expense references a flight leg that does not belong to this report',
       );
     }
 
@@ -251,12 +251,12 @@ export function registerFlightReportHandlers(
       .columns('ID', 'reportNumber', 'status')
       .where({ ID: reportID })) as ReportWorkflowData | undefined;
     if (!report) {
-      return req.reject(404, `Flight report with ID ${reportID} not found`);
+      return req.reject(404, 'This flight report is no longer available');
     }
     if (report.status !== 'DRAFT') {
       return req.reject(
         409,
-        `Flight report ${report.reportNumber} cannot be edited because its status is ${report.status}`,
+        'Only draft flight reports can be edited',
       );
     }
   });
@@ -282,12 +282,12 @@ export function registerFlightReportHandlers(
       .columns('ID', 'reportNumber', 'status')
       .where({ ID: reportID })) as ReportWorkflowData | undefined;
     if (!report) {
-      return req.reject(404, `Flight report with ID ${reportID} not found`);
+      return req.reject(404, 'This flight report is no longer available');
     }
     if (report.status !== 'DRAFT') {
       return req.reject(
         409,
-        `Flight report ${report.reportNumber} cannot be deleted because its status is ${report.status}`,
+        'Only draft flight reports can be deleted',
       );
     }
   });
@@ -323,14 +323,14 @@ export function registerFlightReportHandlers(
         .where({ ID: key.ID }),
     )) as ReportWorkflowData | undefined;
     if (!report) {
-      return req.reject(404, `Flight report with ID ${key.ID} not found`);
+      return req.reject(404, 'This flight report is no longer available');
     }
 
     const reportLabel = report.reportNumber ?? 'Draft flight report';
     if (report.status !== 'DRAFT') {
       return req.reject(
         409,
-        `${reportLabel} cannot be submitted because its status is ${report.status}`,
+        'Only draft flight reports can be submitted',
       );
     }
 

@@ -180,7 +180,7 @@ describe('ExpenseService workflow actions', () => {
 
     expect(response.status).to.equal(409);
     expect(response.data.error.message).to.equal(
-      'Flight report FR-2026-SUBMITTED-LOCKED cannot be edited because its status is SUBMITTED',
+      'Only draft flight reports can be edited',
     );
   });
 
@@ -220,7 +220,7 @@ describe('ExpenseService workflow actions', () => {
 
     expect(response.status).to.equal(409);
     expect(response.data.error.message).to.equal(
-      'Flight report FR-2026-SUBMITTED-NOT-DELETABLE cannot be deleted because its status is SUBMITTED',
+      'Only draft flight reports can be deleted',
     );
 
     const persistedReport = await GET(activeReportUrl(reportID));

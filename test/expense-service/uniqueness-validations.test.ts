@@ -8,7 +8,7 @@ const baseUrl = '/expenses';
 async function activate(
   draftUrl: string,
   acceptedStatus: number,
-): Promise<void> {
+): Promise<Awaited<ReturnType<typeof POST>>> {
   const response = await POST(
     `${draftUrl}/ExpenseService.draftActivate`,
     {},
@@ -21,6 +21,7 @@ async function activate(
   );
 
   expect(response.status).to.equal(acceptedStatus);
+  return response;
 }
 
 describe('ExpenseService uniqueness validations', () => {
@@ -134,6 +135,9 @@ describe('ExpenseService uniqueness validations', () => {
       expect(response.status).to.equal(201);
     }
 
-    await activate(draftUrl, 409);
+    response = await activate(draftUrl, 409);
+    expect(response.data.error.message).to.equal(
+      'The selected crew member is assigned more than once',
+    );
   });
 });
