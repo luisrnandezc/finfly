@@ -19,6 +19,7 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf"
+    "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf",
+    "lint": "eslint webapp --max-warnings 0"
   }
 }

@@ -1,4 +1,4 @@
-import cds, { type Request } from '@sap/cds';
+import cds, { type Request, type Transaction } from '@sap/cds';
 
 import { normalizeFuelQuantity } from '../domain/fuel-quantity.ts';
 
@@ -42,7 +42,7 @@ export function registerExpenseWorkflowHandlers(
   const common = cds.entities('sap.common');
 
   const recalculateReportAuditStatus = async (
-    tx: any,
+    tx: Transaction,
     reportID: string,
   ): Promise<string> => {
     const expenses = (await tx.run(
@@ -75,7 +75,7 @@ export function registerExpenseWorkflowHandlers(
   };
 
   const validateExpenseReferences = async (
-    tx: any,
+    tx: Transaction,
     reportID: string,
     input: ExpenseActionInput,
     req: Request,
@@ -439,7 +439,7 @@ export function registerExpenseWorkflowHandlers(
       ['receiptNumber', 'receiptNumber'],
     ];
 
-    let categoryID = expense.category_ID;
+    const categoryID = expense.category_ID;
     let categoryCode: string | undefined;
     if (Object.prototype.hasOwnProperty.call(input, 'categoryCode')) {
       const category = await tx.run(
@@ -450,7 +450,6 @@ export function registerExpenseWorkflowHandlers(
       );
 
       if (!category) return req.reject(400, 'Select an active expense category');
-      categoryID = category.ID;
       categoryCode = category.code;
       corrections.category_ID = category.ID;
     } else if (categoryID) {

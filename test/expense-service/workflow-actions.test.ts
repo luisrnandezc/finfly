@@ -233,7 +233,7 @@ describe('ExpenseService workflow actions', () => {
     const crewAssignmentID = '90600000-0000-0000-0000-000000000002';
     const expenseID = '90600000-0000-0000-0000-000000000003';
 
-    let response = await POST(
+    await POST(
       `${baseUrl}/FlightReports`,
       {
         ID: reportID,
@@ -287,7 +287,7 @@ describe('ExpenseService workflow actions', () => {
       pilotAuditorConfiguration,
     );
 
-    response = await POST(
+    let response = await POST(
       `${activeReportUrl(reportID)}/ExpenseService.submit`,
       {},
       pilotAuditorConfiguration,

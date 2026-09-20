@@ -19,7 +19,8 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ui5 build"
+    "build": "ui5 build",
+    "lint": "eslint webapp --max-warnings 0"
   },
   "private": true
 }

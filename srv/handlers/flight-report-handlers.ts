@@ -1,4 +1,4 @@
-import cds, { type Request } from '@sap/cds';
+import cds, { type Request, type Transaction } from '@sap/cds';
 import { calculateAircraftUtilizationUpdate } from '../domain/aircraft-utilization.ts';
 import { calculateFlightReportSummary } from '../domain/flight-report-summary.ts';
 import { normalizeFuelQuantity } from '../domain/fuel-quantity.ts';
@@ -20,6 +20,9 @@ type ExpenseReference = {
 type LegSequenceReference = { sequence: number };
 type CrewMemberReference = { crewMember_ID: string };
 type BoundReportKey = { ID: string; IsActiveEntity?: boolean };
+type FinFlyConfiguration = {
+  finfly?: { selfApprovalEnabled?: boolean };
+};
 
 type DraftReportData = {
   reportNumber?: string | null;
@@ -57,10 +60,11 @@ export function registerFlightReportHandlers(
     .entities as any;
   const db = cds.entities('finfly');
   const selfApprovalEnabled =
-    (cds.env as any).finfly?.selfApprovalEnabled === true;
+    (cds.env as unknown as FinFlyConfiguration).finfly?.selfApprovalEnabled ===
+    true;
 
   const nextReportNumber = async (
-    tx: any,
+    tx: Transaction,
     organizationID: string,
   ): Promise<string> => {
     const year = new Date().getUTCFullYear();

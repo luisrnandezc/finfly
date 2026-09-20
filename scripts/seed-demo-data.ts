@@ -248,6 +248,7 @@ async function verifyServer(): Promise<void> {
   } catch (error) {
     throw new Error(
       `FinFly is not available at ${baseUrl}. Start "cds watch" first.\n${errorMessage(error)}`,
+      { cause: error },
     );
   }
 }

@@ -14,8 +14,10 @@
     "@cap-js/cds-types": "^0.15.0",
     "@cap-js/sqlite": "^2.4.0",
     "@types/node": "^24.0.0",
+    "eslint": "^10.8.1",
     "tsx": "^4",
     "typescript": "^5",
+    "typescript-eslint": "^8.67.0",
     "vitest": "^4.1.10",
     "cds-plugin-ui5": "^0.13.0"
   },
@@ -23,7 +25,8 @@
     "start": "cds-serve",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck && npm test",
+    "lint": "eslint srv scripts test --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit",
+    "check": "npm run typecheck && npm run lint && npm test",
     "seed:demo": "tsx scripts/seed-demo-data.ts",
     "watch-flightreports": "cds watch --open finfly.flightreports/index.html?sap-ui-xx-viewCache=false --livereload false"
   },

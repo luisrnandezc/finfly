@@ -173,7 +173,7 @@ npm test
 
 The suite covers business validations, authorization, organization isolation, report and expense lifecycles, exchange rates, concurrency, calculated report summaries, and audit queues.
 
-Run the complete local quality check, including strict TypeScript validation, with:
+Run the complete local quality check, including strict TypeScript validation, ESLint, and the automated test suite, with:
 
 ```bash
 npm run check
