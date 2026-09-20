@@ -4,9 +4,7 @@ FinFly is a portfolio MVP for managing corporate flight reports and their relate
 
 Flight crews use FinFly to record trips, crew assignments, expenses, and receipts. Auditors use a separate review application to approve expenses or return them to the pilot for correction, with every workflow transition preserved in an audit history.
 
-> **Screenshot placeholder — application overview**
->
-> Add a wide screenshot of the pilot report list here. Suggested path: `docs/images/finfly-overview.png`.
+![FinFly pilot work queues and flight-report list](docs/images/pilot-main-view.png)
 
 ## Business purpose
 
@@ -43,17 +41,32 @@ The project is intentionally scoped as an MVP, but its domain and workflow are m
 
 The pilot application supports creating flight reports, maintaining flight legs and crew assignments, recording expenses, submitting reports, and correcting expenses returned by an auditor. Reports are separated into work queues so pilots can quickly identify drafts and reports requiring attention.
 
-> **Screenshot placeholder — pilot workflow**
->
-> Add a screenshot of a flight report object page showing legs and expenses. Suggested path: `docs/images/pilot-report.png`.
+The overview above shows the pilot's role-specific work queues for reports that need attention, are pending audit, or have been approved.
 
 ### Audit application
 
 The audit application presents submitted reports and their expenses to authorized reviewers. Auditors can approve individual expenses, approve all eligible expenses, or request a correction with a reason. The report remains actionable until all returned expenses have been resubmitted.
 
-> **Screenshot placeholder — auditor workflow**
->
-> Add a screenshot showing an expense under review or the correction action. Suggested path: `docs/images/auditor-review.png`.
+![Auditor report queues with bulk approval actions](docs/images/auditor-main-view.png)
+
+![Expense review showing approval and correction actions](docs/images/auditor-flight-report-expenses.png)
+
+<details>
+<summary>More workflow screenshots</summary>
+
+### Report details and calculated operational totals
+
+![Submitted report details and calculated totals](docs/images/auditor-flight-report-object-details.png)
+
+### Flight legs and assigned crew
+
+![Flight legs and crew assignments](docs/images/auditor-flight-report-legs-crew.png)
+
+### Expense history and attachments
+
+![Expense details, audit history, and attachments](docs/images/auditor-pending-expense-details.png)
+
+</details>
 
 ## Architecture
 

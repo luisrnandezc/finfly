@@ -50,5 +50,8 @@ mta_archives/
 *.iml
 *.flattened-pom.xml
 
-# Project-specific generated documentation
-docs/
+# Project-specific documentation stays private except for README screenshots.
+docs/*
+!docs/images/
+docs/images/*
+!docs/images/*.png
