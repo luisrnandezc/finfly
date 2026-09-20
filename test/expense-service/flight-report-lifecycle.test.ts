@@ -10,7 +10,7 @@ describe('ExpenseService flight report lifecycle', () => {
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: flightReportIDs.report,
       aircraft_ID: masterDataIDs.aircraft,
-      requesterName: 'Julián Sierra (FIBEX)',
+      requesterName: 'Alex Demo (FinFly Demo Operator)',
       status: 'DRAFT',
       notes: 'Automated test report',
     });
@@ -26,13 +26,13 @@ describe('ExpenseService flight report lifecycle', () => {
     response = await GET(`${draftUrl}?$select=displayTitle`);
 
     expect(response.status).to.equal(200);
-    expect(response.data.displayTitle).to.equal('Draft - YV3364');
+    expect(response.data.displayTitle).to.equal('Draft - N1234');
 
     response = await POST(`${draftUrl}/legs`, {
       ID: flightReportIDs.outboundLeg,
       flightDate: '2026-08-12',
-      originAirportCode: 'SVVA',
-      destinationAirportCode: 'SKRG',
+      originAirportCode: 'SVMI',
+      destinationAirportCode: 'SKBO',
       flightHours: 2.3,
     });
 
@@ -42,8 +42,8 @@ describe('ExpenseService flight report lifecycle', () => {
     response = await POST(`${draftUrl}/legs`, {
       ID: flightReportIDs.returnLeg,
       flightDate: '2026-08-15',
-      originAirportCode: 'SKRG',
-      destinationAirportCode: 'SVVA',
+      originAirportCode: 'SKBO',
+      destinationAirportCode: 'SVMI',
       flightHours: 2.2,
     });
 
@@ -72,7 +72,7 @@ describe('ExpenseService flight report lifecycle', () => {
       category_ID: masterDataIDs.fboCategory,
       expenseDate: '2026-08-12',
       description: 'FBO and ground handling',
-      supplier: 'Valencia Aviation Services',
+      supplier: 'Demo Aviation Services',
       receiptNumber: 'REC-2026-0812',
       originalAmount: 180000,
       originalCurrency_code: 'VES',
@@ -84,7 +84,7 @@ describe('ExpenseService flight report lifecycle', () => {
       ID: flightReportIDs.usdExpense,
       category_ID: masterDataIDs.fboCategory,
       expenseDate: '2026-08-14',
-      description: 'FBO Colombia',
+      description: 'Demo destination handling',
       originalAmount: 1800,
       originalCurrency_code: 'USD',
     });
@@ -134,7 +134,7 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(vesExpense.leg_ID).to.equal(flightReportIDs.outboundLeg);
     expect(vesExpense.originalAmount).to.equal(180000);
     expect(vesExpense.originalCurrency_code).to.equal('VES');
-    expect(vesExpense.supplier).to.equal('Valencia Aviation Services');
+    expect(vesExpense.supplier).to.equal('Demo Aviation Services');
     expect(vesExpense.receiptNumber).to.equal('REC-2026-0812');
 
     const usdExpense = response.data.expenses.find(

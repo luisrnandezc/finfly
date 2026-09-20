@@ -17,9 +17,9 @@ Content-Type: application/json
   "ID": "{{reportId}}",
   "reportNumber": "FR-2026-0001",
   "aircraft_ID": "20000000-0000-0000-0000-000000000001",
-  "requesterName": "Julián Sierra (FIBEX)",
+  "requesterName": "Alex Demo (FinFly Demo Operator)",
   "status": "DRAFT",
-  "notes": "Sample report based on the August 2026 spreadsheet"
+  "notes": "Synthetic sample report for local development"
 }
 
 ### Add outbound flight leg
@@ -30,8 +30,8 @@ Content-Type: application/json
   "ID": "{{outboundLegId}}",
   "sequence": 1,
   "flightDate": "2026-08-12",
-  "originAirportCode": "SVVA",
-  "destinationAirportCode": "SKRG",
+  "originAirportCode": "SVMI",
+  "destinationAirportCode": "SKBO",
   "flightHours": 2.3
 }
 
@@ -43,8 +43,8 @@ Content-Type: application/json
   "ID": "{{returnLegId}}",
   "sequence": 2,
   "flightDate": "2026-08-15",
-  "originAirportCode": "SKRG",
-  "destinationAirportCode": "SVVA",
+  "originAirportCode": "SKBO",
+  "destinationAirportCode": "SVMI",
   "flightHours": 2.2
 }
 
@@ -57,7 +57,7 @@ Content-Type: application/json
 
 {
   "crewMember_ID": "30000000-0000-0000-0000-000000000001",
-  "role": "CAPTAIN"
+  "role": "PIC"
 }
 
 ### Assign second pilot
@@ -66,7 +66,7 @@ Content-Type: application/json
 
 {
   "crewMember_ID": "30000000-0000-0000-0000-000000000002",
-  "role": "FIRST_OFFICER"
+  "role": "SIC"
 }
 
 ### Read report with legs and crew
@@ -98,7 +98,7 @@ Content-Type: application/json
 {
   "category_ID": "10000000-0000-0000-0000-000000000003",
   "expenseDate": "2026-08-14",
-  "description": "FBO Colombia",
+  "description": "Demo destination handling",
   "originalAmount": 1800,
   "originalCurrency_code": "USD"
 }

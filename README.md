@@ -41,22 +41,28 @@ The project is intentionally scoped as an MVP, but its domain and workflow are m
 
 The pilot application supports creating flight reports, maintaining flight legs and crew assignments, recording expenses, submitting reports, and correcting expenses returned by an auditor. Reports are separated into work queues so pilots can quickly identify drafts and reports requiring attention.
 
-The overview above shows the pilot's role-specific work queues for reports that need attention, are pending audit, or have been approved.
+The overview above shows the pilot's role-specific work queues for reports that need attention, are pending audit, or have been approved. A submitted report brings together its workflow state, calculated trip summary, and the aircraft-utilization snapshot produced when the report was posted.
+
+![Submitted pilot report with trip summary and aircraft utilization](docs/images/pilot-flight-report-submitted-details-1.png)
+
+The same report keeps its flight legs, assigned crew, and auditable expenses together in one object page.
+
+![Submitted pilot report with flight legs, crew, and expenses](docs/images/pilot-flight-report-submitted-details-2.png)
 
 ### Audit application
 
 The audit application presents submitted reports and their expenses to authorized reviewers. Auditors can approve individual expenses, approve all eligible expenses, or request a correction with a reason. The report remains actionable until all returned expenses have been resubmitted.
 
-![Auditor report queues with bulk approval actions](docs/images/auditor-main-view.png)
+![Auditor work queues with per-report bulk approval actions](docs/images/auditor-main-view.png)
 
-![Expense review showing approval and correction actions](docs/images/auditor-flight-report-expenses.png)
+![Auditor expense review with approval and correction actions](docs/images/auditor-flight-report-expenses.png)
 
 <details>
 <summary>More workflow screenshots</summary>
 
 ### Report details and calculated operational totals
 
-![Submitted report details and calculated totals](docs/images/auditor-flight-report-object-details.png)
+![Submitted report details and calculated operational totals](docs/images/auditor-flight-report-details.png)
 
 ### Flight legs and assigned crew
 
