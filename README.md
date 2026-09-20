@@ -160,6 +160,7 @@ The script creates repeatable examples for the main workflow states:
 - Submitted report awaiting audit
 - Report requiring a pilot correction
 - Fully approved report
+- Submitted report using a different aircraft, crew, and requester
 
 Running the command again is safe; scenarios that already exist are skipped.
 

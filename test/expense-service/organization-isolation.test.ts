@@ -124,8 +124,11 @@ describe('ExpenseService organization isolation', () => {
   it('returns only aircraft belonging to the authenticated organization', async () => {
     let response = await GET(`${baseUrl}/Aircraft`);
 
-    expect(response.data.value).to.have.length(1);
-    expect(response.data.value[0].ID).to.equal(masterDataIDs.aircraft);
+    expect(response.data.value).to.have.length(2);
+    expect(response.data.value.map(({ ID }: { ID: string }) => ID)).to.have.members([
+      masterDataIDs.aircraft,
+      masterDataIDs.alternateAircraft,
+    ]);
 
     response = await GET(`${baseUrl}/Aircraft`, otherPilotConfiguration);
 

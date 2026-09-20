@@ -200,6 +200,12 @@ service ExpenseService {
     }
 }
 
+annotate ExpenseService.FlightReports with @cds.search: {
+    reportNumber,
+    requesterName,
+    aircraft.registration
+};
+
 annotate ExpenseService.FlightReports with {
     status        @readonly;
     displayTitle  @readonly;

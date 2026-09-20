@@ -40,6 +40,29 @@ function IDs(response: { data: { value: Array<{ ID: string }> } }): string[] {
 }
 
 describe('ExpenseService pilot report queues', () => {
+  it('searches drafts by aircraft registration without exposing a database error', async () => {
+    const draftID = '98400000-0000-0000-0000-000000000010';
+
+    await POST(
+      `${baseUrl}/FlightReports`,
+      {
+        ID: draftID,
+        aircraft_ID: masterDataIDs.aircraft,
+        requesterName: 'Aircraft search test',
+      },
+      pilotConfiguration,
+    );
+
+    for (const searchTerm of ['N1234', 'n1234', '1234']) {
+      const response = await GET(
+        `${baseUrl}/FlightReports?$search=${searchTerm}&$select=ID,displayTitle&$filter=IsActiveEntity eq false`,
+        pilotConfiguration,
+      );
+
+      expect(IDs(response), `search term ${searchTerm}`).to.include(draftID);
+    }
+  });
+
   it('separates attention, pending, approved, and complete report views', async () => {
     const draftID = '98400000-0000-0000-0000-000000000001';
     const actionRequiredID = '98400000-0000-0000-0000-000000000002';
