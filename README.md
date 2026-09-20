@@ -1,5 +1,7 @@
 # FinFly
 
+[![Quality Checks](https://github.com/luisrnandezc/finfly/actions/workflows/ci.yml/badge.svg)](https://github.com/luisrnandezc/finfly/actions/workflows/ci.yml)
+
 FinFly is a portfolio MVP for managing corporate flight reports and their related expenses. It demonstrates how an approval-driven business process can be modeled with the SAP Cloud Application Programming Model (CAP) and delivered through role-specific SAP Fiori elements applications.
 
 Flight crews use FinFly to record trips, crew assignments, expenses, and receipts. Auditors use a separate review application to approve expenses or return them to the pilot for correction, with every workflow transition preserved in an audit history.
@@ -104,15 +106,15 @@ scripts/  Reusable demo-data seeder
 
 ## Technology stack
 
-| Area | Technology |
-| --- | --- |
+| Area                  | Technology                                    |
+| --------------------- | --------------------------------------------- |
 | Application framework | SAP Cloud Application Programming Model (CAP) |
-| Backend | Node.js, TypeScript, OData |
-| Frontend | SAP Fiori elements, SAPUI5 |
-| Data model | Core Data Services (CDS) |
-| Local database | SQLite |
-| Attachments | `@cap-js/attachments` |
-| Testing | Vitest, `@cap-js/cds-test` |
+| Backend               | Node.js, TypeScript, OData                    |
+| Frontend              | SAP Fiori elements, SAPUI5                    |
+| Data model            | Core Data Services (CDS)                      |
+| Local database        | SQLite                                        |
+| Attachments           | `@cap-js/attachments`                         |
+| Testing               | Vitest, `@cap-js/cds-test`                    |
 
 ## Run locally
 
@@ -137,12 +139,12 @@ The server is available at `http://localhost:4004` by default. Open either appli
 
 Local development uses CAP's mocked authentication. These credentials are demo-only and must not be used for a production deployment.
 
-| User | Password | Roles | Organization |
-| --- | --- | --- | --- |
-| `pilot` | `pilot` | Pilot | Demo organization 1 |
-| `auditor` | `auditor` | Auditor | Demo organization 1 |
-| `admin` | `admin` | Admin, Pilot, Auditor | Demo organization 1 |
-| `otherpilot` | `otherpilot` | Pilot | Demo organization 2 |
+| User         | Password     | Roles                 | Organization        |
+| ------------ | ------------ | --------------------- | ------------------- |
+| `pilot`      | `pilot`      | Pilot                 | Demo organization 1 |
+| `auditor`    | `auditor`    | Auditor               | Demo organization 1 |
+| `admin`      | `admin`      | Admin, Pilot, Auditor | Demo organization 1 |
+| `otherpilot` | `otherpilot` | Pilot                 | Demo organization 2 |
 
 ### Load demonstration scenarios
 
