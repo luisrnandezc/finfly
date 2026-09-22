@@ -52,6 +52,12 @@ service ExpenseService {
     @readonly
     entity ExpenseAuditHistory as projection on db.ExpenseAuditHistory;
 
+    @readonly
+    entity FlightReportStatuses as projection on db.FlightReportStatuses;
+
+    @readonly
+    entity ReportAuditStatuses as projection on db.ReportAuditStatuses;
+
     entity FlightLegs as projection on db.FlightLegs;
     entity CrewAssignments as projection on db.CrewAssignments;
 

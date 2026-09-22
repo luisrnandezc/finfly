@@ -419,6 +419,21 @@ annotate service.FlightReports with {
     totalFlightHours @title : 'Total Flight Hours';
     status @(
         title : 'Report Status',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'FlightReportStatuses',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : status,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        },
         UI.ValueCriticality : [
             { Value : 'DRAFT', Criticality : #Information },
             { Value : 'SUBMITTED', Criticality : #Positive },
@@ -426,6 +441,21 @@ annotate service.FlightReports with {
     );
     auditStatus @(
         title : 'Expense Audit Status',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'ReportAuditStatuses',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : auditStatus,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        },
         UI.ValueCriticality : [
             { Value : 'NOT_STARTED', Criticality : #Neutral },
             { Value : 'PENDING', Criticality : #Information },
@@ -438,6 +468,19 @@ annotate service.FlightReports with {
         UI.MultiLineText
     );
 };
+
+// Keeps fixed status values in their intended business order.
+annotate service.FlightReportStatuses with @(
+    UI.PresentationVariant : {
+        SortOrder : [{ Property : sortOrder, Descending : false }]
+    }
+);
+
+annotate service.ReportAuditStatuses with @(
+    UI.PresentationVariant : {
+        SortOrder : [{ Property : sortOrder, Descending : false }]
+    }
+);
 
 annotate service.FlightReports actions {
     refreshExchangeRates @Core.OperationAvailable : ($self.status = 'DRAFT');

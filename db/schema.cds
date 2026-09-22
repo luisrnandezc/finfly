@@ -40,6 +40,13 @@ type CrewRole : String enum {
     other    = 'OTHER';
 };
 
+// UI-facing labels and ordering for flight-report status value helps.
+entity FlightReportStatuses {
+    key code : FlightReportStatus;
+    name     : String(80) not null;
+    sortOrder : Integer not null;
+}
+
 // UI-facing labels and ordering for report audit-status value helps.
 entity ReportAuditStatuses {
     key code : ReportAuditStatus;

@@ -22,7 +22,7 @@
     "cds-plugin-ui5": "^0.13.0"
   },
   "scripts": {
-    "start": "cds-serve",
+    "start": "tsx scripts/start-server.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint srv scripts test --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit",
