@@ -360,7 +360,7 @@ annotate service.CrewAssignments with @(
 
 annotate service.Expenses with @(
     UI.LineItem : [
-        { $Type : 'UI.DataField', Label : 'Date', Value : expenseDate, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Expense Date', Value : expenseDate, ![@UI.Importance] : #High },
         {
             $Type : 'UI.DataField',
             Label : 'Category',
@@ -368,28 +368,18 @@ annotate service.Expenses with @(
             ![@UI.Importance] : #High,
             ![@HTML5.CssDefaults.width] : '8rem'
         },
-        {
-            $Type : 'UI.DataField',
-            Label : 'Audit Status',
-            Value : auditStatus,
-            ![@UI.Importance] : #High
-        },
-        {
-            $Type : 'UI.DataField',
-            Label : 'Correction Reason',
-            Value : correctionReason,
-            ![@UI.Importance] : #High
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Label : 'Correct and Resubmit',
-            Action : 'ExpenseService.resubmitExpense',
-            Inline : true,
-            ![@UI.Importance] : #High
-        },
         { $Type : 'UI.DataField', Label : 'Flight Leg', Value : leg_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Amount', Value : originalAmount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Currency', Value : originalCurrency_code, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Supplier', Value : supplier, ![@UI.Importance] : #High },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Receipt Number',
+            Value : receiptNumber,
+            ![@UI.Importance] : #High,
+            ![@HTML5.CssDefaults.width] : '9rem'
+        },
+        { $Type : 'UI.DataField', Label : 'Description', Value : description, ![@UI.Importance] : #Medium },
         {
             $Type : 'UI.DataField',
             Label : 'Fuel Quantity',
@@ -406,13 +396,29 @@ annotate service.Expenses with @(
         },
         {
             $Type : 'UI.DataField',
-            Label : 'Receipt Number',
-            Value : receiptNumber,
-            ![@UI.Importance] : #High,
-            ![@HTML5.CssDefaults.width] : '9rem'
+            Label : 'Audit Status',
+            Value : auditStatus,
+            ![@UI.Importance] : #High
         },
-        { $Type : 'UI.DataField', Label : 'Supplier', Value : supplier, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Description', Value : description, ![@UI.Importance] : #Medium },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Correction Reason',
+            Value : correctionReason,
+            ![@UI.Importance] : #High
+        },
+        {
+            $Type : 'UI.DataField',
+            Label : 'Added After Submission',
+            Value : addedAfterReportSubmission,
+            ![@UI.Importance] : #High
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
+            Label : 'Correct and Resubmit',
+            Action : 'ExpenseService.resubmitExpense',
+            Inline : true,
+            ![@UI.Importance] : #High
+        },
     ]
 );
 
