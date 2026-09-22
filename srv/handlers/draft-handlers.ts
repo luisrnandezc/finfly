@@ -40,6 +40,32 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
     }
 
     req.data.organization_ID = organizationID;
+
+    if (!req.data.aircraft_ID) {
+      const crewMember = (await tx.run(
+        SELECT.one.from(db.CrewMembers).columns('ID').where({
+          organization_ID: organizationID,
+          userId: req.user.id,
+          active: true,
+        }),
+      )) as { ID: string } | undefined;
+
+      if (crewMember) {
+        const defaultAircraft = (await tx.run(
+          SELECT.from(db.Aircraft)
+            .columns('ID')
+            .where({
+              organization_ID: organizationID,
+              defaultPilot_ID: crewMember.ID,
+            })
+            .limit(2),
+        )) as Array<{ ID: string }>;
+
+        if (defaultAircraft.length === 1) {
+          req.data.aircraft_ID = defaultAircraft[0].ID;
+        }
+      }
+    }
   });
 
   service.before(['NEW', 'CREATE'], FlightLegs.drafts, async (req: Request) => {

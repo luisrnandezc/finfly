@@ -567,6 +567,10 @@ annotate audit.CrewAssignments with {
     role @title : 'Role';
 };
 
+annotate audit.CrewMembers with {
+    userId @UI.Hidden;
+};
+
 // =============================================================================
 // Action behavior
 // OperationAvailable controls button visibility. SideEffects tell Fiori which

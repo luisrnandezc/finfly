@@ -97,6 +97,7 @@ entity Aircraft : cuid, managed {
     organization : Association to Organizations not null;
     registration : String(20) not null;
     description  : String(100);
+    defaultPilot : Association to CrewMembers;
 
     // Cumulative utilization. Workflow handlers are the only writers.
     @assert.range: [(0), _]
@@ -105,11 +106,16 @@ entity Aircraft : cuid, managed {
     totalCycles        : Integer not null default 0;
 }
 
+@assert.unique: {
+    organizationUser: [organization, userId]
+}
 entity CrewMembers : cuid, managed {
     organization : Association to Organizations not null;
     firstName : String(80) not null;
     lastName  : String(80) not null;
     fullName  : String(161) = firstName || ' ' || lastName;
+    // Optional link to the authenticated user represented by this crew member.
+    userId    : String(255);
     active    : Boolean default true;
 }
 

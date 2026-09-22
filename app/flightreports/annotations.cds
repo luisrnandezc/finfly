@@ -724,6 +724,7 @@ annotate service.Aircraft with {
 
 annotate service.CrewMembers with {
     ID @UI.Hidden;
+    userId @UI.Hidden;
 };
 
 annotate service.ExpenseCategories with {
