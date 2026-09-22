@@ -1,5 +1,9 @@
 using ExpenseService as service from '../../srv/expense-service';
 
+// Instructs Fiori Elements to wrap text filters with tolower so users do not
+// need to match the capitalization stored in the database.
+annotate service with @Capabilities.FilterFunctions : ['tolower'];
+
 // Pilot work queues. All views use FlightReports, so they can safely share
 // one filter bar and the same object-page navigation.
 annotate service.FlightReports with @(
@@ -68,6 +72,18 @@ annotate service.FlightReports with @(
 
 annotate service.FlightReports with @(
 
+    Capabilities.FilterRestrictions : {
+        FilterExpressionRestrictions : [
+            {
+                Property : reportNumber,
+                AllowedExpressions : 'SearchExpression'
+            },
+            {
+                Property : requesterName,
+                AllowedExpressions : 'SearchExpression'
+            }
+        ]
+    },
     Capabilities.UpdateRestrictions : {
         Updatable : (status = 'DRAFT')
     },
@@ -730,4 +746,3 @@ annotate service.FuelUnits with {
         Common.TextArrangement : #TextOnly
     );
 };
-

@@ -1,5 +1,9 @@
 using AuditService as audit from '../../srv/audit-service';
 
+// Instructs Fiori Elements to wrap text filters with tolower so users do not
+// need to match the capitalization stored in the database.
+annotate audit with @Capabilities.FilterFunctions : ['tolower'];
+
 // =============================================================================
 // Expense UI
 // These annotations are reused by the report-specific table and the future
@@ -191,6 +195,18 @@ annotate audit.FlightReports with @(
 // Page-specific metadata for the landing queue: SelectionFields builds the
 // filter bar; the qualified variant applies the initial filter and sort order.
 annotate audit.FlightReports with @(
+    Capabilities.FilterRestrictions : {
+        FilterExpressionRestrictions : [
+            {
+                Property : reportNumber,
+                AllowedExpressions : 'SearchExpression'
+            },
+            {
+                Property : requesterName,
+                AllowedExpressions : 'SearchExpression'
+            }
+        ]
+    },
     UI.SelectionFields : [
         reportNumber,
         reviewStatus,
@@ -473,31 +489,7 @@ annotate audit.FlightReports with {
             ]
         }
     );
-    reportNumber @(
-        title : 'Report Number',
-        Common.ValueList : {
-            CollectionPath : 'FlightReports',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : reportNumber,
-                    ValueListProperty : 'reportNumber'
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'aircraft_ID'
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'firstFlightDate'
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'lastFlightDate'
-                }
-            ]
-        }
-    );
+    reportNumber @title : 'Report Number';
     requesterName @title : 'Flight Requester';
     firstFlightDate @title : 'First Flight Date';
     lastFlightDate  @title : 'Last Flight Date';
