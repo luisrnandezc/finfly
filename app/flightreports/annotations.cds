@@ -507,7 +507,15 @@ annotate service.ReportAuditStatuses with @(
 annotate service.FlightReports actions {
     refreshExchangeRates @Core.OperationAvailable : ($self.status = 'DRAFT');
     submit @(
-        Core.OperationAvailable : ($self.status = 'DRAFT'),
+        Core.OperationAvailable : {
+            $edmJson : {
+                $And : [
+                    { $Path : 'in/IsActiveEntity' },
+                    { $Eq : [{ $Path : 'in/status' }, 'DRAFT'] }
+                ]
+            }
+        },
+        Common.IsActionCritical : true,
         Common.SideEffects : {
             TargetProperties : [
                 'in/status',
