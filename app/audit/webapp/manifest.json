@@ -95,6 +95,7 @@
           "options": {
             "settings": {
               "contextPath": "/FlightReports",
+              "enhanceI18n": "i18n/i18n.properties",
               "variantManagement": "Page",
               "views": {
                 "paths": [
