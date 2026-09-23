@@ -1,5 +1,5 @@
 code,name,sortOrder
 NOT_STARTED,Not Started,1
 PENDING,Pending,2
-ACTION_REQUIRED,Action Required,3
+ACTION_REQUIRED,Waiting for Expense Correction,3
 APPROVED,Approved,4

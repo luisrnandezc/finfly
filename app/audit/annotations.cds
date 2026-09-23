@@ -495,6 +495,8 @@ annotate audit.FlightReports with {
     lastFlightDate  @title : 'Last Flight Date';
     auditStatus @(
         title : 'Audit Status',
+        Common.Text : auditStatusDetails.name,
+        Common.TextArrangement : #TextOnly,
         Common.ValueListWithFixedValues : true,
         Common.ValueList : {
             CollectionPath : 'ReportAuditStatuses',

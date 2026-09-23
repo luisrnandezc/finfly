@@ -167,6 +167,8 @@ entity FlightReports : cuid, managed {
     // Business workflow state-not the Fiori draft state.
     status          : FlightReportStatus not null default #draft;
     auditStatus     : ReportAuditStatus not null default #notStarted;
+    auditStatusDetails : Association to ReportAuditStatuses
+        on auditStatusDetails.code = auditStatus;
     // Maintained by workflow handlers so the UI can expose valid bulk actions.
     pendingExpenseCount : Integer not null default 0;
 

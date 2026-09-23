@@ -17,7 +17,7 @@ describe('AuditService filter value helps', () => {
     expect(response.status).to.equal(200);
     expect(response.data.value).to.deep.equal([
       { code: 'PENDING', name: 'Pending' },
-      { code: 'ACTION_REQUIRED', name: 'Action Required' },
+      { code: 'ACTION_REQUIRED', name: 'Waiting for Expense Correction' },
       { code: 'APPROVED', name: 'Approved' },
     ]);
   });

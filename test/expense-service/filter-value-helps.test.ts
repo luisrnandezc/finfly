@@ -26,7 +26,7 @@ describe('ExpenseService filter value helps', () => {
     expect(response.data.value).to.deep.equal([
       { code: 'NOT_STARTED', name: 'Not Started' },
       { code: 'PENDING', name: 'Pending' },
-      { code: 'ACTION_REQUIRED', name: 'Action Required' },
+      { code: 'ACTION_REQUIRED', name: 'Waiting for Expense Correction' },
       { code: 'APPROVED', name: 'Approved' },
     ]);
   });

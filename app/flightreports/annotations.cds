@@ -463,6 +463,8 @@ annotate service.FlightReports with {
     );
     auditStatus @(
         title : 'Expense Audit Status',
+        Common.Text : auditStatusDetails.name,
+        Common.TextArrangement : #TextOnly,
         Common.ValueListWithFixedValues : true,
         Common.ValueList : {
             CollectionPath : 'ReportAuditStatuses',
