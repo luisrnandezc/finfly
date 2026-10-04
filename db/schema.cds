@@ -40,6 +40,21 @@ type CrewRole : String enum {
     other    = 'OTHER';
 };
 
+type PilotLicenseType : String enum {
+    privateLicense    = 'PRIVATE';
+    commercialLicense = 'COMMERCIAL';
+    airlineTransport = 'TLA';
+};
+
+type AircraftType : String enum {
+    pistonSingle    = 'PISTON_SINGLE';
+    pistonTwin      = 'PISTON_TWIN';
+    turbopropSingle = 'TURBOPROP_SINGLE';
+    turbopropTwin   = 'TURBOPROP_TWIN';
+    turbofanTwin    = 'TURBOFAN_TWIN';
+    other           = 'OTHER';
+};
+
 // UI-facing labels and ordering for flight-report status value helps.
 entity FlightReportStatuses {
     key code : FlightReportStatus;
@@ -63,6 +78,18 @@ entity CrewRoles {
 entity FuelUnits {
     key code : FuelUnit;
     name      : String(30) not null;
+    sortOrder : Integer not null;
+}
+
+entity PilotLicenseTypes {
+    key code : PilotLicenseType;
+    name      : String(50) not null;
+    sortOrder : Integer not null;
+}
+
+entity AircraftTypes {
+    key code : AircraftType;
+    name      : String(60) not null;
     sortOrder : Integer not null;
 }
 
@@ -97,9 +124,14 @@ entity Aircraft : cuid, managed {
     organization : Association to Organizations not null;
     registration : String(20) not null;
     description  : String(100);
+    manufacturer : String(80) not null;
+    model         : String(80) not null;
+    serialNumber  : String(80) not null;
+    aircraftType  : AircraftType not null;
     defaultPilot : Association to CrewMembers;
+    active        : Boolean not null default true;
 
-    // Cumulative utilization. Workflow handlers are the only writers.
+    // Cumulative utilization. Updated by report submission or an administrator.
     @assert.range: [(0), _]
     currentFlightHours : Decimal(12,2) not null default 0;
     @assert.range: [(0), _]
@@ -116,7 +148,14 @@ entity CrewMembers : cuid, managed {
     fullName  : String(161) = firstName || ' ' || lastName;
     // Optional link to the authenticated user represented by this crew member.
     userId    : String(255);
-    active    : Boolean default true;
+    isPilot   : Boolean not null default true;
+    isAuditor : Boolean not null default false;
+    isAdmin   : Boolean not null default false;
+    positionTitle : String(100);
+    licenseType : PilotLicenseType;
+    @assert.range: [(0), _]
+    totalFlightHours : Decimal(12,2) not null default 0;
+    active    : Boolean not null default true;
 }
 
 @assert.unique: {

@@ -141,11 +141,12 @@ export function registerFlightReportHandlers(
         .where({
           ID: draftReport.aircraft_ID,
           organization_ID: draftReport.organization_ID,
+          active: true,
         });
       if (!aircraft) {
         req.reject(
           400,
-          'The selected aircraft does not belong to this organization',
+          'Select an active aircraft from this organization',
         );
       }
     }
@@ -191,11 +192,13 @@ export function registerFlightReportHandlers(
           .where({
             ID: assignment.crewMember_ID,
             organization_ID: draftReport.organization_ID,
+            isPilot: true,
+            active: true,
           });
         if (!crewMember) {
           req.reject(
             400,
-            'The selected crew member does not belong to this organization',
+            'Select an active pilot from this organization',
           );
         }
       }
@@ -374,7 +377,19 @@ export function registerFlightReportHandlers(
       (await nextReportNumber(tx, report.organization_ID));
     const submittedAt = new Date().toISOString();
     const submittedBy = req.user.id;
-    const autoApprove = selfApprovalEnabled && req.user.is('Auditor');
+    const submittingUser = await tx.run(
+      SELECT.one
+        .from(db.CrewMembers)
+        .columns('isAuditor')
+        .where({
+          organization_ID: report.organization_ID,
+          userId: submittedBy,
+          active: true,
+        }),
+    );
+    const autoApprove =
+      selfApprovalEnabled &&
+      (req.user.is('Auditor') || submittingUser?.isAuditor === true);
     const expenseTargetStatus = autoApprove ? 'APPROVED' : 'PENDING';
 
     // Serialize updates for reports submitted concurrently for one aircraft.

@@ -1,0 +1,7 @@
+code,name,sortOrder
+PISTON_SINGLE,Piston Single,1
+PISTON_TWIN,Piston Twin,2
+TURBOPROP_SINGLE,Turboprop Single,3
+TURBOPROP_TWIN,Turboprop Twin,4
+TURBOFAN_TWIN,Turbofan Twin,5
+OTHER,Other,6

@@ -46,6 +46,7 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
         SELECT.one.from(db.CrewMembers).columns('ID').where({
           organization_ID: organizationID,
           userId: req.user.id,
+          isPilot: true,
           active: true,
         }),
       )) as { ID: string } | undefined;
@@ -57,6 +58,7 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
             .where({
               organization_ID: organizationID,
               defaultPilot_ID: crewMember.ID,
+              active: true,
             })
             .limit(2),
         )) as Array<{ ID: string }>;

@@ -4,7 +4,7 @@
 
 FinFly is a portfolio MVP for managing corporate flight reports and their related expenses. It demonstrates how an approval-driven business process can be modeled with the SAP Cloud Application Programming Model (CAP) and delivered through role-specific SAP Fiori elements applications.
 
-Flight crews use FinFly to record trips, crew assignments, expenses, and receipts. Auditors use a separate review application to approve expenses or return them to the pilot for correction, with every workflow transition preserved in an audit history.
+Flight crews use FinFly to record trips, crew assignments, expenses, and receipts. Auditors review expenses and return corrections to pilots, while administrators manage organization users, aircraft, pilot assignments, and the same audit workflow.
 
 ![FinFly pilot work queues and flight-report list](docs/images/pilot-main-view.png)
 
@@ -76,17 +76,25 @@ The audit application presents submitted reports and their expenses to authorize
 
 </details>
 
+### Administration application
+
+The administration application provides organization-wide views of users, aircraft, flight reports, and expenses. Administrators can maintain pilot, auditor, and administrator profiles; assign default pilots to aircraft; deactivate and reactivate records without deleting audit history; and perform the same expense-review actions available to auditors.
+
+Aircraft master data includes manufacturer, model, serial number, type, flight hours, and cycles. Pilot profiles include license type and total flight hours, and a pilot can also be designated as an auditor so that their submitted reports are approved automatically.
+
 ## Architecture
 
 ```text
 SAP Fiori elements
   |-- Pilot application
-  `-- Audit application
+  |-- Audit application
+  `-- Administration application
            |
            v
 SAP CAP OData services
   |-- ExpenseService
-  `-- AuditService
+  |-- AuditService
+  `-- AdminService
            |
            v
 CDS domain model + SQLite (local development)
@@ -130,14 +138,18 @@ npm install
 npm start
 ```
 
-The server is available at `http://localhost:4004` by default. Open either application directly:
+The server is available at `http://localhost:4004` by default. Open an application directly:
 
+- Demo login and user switcher: `http://localhost:4004/dev/login`
 - Pilot application: `http://localhost:4004/finfly.flightreports/index.html`
 - Audit application: `http://localhost:4004/finfly.audit/index.html`
+- Administration application: `http://localhost:4004/finfly.admin/index.html`
 
 ### Mock users
 
 Local development uses CAP's mocked authentication. These credentials are demo-only and must not be used for a production deployment.
+
+When the server is started with `npm start`, use `/dev/login` to select or switch the active demo user. The selection is stored in a local cookie, avoiding the browser's cached HTTP Basic Authentication dialog.
 
 | User         | Password     | Roles                 | Organization        |
 | ------------ | ------------ | --------------------- | ------------------- |
@@ -172,7 +184,7 @@ Run the automated test suite with:
 npm test
 ```
 
-The suite covers business validations, authorization, organization isolation, report and expense lifecycles, exchange rates, concurrency, calculated report summaries, and audit queues.
+The suite covers business validations, authorization, organization isolation, report and expense lifecycles, administrative master-data management, exchange rates, concurrency, calculated report summaries, and audit queues.
 
 Run the complete local quality check, including strict TypeScript validation, ESLint, and the automated test suite, with:
 

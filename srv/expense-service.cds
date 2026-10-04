@@ -184,7 +184,7 @@ service ExpenseService {
     entity Aircraft as projection on db.Aircraft;
 
     @readonly
-    entity CrewMembers as projection on db.CrewMembers;
+    entity CrewMembers as projection on db.CrewMembers where isPilot = true;
 
     @readonly
     entity CrewRoles as projection on db.CrewRoles;

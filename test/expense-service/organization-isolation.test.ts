@@ -154,7 +154,7 @@ describe('ExpenseService organization isolation', () => {
     );
 
     expect(response.data.error.message).to.equal(
-      'The selected aircraft does not belong to this organization',
+      'Select an active aircraft from this organization',
     );
   });
 

@@ -1,0 +1,136 @@
+{
+  "_version": "1.83.0",
+  "sap.app": {
+    "id": "finfly.admin",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": { "version": "0.0.1" },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "dataSources": {
+      "mainService": {
+        "uri": "/admin/",
+        "type": "OData",
+        "settings": { "annotations": [], "odataVersion": "4.01" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.151.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": { "compact": true, "cozy": true },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": { "bundleName": "finfly.admin.i18n.i18n" }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "@i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      }
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        { "pattern": ":?query:", "name": "AdminList", "target": "AdminList" },
+        { "pattern": "Users({key}):?query:", "name": "UserObjectPage", "target": "UserObjectPage" },
+        { "pattern": "Aircraft({key}):?query:", "name": "AircraftObjectPage", "target": "AircraftObjectPage" },
+        { "pattern": "FlightReports({key}):?query:", "name": "FlightReportObjectPage", "target": "FlightReportObjectPage" },
+        { "pattern": "Expenses({key}):?query:", "name": "ExpenseObjectPage", "target": "ExpenseObjectPage" },
+        { "pattern": "FlightReports({key})/expenses({key2}):?query:", "name": "ReportExpenseObjectPage", "target": "ReportExpenseObjectPage" }
+      ],
+      "targets": {
+        "AdminList": {
+          "type": "Component",
+          "id": "AdminList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/Users",
+              "enhanceI18n": "i18n/i18n.properties",
+              "variantManagement": "Page",
+              "views": {
+                "paths": [
+                  { "key": "users", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllUsers" },
+                  { "key": "aircraft", "entitySet": "Aircraft", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllAircraft" },
+                  { "key": "reports", "entitySet": "FlightReports", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllReports" },
+                  { "key": "expenses", "entitySet": "Expenses", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllExpenses" }
+                ]
+              },
+              "navigation": {
+                "Users": { "detail": { "route": "UserObjectPage" } },
+                "Aircraft": { "detail": { "route": "AircraftObjectPage" } },
+                "FlightReports": { "detail": { "route": "FlightReportObjectPage" } },
+                "Expenses": { "detail": { "route": "ExpenseObjectPage" } }
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": { "type": "ResponsiveTable" }
+                }
+              }
+            }
+          }
+        },
+        "UserObjectPage": {
+          "type": "Component",
+          "id": "UserObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": { "settings": { "contextPath": "/Users", "enhanceI18n": "i18n/i18n.properties" } }
+        },
+        "AircraftObjectPage": {
+          "type": "Component",
+          "id": "AircraftObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": { "settings": { "contextPath": "/Aircraft", "enhanceI18n": "i18n/i18n.properties" } }
+        },
+        "FlightReportObjectPage": {
+          "type": "Component",
+          "id": "FlightReportObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/FlightReports",
+              "enhanceI18n": "i18n/i18n.properties",
+              "navigation": { "expenses": { "detail": { "route": "ReportExpenseObjectPage" } } }
+            }
+          }
+        },
+        "ExpenseObjectPage": {
+          "type": "Component",
+          "id": "ExpenseObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": { "settings": { "editableHeaderContent": false, "contextPath": "/Expenses", "enhanceI18n": "i18n/i18n.properties" } }
+        },
+        "ReportExpenseObjectPage": {
+          "type": "Component",
+          "id": "ReportExpenseObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": { "settings": { "editableHeaderContent": false, "contextPath": "/FlightReports/expenses", "enhanceI18n": "i18n/i18n.properties" } }
+        }
+      }
+    }
+  },
+  "sap.fiori": { "registrationIds": [], "archeType": "transactional" },
+  "sap.fe": { "app": { "enableLazyLoading": true } }
+}

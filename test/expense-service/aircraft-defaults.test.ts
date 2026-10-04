@@ -69,6 +69,10 @@ describe('ExpenseService default aircraft selection', () => {
         organization_ID: masterDataIDs.organization,
         registration: 'N9012',
         description: 'Multiple-default test aircraft',
+        manufacturer: 'Cessna',
+        model: '172S',
+        serialNumber: 'TEST-9012',
+        aircraftType: 'PISTON_SINGLE',
         defaultPilot_ID: masterDataIDs.captain,
       }),
     );

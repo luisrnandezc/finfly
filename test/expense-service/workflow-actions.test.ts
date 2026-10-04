@@ -4,7 +4,7 @@ import { masterDataIDs } from '../support/ids';
 import { expenseServiceTest } from '../support/expense-service-test';
 
 const { DELETE, GET, POST, expect } = expenseServiceTest();
-const { INSERT, SELECT } = cds.ql;
+const { INSERT, SELECT, UPDATE } = cds.ql;
 
 const baseUrl = '/expenses';
 
@@ -20,7 +20,7 @@ const auditorConfiguration = {
 
 const pilotAuditorConfiguration = {
   headers: { 'If-Match': '*' },
-  auth: { username: 'admin', password: 'admin' },
+  auth: { username: 'pilot', password: 'pilot' },
 };
 
 async function seedReport(
@@ -232,6 +232,14 @@ describe('ExpenseService workflow actions', () => {
     const legID = '90600000-0000-0000-0000-000000000001';
     const crewAssignmentID = '90600000-0000-0000-0000-000000000002';
     const expenseID = '90600000-0000-0000-0000-000000000003';
+    const db = await cds.connect.to('db');
+    const { CrewMembers } = cds.entities('finfly');
+
+    await db.run(
+      UPDATE.entity(CrewMembers)
+        .set({ isAuditor: true })
+        .where({ ID: masterDataIDs.captain }),
+    );
 
     await POST(
       `${baseUrl}/FlightReports`,
@@ -299,7 +307,13 @@ describe('ExpenseService workflow actions', () => {
 
     response = await GET(activeExpenseUrl(expenseID), pilotAuditorConfiguration);
     expect(response.data.auditStatus).to.equal('APPROVED');
-    expect(response.data.auditedBy).to.equal('admin');
+    expect(response.data.auditedBy).to.equal('pilot');
+
+    await db.run(
+      UPDATE.entity(CrewMembers)
+        .set({ isAuditor: false })
+        .where({ ID: masterDataIDs.captain }),
+    );
   });
 
   it('queues an expense added after report submission for audit', async () => {

@@ -325,6 +325,11 @@ annotate service.FlightReports with {
                 $Type : 'Common.ValueListParameterDisplayOnly',
                 ValueListProperty : 'description',
             },
+            {
+                $Type : 'Common.ValueListParameterConstant',
+                Constant : true,
+                ValueListProperty : 'active',
+            },
         ],
     }
 };
@@ -599,6 +604,11 @@ annotate service.CrewAssignments with {
                 {
                     $Type : 'Common.ValueListParameterDisplayOnly',
                     ValueListProperty : 'fullName',
+                },
+                {
+                    $Type : 'Common.ValueListParameterConstant',
+                    Constant : true,
+                    ValueListProperty : 'active',
                 },
             ],
         }

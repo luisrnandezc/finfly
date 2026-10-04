@@ -25,7 +25,7 @@
     "start": "tsx scripts/start-server.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint srv scripts test --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit",
+    "lint": "eslint srv scripts test --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit && npm run lint --workspace=app/admin",
     "check": "npm run typecheck && npm run lint && npm test",
     "seed:demo": "tsx scripts/seed-demo-data.ts",
     "watch-flightreports": "cds watch --open finfly.flightreports/index.html?sap-ui-xx-viewCache=false --livereload false"

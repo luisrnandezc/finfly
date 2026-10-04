@@ -1,0 +1,4 @@
+code,name,sortOrder
+PRIVATE,Private Pilot,1
+COMMERCIAL,Commercial Pilot,2
+TLA,Airline Transport Pilot,3
