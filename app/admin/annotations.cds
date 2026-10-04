@@ -200,6 +200,8 @@ annotate admin.Aircraft with {
     active       @title : 'Active';
     aircraftType @(
         title : 'Aircraft Type',
+        Common.Text : aircraftTypeDetails.name,
+        Common.TextArrangement : #TextOnly,
         Common.ValueListWithFixedValues : true,
         Common.ValueList : {
             CollectionPath : 'AircraftTypes',
@@ -367,8 +369,58 @@ annotate admin.ExpenseAuditHistory with @(UI.LineItem : [
 ]);
 
 annotate admin.FlightReports with {
+    aircraft @(
+        title : 'Aircraft',
+        Common.Text : aircraft.registration,
+        Common.TextArrangement : #TextOnly,
+        Common.ValueList : {
+            CollectionPath : 'Aircraft',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : aircraft_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'registration'
+                }
+            ]
+        }
+    );
     auditStatus @(
         Common.Text : auditStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
+};
+
+annotate admin.Expenses with {
+    report @(
+        title : 'Flight Report',
+        Common.Text : report.displayTitle,
+        Common.TextArrangement : #TextOnly
+    );
+    leg @(
+        title : 'Flight Leg',
+        Common.Text : leg.sequenceText,
+        Common.TextArrangement : #TextOnly
+    );
+    category @(
+        title : 'Category',
+        Common.Text : category.name,
+        Common.TextArrangement : #TextOnly
+    );
+    originalCurrency @(
+        title : 'Currency',
+        Common.Text : originalCurrency.name,
+        Common.TextArrangement : #TextOnly
+    );
+};
+
+annotate admin.CrewAssignments with {
+    crewMember @(
+        title : 'Crew Member',
+        Common.Text : crewMember.fullName,
         Common.TextArrangement : #TextOnly
     );
 };

@@ -128,6 +128,8 @@ entity Aircraft : cuid, managed {
     model         : String(80) not null;
     serialNumber  : String(80) not null;
     aircraftType  : AircraftType not null;
+    aircraftTypeDetails : Association to AircraftTypes
+        on aircraftTypeDetails.code = aircraftType;
     defaultPilot : Association to CrewMembers;
     active        : Boolean not null default true;
 
