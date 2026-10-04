@@ -3,8 +3,8 @@ using AdminService as admin from '../../srv/admin-service';
 annotate admin with @Capabilities.FilterFunctions : ['tolower'];
 
 annotate admin.Users with @(UI.SelectionPresentationVariant #AllUsers : {
-    Text : 'Users',
-    SelectionVariant : { Text : 'Users' },
+    Text : 'Personnel',
+    SelectionVariant : { Text : 'Personnel' },
     PresentationVariant : { SortOrder : [{ Property : fullName }] }
 });
 
@@ -30,15 +30,15 @@ annotate admin.Users with @(
     Capabilities.DeleteRestrictions : { Deletable : false },
     UI.HeaderInfo : {
         $Type : 'UI.HeaderInfoType',
-        TypeName : 'User',
-        TypeNamePlural : 'Users',
+        TypeName : 'Person',
+        TypeNamePlural : 'Personnel',
         Title : { $Type : 'UI.DataField', Value : fullName },
         Description : { $Type : 'UI.DataField', Value : userId }
     },
     UI.SelectionFields : [fullName, userId, isPilot, isAuditor, isAdmin, active],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Name', Value : fullName, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'User ID', Value : userId, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Login ID', Value : userId, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin, ![@UI.Importance] : #Medium },
@@ -75,7 +75,7 @@ annotate admin.Users with @(
     UI.FieldGroup #UserDetails : {
         $Type : 'UI.FieldGroupType',
         Data : [
-            { $Type : 'UI.DataField', Label : 'User ID', Value : userId },
+            { $Type : 'UI.DataField', Label : 'Login ID', Value : userId },
             { $Type : 'UI.DataField', Label : 'First Name', Value : firstName },
             { $Type : 'UI.DataField', Label : 'Last Name', Value : lastName },
             { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot },
@@ -90,7 +90,7 @@ annotate admin.Users with @(
     UI.Facets : [{
         $Type : 'UI.ReferenceFacet',
         ID : 'UserDetails',
-        Label : 'User Details',
+        Label : 'Personnel Details',
         Target : '@UI.FieldGroup#UserDetails'
     }]
 );
@@ -99,7 +99,7 @@ annotate admin.Users with {
     ID           @UI.Hidden;
     organization @UI.Hidden;
     fullName     @title : 'Name';
-    userId       @title : 'User ID';
+    userId       @title : 'Login ID';
     firstName    @title : 'First Name';
     lastName     @title : 'Last Name';
     isPilot      @title : 'Pilot';
