@@ -38,63 +38,74 @@ annotate admin.Users with @(
     },
     UI.SelectionFields : [fullName, nationalId, userId, isPilot, isAuditor, isAdmin, active],
     UI.LineItem : [
-        { $Type : 'UI.DataField', Label : 'Name', Value : fullName, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Full Name', Value : fullName, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'National ID', Value : nationalId, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Login ID', Value : userId, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin, ![@UI.Importance] : #Medium },
-        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Label : 'Deactivate',
-            Action : 'AdminService.deactivateUser',
-            Inline : true,
-            ![@UI.Importance] : #High
-        },
-        {
-            $Type : 'UI.DataFieldForAction',
-            Label : 'Reactivate',
-            Action : 'AdminService.reactivateUser',
-            Inline : true,
-            ![@UI.Importance] : #High
-        }
+        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High }
     ],
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
-            Label : 'Deactivate User',
+            Label : 'Deactivate Person',
             Action : 'AdminService.deactivateUser',
             Criticality : #Negative
         },
         {
             $Type : 'UI.DataFieldForAction',
-            Label : 'Reactivate User',
+            Label : 'Reactivate Person',
             Action : 'AdminService.reactivateUser',
             Criticality : #Positive
         }
     ],
-    UI.FieldGroup #UserDetails : {
+    UI.FieldGroup #PersonalDetails : {
         $Type : 'UI.FieldGroupType',
         Data : [
-            { $Type : 'UI.DataField', Label : 'Login ID', Value : userId },
             { $Type : 'UI.DataField', Label : 'National ID', Value : nationalId },
             { $Type : 'UI.DataField', Label : 'First Name', Value : firstName },
             { $Type : 'UI.DataField', Label : 'Last Name', Value : lastName },
-            { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot },
-            { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor },
-            { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin },
-            { $Type : 'UI.DataField', Label : 'Position', Value : positionTitle },
-            { $Type : 'UI.DataField', Label : 'Pilot License', Value : licenseType },
-            { $Type : 'UI.DataField', Label : 'Total Flight Hours', Value : totalFlightHours },
+            { $Type : 'UI.DataField', Label : 'Login ID', Value : userId },
             { $Type : 'UI.DataField', Label : 'Active', Value : active }
         ]
     },
-    UI.Facets : [{
-        $Type : 'UI.ReferenceFacet',
-        ID : 'UserDetails',
-        Label : 'Personnel Details',
-        Target : '@UI.FieldGroup#UserDetails'
-    }]
+    UI.FieldGroup #ApplicationRoles : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot },
+            { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor },
+            { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin }
+        ]
+    },
+    UI.FieldGroup #ProfessionalDetails : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Position', Value : positionTitle },
+            { $Type : 'UI.DataField', Label : 'Pilot License', Value : licenseType },
+            { $Type : 'UI.DataField', Label : 'Total Flight Hours', Value : totalFlightHours }
+        ]
+    },
+    UI.Facets : [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'PersonalDetails',
+            Label : 'Personal Details',
+            Target : '@UI.FieldGroup#PersonalDetails'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'ApplicationRoles',
+            Label : 'Application Roles',
+            Target : '@UI.FieldGroup#ApplicationRoles'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'ProfessionalDetails',
+            Label : 'Professional Details',
+            Target : '@UI.FieldGroup#ProfessionalDetails'
+        }
+    ]
 );
 
 annotate admin.Users with {

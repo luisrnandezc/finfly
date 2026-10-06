@@ -95,7 +95,13 @@
           "type": "Component",
           "id": "UserObjectPage",
           "name": "sap.fe.templates.ObjectPage",
-          "options": { "settings": { "contextPath": "/Users", "enhanceI18n": "i18n/i18n.properties" } }
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/Users",
+              "enhanceI18n": "i18n/i18n.properties"
+            }
+          }
         },
         "AircraftObjectPage": {
           "type": "Component",
