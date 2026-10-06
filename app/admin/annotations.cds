@@ -27,6 +27,7 @@ annotate admin.Expenses with @(UI.SelectionPresentationVariant #AllExpenses : {
 });
 
 annotate admin.Users with @(
+    Capabilities.InsertRestrictions : { Insertable : true },
     Capabilities.DeleteRestrictions : { Deletable : false },
     UI.HeaderInfo : {
         $Type : 'UI.HeaderInfoType',
@@ -129,6 +130,7 @@ annotate admin.Users with {
 };
 
 annotate admin.Aircraft with @(
+    Capabilities.InsertRestrictions : { Insertable : true },
     Capabilities.DeleteRestrictions : { Deletable : false },
     UI.HeaderInfo : {
         $Type : 'UI.HeaderInfoType',

@@ -5,11 +5,13 @@ using { sap.common as common } from '@sap/cds/common';
 @requires: 'Admin'
 service AdminService {
     @cds.redirection.target
+    @odata.draft.enabled
     entity Users as projection on db.CrewMembers actions {
         action deactivateUser() returns Users;
         action reactivateUser() returns Users;
     };
 
+    @odata.draft.enabled
     entity Aircraft as projection on db.Aircraft actions {
         action deactivateAircraft() returns Aircraft;
         action reactivateAircraft() returns Aircraft;
