@@ -101,7 +101,13 @@
           "type": "Component",
           "id": "AircraftObjectPage",
           "name": "sap.fe.templates.ObjectPage",
-          "options": { "settings": { "contextPath": "/Aircraft", "enhanceI18n": "i18n/i18n.properties" } }
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/Aircraft",
+              "enhanceI18n": "i18n/i18n.properties"
+            }
+          }
         },
         "FlightReportObjectPage": {
           "type": "Component",

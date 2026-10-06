@@ -36,7 +36,7 @@ annotate admin.Users with @(
         Title : { $Type : 'UI.DataField', Value : fullName },
         Description : { $Type : 'UI.DataField', Value : userId }
     },
-    UI.SelectionFields : [fullName, userId, isPilot, isAuditor, isAdmin, active],
+    UI.SelectionFields : [fullName, nationalId, userId, isPilot, isAuditor, isAdmin, active],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Name', Value : fullName, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Login ID', Value : userId, ![@UI.Importance] : #High },
@@ -77,6 +77,7 @@ annotate admin.Users with @(
         $Type : 'UI.FieldGroupType',
         Data : [
             { $Type : 'UI.DataField', Label : 'Login ID', Value : userId },
+            { $Type : 'UI.DataField', Label : 'National ID', Value : nationalId },
             { $Type : 'UI.DataField', Label : 'First Name', Value : firstName },
             { $Type : 'UI.DataField', Label : 'Last Name', Value : lastName },
             { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot },
@@ -100,6 +101,7 @@ annotate admin.Users with {
     ID           @UI.Hidden;
     organization @UI.Hidden;
     fullName     @title : 'Name';
+    nationalId   @title : 'National ID';
     userId       @title : 'Login ID';
     firstName    @title : 'First Name';
     lastName     @title : 'Last Name';
@@ -246,6 +248,10 @@ annotate admin.Aircraft with {
                 },
                 {
                     $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'nationalId'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
                     ValueListProperty : 'fullName'
                 }
             ]
@@ -265,11 +271,21 @@ annotate admin.Aircraft with {
                 },
                 {
                     $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'nationalId'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
                     ValueListProperty : 'fullName'
                 }
             ]
         }
     );
+};
+
+annotate admin.Pilots with {
+    ID         @UI.Hidden;
+    nationalId @title : 'National ID';
+    fullName   @title : 'Full Name';
 };
 
 annotate admin.FlightReports with @(

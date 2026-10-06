@@ -23,4 +23,18 @@ describe('admin business-text metadata', () => {
     expect(element?.['@Common.Text']).toEqual({ '=': textPath });
     expect(element?.['@Common.TextArrangement']).toEqual({ '#': 'TextOnly' });
   });
+
+  it('labels pilot value-help columns and hides the technical key', async () => {
+    const model = await cds.load(['srv', 'app']);
+    const definitions = model.definitions as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    const elements = definitions?.['AdminService.Pilots']?.elements as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+
+    expect(elements?.ID?.['@UI.Hidden']).toBe(true);
+    expect(elements?.nationalId?.['@title']).toBe('National ID');
+    expect(elements?.fullName?.['@title']).toBe('Full Name');
+  });
 });

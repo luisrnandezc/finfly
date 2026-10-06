@@ -5,6 +5,7 @@ const { SELECT, INSERT, UPDATE } = cds.ql;
 type AdminUserData = {
   ID: string;
   organization_ID: string;
+  nationalId?: string;
   userId?: string | null;
   firstName?: string;
   lastName?: string;
@@ -36,6 +37,7 @@ function entityID(req: Request): string | undefined {
 }
 
 function validateUser(user: AdminUserData, req: Request): void {
+  if (!user.nationalId?.trim()) req.reject(400, 'National ID is required');
   if (!user.userId?.trim()) req.reject(400, 'User ID is required');
   if (!user.firstName?.trim()) req.reject(400, 'First name is required');
   if (!user.lastName?.trim()) req.reject(400, 'Last name is required');

@@ -142,10 +142,12 @@ entity Aircraft : cuid, managed {
 }
 
 @assert.unique: {
-    organizationUser: [organization, userId]
+    organizationUser: [organization, userId],
+    organizationNationalId: [organization, nationalId]
 }
 entity CrewMembers : cuid, managed {
     organization : Association to Organizations not null;
+    nationalId : String(40) not null;
     firstName : String(80) not null;
     lastName  : String(80) not null;
     fullName  : String(161) = firstName || ' ' || lastName;

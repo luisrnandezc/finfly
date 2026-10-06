@@ -109,6 +109,7 @@ describe('AdminService organization administration', () => {
 
     try {
       const draftUrl = await createUserDraft(userID, {
+        nationalId: 'TEST-ID-001',
         userId,
         firstName: 'Jamie',
         lastName: 'Synthetic',
@@ -145,6 +146,7 @@ describe('AdminService organization administration', () => {
     const noRoleDraftUrl = await createUserDraft(
       '72000000-0000-0000-0000-000000000002',
       {
+        nationalId: 'TEST-ID-002',
         userId: 'invalid.no.role',
         firstName: 'Invalid',
         lastName: 'User',
@@ -156,6 +158,7 @@ describe('AdminService organization administration', () => {
     const noLicenseDraftUrl = await createUserDraft(
       '72000000-0000-0000-0000-000000000003',
       {
+        nationalId: 'TEST-ID-003',
         userId: 'invalid.no.license',
         firstName: 'Invalid',
         lastName: 'Pilot',
@@ -186,6 +189,7 @@ describe('AdminService organization administration', () => {
     const db = await cds.connect.to('db');
     const entities = cds.entities('finfly');
     const draftUrl = await createUserDraft(userID, {
+      nationalId: 'TEST-ID-005',
       userId,
       firstName: 'Discarded',
       lastName: 'Draft',
