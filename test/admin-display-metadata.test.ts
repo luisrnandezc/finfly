@@ -3,6 +3,8 @@ import cds from '@sap/cds';
 describe('admin business-text metadata', () => {
   it.each([
     ['AdminService.Aircraft', 'aircraftType', 'aircraftTypeDetails.name'],
+    ['AdminService.Aircraft', 'defaultPIC', 'defaultPIC.fullName'],
+    ['AdminService.Aircraft', 'defaultSIC', 'defaultSIC.fullName'],
     ['AdminService.FlightReports', 'aircraft', 'aircraft.registration'],
     ['AdminService.Expenses', 'report', 'report.displayTitle'],
     ['AdminService.Expenses', 'leg', 'leg.sequenceText'],

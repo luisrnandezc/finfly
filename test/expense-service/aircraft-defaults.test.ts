@@ -4,7 +4,7 @@ import { expenseServiceTest } from '../support/expense-service-test';
 import { masterDataIDs } from '../support/ids';
 
 const { DELETE, POST, expect } = expenseServiceTest();
-const { INSERT, DELETE: DELETE_QUERY } = cds.ql;
+const { INSERT, UPDATE, DELETE: DELETE_QUERY } = cds.ql;
 
 const baseUrl = '/expenses';
 
@@ -57,6 +57,41 @@ describe('ExpenseService default aircraft selection', () => {
     }
   });
 
+  it('selects an aircraft when the authenticated pilot is its default SIC', async () => {
+    const reportID = '71400000-0000-0000-0000-000000000005';
+    const db = await cds.connect.to('db');
+    const { Aircraft } = cds.entities('finfly');
+
+    await db.run(
+      UPDATE.entity(Aircraft)
+        .set({
+          defaultPIC_ID: null,
+          defaultSIC_ID: masterDataIDs.captain,
+        })
+        .where({ ID: masterDataIDs.aircraft }),
+    );
+
+    try {
+      const response = await POST(`${baseUrl}/FlightReports`, {
+        ID: reportID,
+        requesterName: 'Default SIC aircraft test',
+      });
+
+      expect(response.status).to.equal(201);
+      expect(response.data.aircraft_ID).to.equal(masterDataIDs.aircraft);
+    } finally {
+      await DELETE(draftUrl(reportID), deleteConfiguration());
+      await db.run(
+        UPDATE.entity(Aircraft)
+          .set({
+            defaultPIC_ID: masterDataIDs.captain,
+            defaultSIC_ID: masterDataIDs.firstOfficer,
+          })
+          .where({ ID: masterDataIDs.aircraft }),
+      );
+    }
+  });
+
   it('leaves aircraft empty when the pilot has multiple defaults', async () => {
     const reportID = '71400000-0000-0000-0000-000000000002';
     const aircraftID = '21400000-0000-0000-0000-000000000001';
@@ -73,7 +108,7 @@ describe('ExpenseService default aircraft selection', () => {
         model: '172S',
         serialNumber: 'TEST-9012',
         aircraftType: 'PISTON_SINGLE',
-        defaultPilot_ID: masterDataIDs.captain,
+        defaultSIC_ID: masterDataIDs.captain,
       }),
     );
 

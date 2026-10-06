@@ -55,11 +55,7 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
         const defaultAircraft = (await tx.run(
           SELECT.from(db.Aircraft)
             .columns('ID')
-            .where({
-              organization_ID: organizationID,
-              defaultPilot_ID: crewMember.ID,
-              active: true,
-            })
+            .where`organization_ID = ${organizationID} and active = true and (defaultPIC_ID = ${crewMember.ID} or defaultSIC_ID = ${crewMember.ID})`
             .limit(2),
         )) as Array<{ ID: string }>;
 

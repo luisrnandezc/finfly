@@ -212,6 +212,12 @@ describe('AdminService organization administration', () => {
     const db = await cds.connect.to('db');
     const entities = cds.entities('finfly');
     try {
+      await db.run(
+        UPDATE.entity(entities.Aircraft)
+          .set({ defaultSIC_ID: masterDataIDs.captain })
+          .where({ ID: masterDataIDs.alternateAircraft }),
+      );
+
       const response = await POST(
         `${baseUrl}/Users(ID=${masterDataIDs.captain},IsActiveEntity=true)/AdminService.deactivateUser`,
         {},
@@ -221,11 +227,23 @@ describe('AdminService organization administration', () => {
       expect(response.data.active).to.equal(false);
 
       const aircraft = await db.run(
-        SELECT.one.from(entities.Aircraft).columns('defaultPilot_ID').where({
-          ID: masterDataIDs.aircraft,
-        }),
+        SELECT.one
+          .from(entities.Aircraft)
+          .columns('defaultPIC_ID', 'defaultSIC_ID')
+          .where({ ID: masterDataIDs.aircraft }),
       );
-      expect(aircraft.defaultPilot_ID).to.equal(null);
+      const alternateAircraft = await db.run(
+        SELECT.one
+          .from(entities.Aircraft)
+          .columns('defaultPIC_ID', 'defaultSIC_ID')
+          .where({ ID: masterDataIDs.alternateAircraft }),
+      );
+      expect(aircraft.defaultPIC_ID).to.equal(null);
+      expect(aircraft.defaultSIC_ID).to.equal(masterDataIDs.firstOfficer);
+      expect(alternateAircraft.defaultPIC_ID).to.equal(
+        masterDataIDs.alternateCaptain,
+      );
+      expect(alternateAircraft.defaultSIC_ID).to.equal(null);
     } finally {
       await db.run(
         UPDATE.entity(entities.CrewMembers)
@@ -242,8 +260,19 @@ describe('AdminService organization administration', () => {
       );
       await db.run(
         UPDATE.entity(entities.Aircraft)
-          .set({ defaultPilot_ID: masterDataIDs.captain })
+          .set({
+            defaultPIC_ID: masterDataIDs.captain,
+            defaultSIC_ID: masterDataIDs.firstOfficer,
+          })
           .where({ ID: masterDataIDs.aircraft }),
+      );
+      await db.run(
+        UPDATE.entity(entities.Aircraft)
+          .set({
+            defaultPIC_ID: masterDataIDs.alternateCaptain,
+            defaultSIC_ID: masterDataIDs.alternateFirstOfficer,
+          })
+          .where({ ID: masterDataIDs.alternateAircraft }),
       );
     }
   });
@@ -261,7 +290,8 @@ describe('AdminService organization administration', () => {
         model: '208B Grand Caravan',
         serialNumber: 'TEST-C208-8080',
         aircraftType: 'TURBOPROP_SINGLE',
-        defaultPilot_ID: masterDataIDs.captain,
+        defaultPIC_ID: masterDataIDs.captain,
+        defaultSIC_ID: masterDataIDs.firstOfficer,
         currentFlightHours: 1200,
         totalCycles: 900,
       });
@@ -283,6 +313,34 @@ describe('AdminService organization administration', () => {
       expect(stored).to.exist;
     } finally {
       await db.run(DELETE.from(entities.Aircraft).where({ ID: aircraftID }));
+    }
+  });
+
+  it('requires different pilots for the default PIC and SIC', async () => {
+    const aircraftID = '72000000-0000-0000-0000-000000000006';
+    const draftUrl = await createAircraftDraft(aircraftID, {
+      registration: 'N8081',
+      description: 'Invalid duplicate crew assignment',
+      manufacturer: 'Cessna',
+      model: '208B Grand Caravan',
+      serialNumber: 'TEST-C208-8081',
+      aircraftType: 'TURBOPROP_SINGLE',
+      defaultPIC_ID: masterDataIDs.captain,
+      defaultSIC_ID: masterDataIDs.captain,
+      currentFlightHours: 1200,
+      totalCycles: 900,
+    });
+
+    try {
+      await expectRequestFailure(
+        activateAircraftDraft(draftUrl),
+        /Default PIC and SIC must be different pilots/,
+      );
+    } finally {
+      await HTTP_DELETE(draftUrl, {
+        ...adminConfiguration,
+        headers: { 'If-Match': '*' },
+      });
     }
   });
 });

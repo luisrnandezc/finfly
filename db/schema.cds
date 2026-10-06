@@ -130,7 +130,8 @@ entity Aircraft : cuid, managed {
     aircraftType  : AircraftType not null;
     aircraftTypeDetails : Association to AircraftTypes
         on aircraftTypeDetails.code = aircraftType;
-    defaultPilot : Association to CrewMembers;
+    defaultPIC    : Association to CrewMembers;
+    defaultSIC    : Association to CrewMembers;
     active        : Boolean not null default true;
 
     // Cumulative utilization. Updated by report submission or an administrator.

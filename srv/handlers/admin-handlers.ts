@@ -18,7 +18,8 @@ type AdminUserData = {
 type AircraftData = {
   ID: string;
   organization_ID: string;
-  defaultPilot_ID?: string | null;
+  defaultPIC_ID?: string | null;
+  defaultSIC_ID?: string | null;
 };
 
 function organizationFor(req: Request): string {
@@ -46,24 +47,37 @@ function validateUser(user: AdminUserData, req: Request): void {
   }
 }
 
-async function validateDefaultPilot(
+async function validateDefaultPilots(
   tx: Transaction,
   organizationID: string,
-  pilotID: string | null | undefined,
+  defaultPICID: string | null | undefined,
+  defaultSICID: string | null | undefined,
   req: Request,
 ): Promise<void> {
-  if (!pilotID) return;
+  if (defaultPICID && defaultPICID === defaultSICID) {
+    req.reject(400, 'Default PIC and SIC must be different pilots');
+  }
 
-  const pilot = await tx.run(
-    SELECT.one.from('finfly.CrewMembers').columns('ID').where({
-      ID: pilotID,
-      organization_ID: organizationID,
-      isPilot: true,
-      active: true,
-    }),
-  );
-  if (!pilot) {
-    req.reject(400, 'Select an active pilot from this organization');
+  for (const [role, pilotID] of [
+    ['PIC', defaultPICID],
+    ['SIC', defaultSICID],
+  ] as const) {
+    if (!pilotID) continue;
+
+    const pilot = await tx.run(
+      SELECT.one.from('finfly.CrewMembers').columns('ID').where({
+        ID: pilotID,
+        organization_ID: organizationID,
+        isPilot: true,
+        active: true,
+      }),
+    );
+    if (!pilot) {
+      req.reject(
+        400,
+        `Default ${role} must be an active pilot from this organization`,
+      );
+    }
   }
 }
 
@@ -160,8 +174,13 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
     );
     await tx.run(
       UPDATE.entity(db.Aircraft)
-        .set({ defaultPilot_ID: null })
-        .where({ organization_ID: organizationID, defaultPilot_ID: ID }),
+        .set({ defaultPIC_ID: null })
+        .where({ organization_ID: organizationID, defaultPIC_ID: ID }),
+    );
+    await tx.run(
+      UPDATE.entity(db.Aircraft)
+        .set({ defaultSIC_ID: null })
+        .where({ organization_ID: organizationID, defaultSIC_ID: ID }),
     );
     req.notify('User deactivated successfully');
     return tx.run(SELECT.one.from(db.CrewMembers).where({ ID }));
@@ -196,10 +215,11 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
     const organizationID = organizationFor(req);
     req.data.organization_ID = organizationID;
     req.data.active = true;
-    await validateDefaultPilot(
+    await validateDefaultPilots(
       cds.tx(req),
       organizationID,
-      req.data.defaultPilot_ID as string | null | undefined,
+      req.data.defaultPIC_ID as string | null | undefined,
+      req.data.defaultSIC_ID as string | null | undefined,
       req,
     );
   });
@@ -207,17 +227,22 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
   service.before('UPDATE', Aircraft, async (req: Request) => {
     const ID = entityID(req);
     const organizationID = organizationFor(req);
-    const existing = (await SELECT.one.from(db.Aircraft).columns('ID').where({
-      ID,
-      organization_ID: organizationID,
-    })) as AircraftData | undefined;
+    const existing = (await SELECT.one
+      .from(db.Aircraft)
+      .columns('ID', 'defaultPIC_ID', 'defaultSIC_ID')
+      .where({
+        ID,
+        organization_ID: organizationID,
+      })) as AircraftData | undefined;
     if (!existing) req.reject(404, 'This aircraft is no longer available');
 
     req.data.organization_ID = organizationID;
-    await validateDefaultPilot(
+    const merged = { ...existing, ...req.data } as AircraftData;
+    await validateDefaultPilots(
       cds.tx(req),
       organizationID,
-      req.data.defaultPilot_ID as string | null | undefined,
+      merged.defaultPIC_ID,
+      merged.defaultSIC_ID,
       req,
     );
   });
