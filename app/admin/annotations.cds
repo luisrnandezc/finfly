@@ -142,22 +142,12 @@ annotate admin.Aircraft with @(
     UI.SelectionFields : [registration, manufacturer, model, aircraftType, active],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Registration', Value : registration, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Manufacturer', Value : manufacturer, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Model', Value : model, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Aircraft Type', Value : aircraftType, ![@UI.Importance] : #Medium },
         { $Type : 'UI.DataField', Label : 'Default PIC', Value : defaultPIC_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Default SIC', Value : defaultSIC_ID, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Flight Hours', Value : currentFlightHours, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Cycles', Value : totalCycles, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High },
-        {
-            $Type : 'UI.DataFieldForAction', Label : 'Deactivate',
-            Action : 'AdminService.deactivateAircraft', Inline : true
-        },
-        {
-            $Type : 'UI.DataFieldForAction', Label : 'Reactivate',
-            Action : 'AdminService.reactivateAircraft', Inline : true
-        }
+        { $Type : 'UI.DataField', Label : 'Total Hours', Value : currentFlightHours, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Total Cycles', Value : totalCycles, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High }
     ],
     UI.Identification : [
         {
@@ -178,17 +168,37 @@ annotate admin.Aircraft with @(
             { $Type : 'UI.DataField', Label : 'Serial Number', Value : serialNumber },
             { $Type : 'UI.DataField', Label : 'Aircraft Type', Value : aircraftType },
             { $Type : 'UI.DataField', Label : 'Description', Value : description },
-            { $Type : 'UI.DataField', Label : 'Default PIC', Value : defaultPIC_ID },
-            { $Type : 'UI.DataField', Label : 'Default SIC', Value : defaultSIC_ID },
-            { $Type : 'UI.DataField', Label : 'Current Flight Hours', Value : currentFlightHours },
-            { $Type : 'UI.DataField', Label : 'Total Cycles', Value : totalCycles },
             { $Type : 'UI.DataField', Label : 'Active', Value : active }
         ]
     },
-    UI.Facets : [{
-        $Type : 'UI.ReferenceFacet', ID : 'AircraftDetails',
-        Label : 'Aircraft Details', Target : '@UI.FieldGroup#AircraftDetails'
-    }]
+    UI.FieldGroup #DefaultCrew : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Default PIC', Value : defaultPIC_ID },
+            { $Type : 'UI.DataField', Label : 'Default SIC', Value : defaultSIC_ID }
+        ]
+    },
+    UI.FieldGroup #Utilization : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Total Hours', Value : currentFlightHours },
+            { $Type : 'UI.DataField', Label : 'Total Cycles', Value : totalCycles }
+        ]
+    },
+    UI.Facets : [
+        {
+            $Type : 'UI.ReferenceFacet', ID : 'AircraftDetails',
+            Label : 'Aircraft Details', Target : '@UI.FieldGroup#AircraftDetails'
+        },
+        {
+            $Type : 'UI.ReferenceFacet', ID : 'DefaultCrew',
+            Label : 'Default Crew', Target : '@UI.FieldGroup#DefaultCrew'
+        },
+        {
+            $Type : 'UI.ReferenceFacet', ID : 'Utilization',
+            Label : 'Utilization', Target : '@UI.FieldGroup#Utilization'
+        }
+    ]
 );
 
 annotate admin.Aircraft with {
