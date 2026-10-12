@@ -60,6 +60,19 @@
       "selfApprovalEnabled": true
     },
     "requires": {
+      "db": {
+        "[development]": {
+          "data": [
+            "db/data",
+            "test/data"
+          ]
+        },
+        "[production]": {
+          "data": [
+            "db/data"
+          ]
+        }
+      },
       "ExchangeRateService": {
         "kind": "odata",
         "model": "srv/external/exchange-rate-service"
