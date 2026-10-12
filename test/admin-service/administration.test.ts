@@ -2,6 +2,7 @@ import cds from '@sap/cds';
 
 import { expenseServiceTest } from '../support/expense-service-test';
 import { masterDataIDs } from '../support/ids';
+import { verifyPassword } from '../../srv/auth/passwords';
 
 const { DELETE: HTTP_DELETE, GET, PATCH, POST, expect } = expenseServiceTest();
 const { SELECT, UPDATE, DELETE } = cds.ql;
@@ -278,6 +279,47 @@ describe('AdminService organization administration', () => {
           })
           .where({ ID: masterDataIDs.alternateAircraft }),
       );
+    }
+  });
+
+  it('sets a temporary password without storing it in plain text', async () => {
+    const userID = '72000000-0000-0000-0000-000000000007';
+    const userId = 'temporary.password.user';
+    const password = 'Temporary beta password 42!';
+    const db = await cds.connect.to('db');
+    const entities = cds.entities('finfly');
+
+    try {
+      const draftUrl = await createUserDraft(userID, {
+        nationalId: 'TEST-ID-007',
+        userId,
+        firstName: 'Taylor',
+        lastName: 'Temporary',
+        isPilot: false,
+        isAuditor: true,
+        isAdmin: false,
+        totalFlightHours: 100,
+      });
+      await activateUserDraft(draftUrl);
+
+      const response = await POST(
+        `${baseUrl}/Users(ID=${userID},IsActiveEntity=true)/AdminService.setTemporaryPassword`,
+        { password },
+        adminConfiguration,
+      );
+      expect(response.status).to.equal(200);
+
+      const credential = await db.run(
+        SELECT.one.from(entities.UserCredentials).where({ crewMember_ID: userID }),
+      );
+      expect(credential.passwordHash).not.to.contain(password);
+      expect(credential.mustChangePassword).to.equal(true);
+      expect(await verifyPassword(password, credential.passwordHash)).to.equal(true);
+    } finally {
+      await db.run(DELETE.from(entities.UserSessions).where({ crewMember_ID: userID }));
+      await db.run(DELETE.from(entities.UserCredentials).where({ crewMember_ID: userID }));
+      await db.run(DELETE.from(entities.OrganizationMembers).where({ userId }));
+      await db.run(DELETE.from(entities.CrewMembers).where({ ID: userID }));
     }
   });
 

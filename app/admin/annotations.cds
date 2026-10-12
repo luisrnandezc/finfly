@@ -49,6 +49,11 @@ annotate admin.Users with @(
     UI.Identification : [
         {
             $Type : 'UI.DataFieldForAction',
+            Label : 'Set Temporary Password',
+            Action : 'AdminService.setTemporaryPassword'
+        },
+        {
+            $Type : 'UI.DataFieldForAction',
             Label : 'Deactivate Person',
             Action : 'AdminService.deactivateUser',
             Criticality : #Negative
@@ -488,6 +493,7 @@ annotate admin.CrewAssignments with {
 annotate admin.Users actions {
     deactivateUser @Core.OperationAvailable : ($self.active = true);
     reactivateUser @Core.OperationAvailable : ($self.active = false);
+    setTemporaryPassword @Core.OperationAvailable : ($self.active = true);
 };
 
 annotate admin.Aircraft actions {

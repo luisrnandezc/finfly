@@ -163,6 +163,26 @@ entity CrewMembers : cuid, managed {
     active    : Boolean not null default true;
 }
 
+// Authentication data is kept separate from personnel records so password
+// material never appears in the admin draft tables or regular OData reads.
+@assert.unique: {
+    crewMember: [crewMember]
+}
+entity UserCredentials : cuid, managed {
+    crewMember          : Association to CrewMembers not null;
+    passwordHash        : String(512) not null;
+    mustChangePassword  : Boolean not null default true;
+    failedLoginAttempts : Integer not null default 0;
+    lockedUntil         : Timestamp;
+}
+
+entity UserSessions {
+    key tokenHash : String(64);
+    crewMember    : Association to CrewMembers not null;
+    createdAt     : Timestamp not null;
+    expiresAt     : Timestamp not null;
+}
+
 @assert.unique: {
     code: [code]
 }

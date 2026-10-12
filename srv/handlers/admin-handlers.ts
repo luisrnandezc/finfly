@@ -1,6 +1,7 @@
 import cds, { type Request, type Transaction } from '@sap/cds';
+import { hashPassword, validatePassword } from '../auth/passwords.ts';
 
-const { SELECT, INSERT, UPDATE } = cds.ql;
+const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
 
 type AdminUserData = {
   ID: string;
@@ -174,6 +175,7 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
         userId: user.userId,
       }),
     );
+    await tx.run(DELETE.from(db.UserSessions).where({ crewMember_ID: ID }));
     await tx.run(
       UPDATE.entity(db.Aircraft)
         .set({ defaultPIC_ID: null })
@@ -210,6 +212,56 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
       }),
     );
     req.notify('User reactivated successfully');
+    return tx.run(SELECT.one.from(db.CrewMembers).where({ ID }));
+  });
+
+  service.on('setTemporaryPassword', Users, async (req: Request) => {
+    const ID = entityID(req);
+    const organizationID = organizationFor(req);
+    const password = req.data.password;
+    try {
+      validatePassword(password);
+    } catch (error) {
+      return req.reject(400, (error as Error).message);
+    }
+
+    const tx = cds.tx(req);
+    const user = await tx.run(
+      SELECT.one.from(db.CrewMembers).columns('ID').where({
+        ID,
+        organization_ID: organizationID,
+        active: true,
+      }),
+    );
+    if (!user) return req.reject(404, 'This active user is no longer available');
+
+    const passwordHash = await hashPassword(password);
+    const credential = (await tx.run(
+      SELECT.one.from(db.UserCredentials).columns('ID').where({ crewMember_ID: ID }),
+    )) as { ID: string } | undefined;
+    if (credential) {
+      await tx.run(
+        UPDATE.entity(db.UserCredentials)
+          .set({
+            passwordHash,
+            mustChangePassword: true,
+            failedLoginAttempts: 0,
+            lockedUntil: null,
+          })
+          .where({ ID: credential.ID }),
+      );
+    } else {
+      await tx.run(
+        INSERT.into(db.UserCredentials).entries({
+          crewMember_ID: ID,
+          passwordHash,
+          mustChangePassword: true,
+          failedLoginAttempts: 0,
+        }),
+      );
+    }
+    await tx.run(DELETE.from(db.UserSessions).where({ crewMember_ID: ID }));
+    req.notify('Temporary password set successfully');
     return tx.run(SELECT.one.from(db.CrewMembers).where({ ID }));
   });
 

@@ -94,6 +94,13 @@
           "*": false
         }
       }
+    },
+    "[production]": {
+      "requires": {
+        "auth": {
+          "impl": "srv/auth/authentication.ts"
+        }
+      }
     }
   }
 }

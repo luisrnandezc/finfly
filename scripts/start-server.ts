@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import cds from '@sap/cds';
 import { registerDevelopmentLogin } from './dev-login.ts';
+import { registerAuthenticationRoutes } from '../srv/auth/routes.ts';
 
 // CAP only discovers sibling .ts service implementations when this flag is
 // present. Set it before loading the CAP server command.
@@ -12,7 +13,22 @@ type ServeCommand = {
 
 const require = createRequire(import.meta.url);
 const serve = require('@sap/cds/bin/serve.js') as ServeCommand;
+const databaseAuthentication =
+  process.env.NODE_ENV === 'production' || process.env.FINFLY_AUTH === 'database';
 
-cds.once('bootstrap', registerDevelopmentLogin);
+if (databaseAuthentication) {
+  cds.env.requires.auth = {
+    ...cds.env.requires.auth,
+    impl: 'srv/auth/authentication.ts',
+  };
+}
+
+cds.once('bootstrap', (app) => {
+  if (databaseAuthentication) {
+    registerAuthenticationRoutes(app);
+  } else {
+    registerDevelopmentLogin(app);
+  }
+});
 
 await serve.exec(...process.argv.slice(2));

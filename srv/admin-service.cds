@@ -9,6 +9,7 @@ service AdminService {
     entity Users as projection on db.CrewMembers actions {
         action deactivateUser() returns Users;
         action reactivateUser() returns Users;
+        action setTemporaryPassword(password : String(200) not null) returns Users;
     };
 
     @odata.draft.enabled
@@ -69,7 +70,7 @@ annotate AdminService.Aircraft with {
 annotate AdminService.Users with @restrict: [
     { grant : 'CREATE' },
     {
-        grant : [ 'READ', 'UPDATE', 'DELETE', 'deactivateUser', 'reactivateUser' ],
+        grant : [ 'READ', 'UPDATE', 'DELETE', 'deactivateUser', 'reactivateUser', 'setTemporaryPassword' ],
         where : 'organization_ID = $user.organization'
     }
 ];
