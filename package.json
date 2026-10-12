@@ -29,6 +29,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint srv scripts test --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit && npm run lint --workspace=app/admin",
     "check": "npm run typecheck && npm run lint && npm test",
+    "build:ui": "npm run build --workspace=app/flightreports && npm run build --workspace=app/audit && npm run build --workspace=app/admin",
     "seed:demo": "tsx scripts/seed-demo-data.ts",
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "watch-flightreports": "cds watch --open finfly.flightreports/index.html?sap-ui-xx-viewCache=false --livereload false"
