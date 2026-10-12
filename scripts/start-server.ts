@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import cds from '@sap/cds';
 import { registerDevelopmentLogin } from './dev-login.ts';
+import { registerProductionUI } from './production-ui.ts';
 import { registerAuthenticationRoutes } from '../srv/auth/routes.ts';
 
 // CAP only discovers sibling .ts service implementations when this flag is
@@ -26,6 +27,7 @@ if (databaseAuthentication) {
 cds.once('bootstrap', (app) => {
   if (databaseAuthentication) {
     registerAuthenticationRoutes(app);
+    registerProductionUI(app);
   } else {
     registerDevelopmentLogin(app);
   }
