@@ -6,7 +6,8 @@
   "dependencies": {
     "@cap-js/postgres": "^2.3.3",
     "@sap/cds": "^9",
-    "express": "^4"
+    "express": "^4",
+    "tsx": "^4.23.15"
   },
   "devDependencies": {
     "@cap-js/attachments": "^4.0.0",
@@ -18,18 +19,20 @@
     "brace-expansion": "^1.1.21",
     "cds-plugin-ui5": "^0.13.0",
     "eslint": "^10.8.1",
-    "tsx": "^4",
     "typescript": "^5",
     "typescript-eslint": "^8.67.0",
     "vitest": "^4.1.10"
   },
   "scripts": {
     "start": "tsx scripts/start-server.ts",
+    "start:production": "tsx scripts/start-server.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "lint": "eslint srv scripts test --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit && npm run lint --workspace=app/admin",
     "check": "npm run typecheck && npm run lint && npm test",
     "build:ui": "npm run build --workspace=app/flightreports && npm run build --workspace=app/audit && npm run build --workspace=app/admin",
+    "build:production": "npm run build:ui",
+    "deploy:database": "cds-deploy",
     "seed:demo": "tsx scripts/seed-demo-data.ts",
     "bootstrap:admin": "tsx scripts/bootstrap-admin.ts",
     "watch-flightreports": "cds watch --open finfly.flightreports/index.html?sap-ui-xx-viewCache=false --livereload false"
