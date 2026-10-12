@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module';
 import cds from '@sap/cds';
 import { registerDevelopmentLogin } from './dev-login.ts';
+import { registerHealthCheck } from './health.ts';
 import { registerProductionUI } from './production-ui.ts';
 import { registerAuthenticationRoutes } from '../srv/auth/routes.ts';
 
@@ -26,6 +27,7 @@ if (databaseAuthentication) {
 
 cds.once('bootstrap', (app) => {
   if (databaseAuthentication) {
+    registerHealthCheck(app);
     registerAuthenticationRoutes(app);
     registerProductionUI(app);
   } else {
