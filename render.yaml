@@ -21,4 +21,5 @@ databases:
   - name: finfly-beta-db
     region: virginia
     plan: 0.1c-256mb
+    diskSizeGB: 1
     ipAllowList: []
