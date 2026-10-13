@@ -12,7 +12,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: cds_requires_db_credentials_url
+      - key: cds_requires_db_client_connectionString
         fromDatabase:
           name: finfly-beta-db
           property: connectionString
