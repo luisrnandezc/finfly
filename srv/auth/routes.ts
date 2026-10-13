@@ -123,6 +123,10 @@ function secureCookie(): boolean {
 }
 
 export function registerAuthenticationRoutes(app: Application): void {
+  app.get('/', (_req, res) => {
+    res.redirect('/auth/login');
+  });
+
   app.use(express.urlencoded({ extended: false, limit: '8kb' }));
 
   app.get('/auth/login', (req, res) => {
