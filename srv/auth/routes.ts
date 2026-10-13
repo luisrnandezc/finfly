@@ -234,7 +234,11 @@ export function registerAuthenticationRoutes(app: Application): void {
         .from(entities.CrewMembers)
         .columns('isAdmin', 'isAuditor', 'isPilot')
         .where({ ID: session.crewMember_ID }),
-    )) as LoginRecord;
+    )) as LoginRecord | undefined;
+    if (!user) {
+      res.clearCookie(SESSION_COOKIE, { path: '/' });
+      return res.redirect('/auth/login');
+    }
     return res.redirect(defaultPath(user));
   });
 
