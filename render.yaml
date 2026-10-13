@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: finfly-beta
+    runtime: node
+    region: virginia
+    plan: 0.5c-512mb
+    buildCommand: npm ci --include=dev && npm run build:production && npm prune --omit=dev
+    preDeployCommand: npm run deploy:database
+    startCommand: npm run start:production
+    healthCheckPath: /health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: cds_requires_db_credentials_url
+        fromDatabase:
+          name: finfly-beta-db
+          property: connectionString
+
+databases:
+  - name: finfly-beta-db
+    region: virginia
+    plan: 0.1c-256mb
+    ipAllowList: []
