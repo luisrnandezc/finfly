@@ -4,6 +4,14 @@ import { hashPassword, validatePassword } from './passwords.ts';
 
 const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
 
+const entities = {
+  Organizations: 'finfly.Organizations',
+  CrewMembers: 'finfly.CrewMembers',
+  OrganizationMembers: 'finfly.OrganizationMembers',
+  UserCredentials: 'finfly.UserCredentials',
+  UserSessions: 'finfly.UserSessions',
+} as const;
+
 export type BootstrapAdminInput = {
   organizationCode: string;
   organizationName: string;
@@ -40,8 +48,6 @@ export async function bootstrapOrganizationAdministrator(
   const lastName = required(input.lastName, 'Administrator last name');
   validatePassword(input.password);
   const passwordHash = await hashPassword(input.password);
-  const entities = cds.entities('finfly');
-
   return (await db.tx(async (tx) => {
     let organization = (await tx.run(
       SELECT.one.from(entities.Organizations).columns('ID').where({ code: organizationCode }),
