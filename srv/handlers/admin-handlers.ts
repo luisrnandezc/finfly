@@ -20,6 +20,7 @@ type AdminUserData = {
 type AircraftData = {
   ID: string;
   organization_ID: string;
+  registration: string;
   defaultPIC_ID?: string | null;
   defaultSIC_ID?: string | null;
 };
@@ -35,6 +36,28 @@ function organizationFor(req: Request): string {
 function entityID(req: Request): string | undefined {
   const key = req.params[0] as { ID?: string } | undefined;
   return key?.ID ?? (req.data.ID as string | undefined);
+}
+
+function normalizeAircraftRegistration(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  return value.trim().toUpperCase();
+}
+
+async function validateAircraftRegistration(
+  tx: Transaction,
+  registration: string | undefined,
+  aircraftID: string | undefined,
+  req: Request,
+): Promise<void> {
+  if (registration === undefined) return;
+  if (!registration) req.reject(400, 'Aircraft registration is required');
+
+  const duplicate = (await tx.run(
+    SELECT.one.from('finfly.Aircraft').columns('ID').where({ registration }),
+  )) as { ID: string } | undefined;
+  if (duplicate && duplicate.ID !== aircraftID) {
+    req.reject(409, 'An aircraft with this registration already exists');
+  }
 }
 
 function validateUser(user: AdminUserData, req: Request): void {
@@ -267,10 +290,19 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
 
   service.before('CREATE', Aircraft, async (req: Request) => {
     const organizationID = organizationFor(req);
+    const registration = normalizeAircraftRegistration(req.data.registration);
+    if (registration !== undefined) req.data.registration = registration;
     req.data.organization_ID = organizationID;
     req.data.active = true;
+    const tx = cds.tx(req);
+    await validateAircraftRegistration(
+      tx,
+      registration,
+      req.data.ID as string | undefined,
+      req,
+    );
     await validateDefaultPilots(
-      cds.tx(req),
+      tx,
       organizationID,
       req.data.defaultPIC_ID as string | null | undefined,
       req.data.defaultSIC_ID as string | null | undefined,
@@ -283,7 +315,7 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
     const organizationID = organizationFor(req);
     const existing = (await SELECT.one
       .from(db.Aircraft)
-      .columns('ID', 'defaultPIC_ID', 'defaultSIC_ID')
+      .columns('ID', 'registration', 'defaultPIC_ID', 'defaultSIC_ID')
       .where({
         ID,
         organization_ID: organizationID,
@@ -292,8 +324,15 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
 
     req.data.organization_ID = organizationID;
     const merged = { ...existing, ...req.data } as AircraftData;
+    const registration = normalizeAircraftRegistration(merged.registration);
+    if (registration !== undefined) {
+      req.data.registration = registration;
+      merged.registration = registration;
+    }
+    const tx = cds.tx(req);
+    await validateAircraftRegistration(tx, registration, ID, req);
     await validateDefaultPilots(
-      cds.tx(req),
+      tx,
       organizationID,
       merged.defaultPIC_ID,
       merged.defaultSIC_ID,

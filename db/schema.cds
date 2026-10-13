@@ -118,7 +118,7 @@ entity ReportNumberRanges {
 }
 
 @assert.unique: {
-    organizationRegistration: [organization, registration]
+    registration: [registration]
 }
 entity Aircraft : cuid, managed {
     organization : Association to Organizations not null;

@@ -5,7 +5,7 @@ import { masterDataIDs } from '../support/ids';
 import { verifyPassword } from '../../srv/auth/passwords';
 
 const { DELETE: HTTP_DELETE, GET, PATCH, POST, expect } = expenseServiceTest();
-const { SELECT, UPDATE, DELETE } = cds.ql;
+const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
 
 const baseUrl = '/admin';
 const adminConfiguration = {
@@ -330,7 +330,7 @@ describe('AdminService organization administration', () => {
 
     try {
       const draftUrl = await createAircraftDraft(aircraftID, {
-        registration: 'N8080',
+        registration: ' n8080 ',
         description: 'Synthetic admin test aircraft',
         manufacturer: 'Cessna',
         model: '208B Grand Caravan',
@@ -357,6 +357,7 @@ describe('AdminService organization administration', () => {
         SELECT.one.from(entities.Aircraft).where({ ID: aircraftID }),
       );
       expect(stored).to.exist;
+      expect(stored.registration).to.equal('N8080');
     } finally {
       await db.run(DELETE.from(entities.Aircraft).where({ ID: aircraftID }));
     }
@@ -388,5 +389,72 @@ describe('AdminService organization administration', () => {
         headers: { 'If-Match': '*' },
       });
     }
+  });
+
+  it('rejects an aircraft registration already assigned to another organization', async () => {
+    const existingAircraftID = '72000000-0000-0000-0000-000000000007';
+    const newAircraftID = '72000000-0000-0000-0000-000000000008';
+    const draftUrl = aircraftDraftUrl(newAircraftID);
+    const db = await cds.connect.to('db');
+    const entities = cds.entities('finfly');
+
+    await db.run(
+      INSERT.into(entities.Aircraft).entries({
+        ID: existingAircraftID,
+        organization_ID: masterDataIDs.otherOrganization,
+        registration: 'N8181',
+        manufacturer: 'Cessna',
+        model: '172S',
+        serialNumber: 'TEST-C172-8181',
+        aircraftType: 'PISTON_SINGLE',
+        active: true,
+        currentFlightHours: 800,
+        totalCycles: 600,
+      }),
+    );
+
+    try {
+      await createAircraftDraft(newAircraftID, {
+        registration: 'n8181',
+        manufacturer: 'Piper',
+        model: 'PA-28',
+        serialNumber: 'TEST-PA28-8181',
+        aircraftType: 'PISTON_SINGLE',
+        currentFlightHours: 500,
+        totalCycles: 400,
+      });
+      await expectRequestFailure(
+        activateAircraftDraft(draftUrl),
+        /An aircraft with this registration already exists/,
+      );
+    } finally {
+      await HTTP_DELETE(draftUrl, {
+        ...adminConfiguration,
+        headers: { 'If-Match': '*' },
+        validateStatus: (status: number) => status === 204 || status === 404,
+      });
+      await db.run(DELETE.from(entities.Aircraft).where({ ID: existingAircraftID }));
+    }
+  });
+
+  it('does not allow an administrator to deactivate another organization aircraft', async () => {
+    const db = await cds.connect.to('db');
+    const entities = cds.entities('finfly');
+
+    await expectRequestFailure(
+      POST(
+        `${baseUrl}/Aircraft(ID=${masterDataIDs.otherAircraft},IsActiveEntity=true)/AdminService.deactivateAircraft`,
+        {},
+        adminConfiguration,
+      ),
+      /403|404/,
+    );
+
+    const aircraft = await db.run(
+      SELECT.one.from(entities.Aircraft).columns('active').where({
+        ID: masterDataIDs.otherAircraft,
+      }),
+    );
+    expect(aircraft.active).to.equal(true);
   });
 });

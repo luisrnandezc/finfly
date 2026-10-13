@@ -51,7 +51,15 @@ export async function resolveSessionUser(req: Request): Promise<SessionUser | un
       active: true,
     }),
   );
-  return membership ? { ...user, ...credential } : undefined;
+  if (!membership) return undefined;
+
+  const organization = await db.run(
+    SELECT.one.from(entities.Organizations).columns('ID').where({
+      ID: user.organization_ID,
+      active: true,
+    }),
+  );
+  return organization ? { ...user, ...credential } : undefined;
 }
 
 /** CAP custom-authentication middleware backed by FinFly sessions. */
