@@ -129,6 +129,11 @@
       "requires": {
         "auth": {
           "impl": "srv/auth/authentication.ts"
+        },
+        "db": {
+          "pool": {
+            "acquireTimeoutMillis": 30000
+          }
         }
       }
     }
