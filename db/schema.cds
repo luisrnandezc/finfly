@@ -6,10 +6,6 @@ using {
     sap.common.Currencies
 } from '@sap/cds/common';
 
-using {
-    Attachments
-} from '@cap-js/attachments';
-
 type FlightReportStatus : String enum {
     draft       = 'DRAFT';
     submitted   = 'SUBMITTED';
@@ -339,7 +335,6 @@ entity Expenses : cuid, managed {
     fuelUnit           : FuelUnit;
     fuelQuantityLiters : Decimal(12,2);
 
-    attachments : Composition of many Attachments;
 }
 
 entity ExpenseAuditHistory : cuid, managed {
