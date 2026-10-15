@@ -113,9 +113,9 @@ async function findLogin(
         lockedUntil?: string | null;
       }
     | undefined;
-  return credential
-    ? { ...user, ...credential, credentialID: credential.ID }
-    : undefined;
+  if (!credential) return undefined;
+  const { ID: credentialID, ...credentialData } = credential;
+  return { ...user, ...credentialData, credentialID };
 }
 
 function secureCookie(): boolean {
