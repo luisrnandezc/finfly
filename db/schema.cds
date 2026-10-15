@@ -99,7 +99,8 @@ entity Organizations : cuid, managed {
 }
 
 @assert.unique: {
-    organizationUser: [organization, userId]
+    organizationUser: [organization, userId],
+    user: [userId]
 }
 entity OrganizationMembers : cuid, managed {
     organization : Association to Organizations not null;
@@ -139,6 +140,7 @@ entity Aircraft : cuid, managed {
 
 @assert.unique: {
     organizationUser: [organization, userId],
+    user: [userId],
     organizationNationalId: [organization, nationalId]
 }
 entity CrewMembers : cuid, managed {

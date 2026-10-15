@@ -69,7 +69,6 @@ describe('forced password change', () => {
     const login = await fetch(`${baseUrl}/auth/login`, {
       method: 'POST',
       body: new URLSearchParams({
-        organization: input.organizationCode,
         userId: input.userId,
         password: temporaryPassword,
       }),

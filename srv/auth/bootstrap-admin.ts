@@ -72,14 +72,14 @@ export async function bootstrapOrganizationAdministrator(
     }
 
     let administrator = (await tx.run(
-      SELECT.one.from(entities.CrewMembers).columns('ID').where({
-        organization_ID: organization.ID,
-        userId,
-      }),
-    )) as { ID: string } | undefined;
+      SELECT.one.from(entities.CrewMembers).columns('ID', 'organization_ID').where({ userId }),
+    )) as { ID: string; organization_ID: string } | undefined;
+    if (administrator && administrator.organization_ID !== organization.ID) {
+      throw new Error(`Administrator User ID ${userId} is already in use`);
+    }
     const createdAdministrator = !administrator;
     if (!administrator) {
-      administrator = { ID: randomUUID() };
+      administrator = { ID: randomUUID(), organization_ID: organization.ID };
       await tx.run(
         INSERT.into(entities.CrewMembers).entries({
           ID: administrator.ID,
