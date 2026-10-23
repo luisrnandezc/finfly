@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 
 const scrypt = promisify(nodeScrypt);
 const KEY_LENGTH = 64;
-const MINIMUM_PASSWORD_LENGTH = 12;
+const MINIMUM_PASSWORD_LENGTH = 8;
 
 export function validatePassword(password: unknown): asserts password is string {
   if (typeof password !== 'string' || password.length < MINIMUM_PASSWORD_LENGTH) {

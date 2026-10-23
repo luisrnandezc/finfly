@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hashPassword, verifyPassword } from '../srv/auth/passwords.ts';
+import { hashPassword, validatePassword, verifyPassword } from '../srv/auth/passwords.ts';
 import { cookieValue, newSessionToken, sessionTokenHash } from '../srv/auth/session.ts';
 
 describe('Authentication security primitives', () => {
@@ -12,6 +12,11 @@ describe('Authentication security primitives', () => {
     expect(firstHash).not.toEqual(secondHash);
     await expect(verifyPassword(password, firstHash)).resolves.toBe(true);
     await expect(verifyPassword('incorrect password', firstHash)).resolves.toBe(false);
+  });
+
+  it('accepts passwords from eight characters', () => {
+    expect(() => validatePassword('12345678')).not.toThrow();
+    expect(() => validatePassword('1234567')).toThrow('Password must contain at least 8 characters');
   });
 
   it('uses random session tokens and stores only their deterministic hash', () => {
