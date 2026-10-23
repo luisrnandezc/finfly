@@ -11,6 +11,7 @@ Open the local user selector at:
 | `pilot` | `pilot` | Pilot application | FinFly Demo Operator |
 | `auditor` | `auditor` | Auditor application | FinFly Demo Operator |
 | `admin` | `admin` | Admin, auditor, and pilot applications | FinFly Demo Operator |
+| `staff` | `staff` | Internal Staff application | FinFly |
 | `otherpilot` | `otherpilot` | Pilot application | Other Test Operator |
 
 To change users, return to `/dev/login` and select another account.

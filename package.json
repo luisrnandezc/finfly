@@ -30,9 +30,9 @@
     "start:production": "tsx scripts/start-server.ts",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint srv scripts test app/common --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit && npm run lint --workspace=app/admin",
+    "lint": "eslint srv scripts test app/common --max-warnings 0 && npm run lint --workspace=app/flightreports && npm run lint --workspace=app/audit && npm run lint --workspace=app/admin && npm run lint --workspace=app/staff",
     "check": "npm run typecheck && npm run lint && npm test",
-    "build:ui": "npm run build --workspace=app/flightreports && npm run build --workspace=app/audit && npm run build --workspace=app/admin",
+    "build:ui": "npm run build --workspace=app/flightreports && npm run build --workspace=app/audit && npm run build --workspace=app/admin && npm run build --workspace=app/staff",
     "build:production": "npm run build:ui",
     "deploy:database": "cds-deploy",
     "seed:demo": "tsx scripts/seed-demo-data.ts",
@@ -119,6 +119,15 @@
             },
             "roles": [
               "Pilot"
+            ]
+          },
+          "staff": {
+            "password": "staff",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000099"
+            },
+            "roles": [
+              "Staff"
             ]
           },
           "*": false

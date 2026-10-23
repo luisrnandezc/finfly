@@ -32,6 +32,13 @@ const demoUsers: Record<string, DemoUser> = {
     defaultPath: '/finfly.admin/index.html',
     organizationName: 'FinFly Demo Operator',
   },
+  staff: {
+    password: 'staff',
+    label: 'FinFly Staff',
+    description: 'Manage customer organizations and administrators',
+    defaultPath: '/finfly.staff/index.html',
+    organizationName: 'FinFly',
+  },
   otherpilot: {
     password: 'otherpilot',
     label: 'Other-organization pilot',

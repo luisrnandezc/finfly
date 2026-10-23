@@ -1,0 +1,89 @@
+{
+  "_version": "1.83.0",
+  "sap.app": {
+    "id": "finfly.staff",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": { "version": "0.0.1" },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "dataSources": {
+      "mainService": {
+        "uri": "/staff/",
+        "type": "OData",
+        "settings": { "annotations": [], "odataVersion": "4.01" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.151.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": { "compact": true, "cozy": true },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": { "bundleName": "finfly.staff.i18n.i18n" }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        { "pattern": ":?query:", "name": "StaffList", "target": "StaffList" }
+      ],
+      "targets": {
+        "StaffList": {
+          "type": "Component",
+          "id": "StaffList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/Organizations",
+              "enhanceI18n": "i18n/i18n.properties",
+              "variantManagement": "Page",
+              "views": {
+                "paths": [
+                  { "key": "organizations", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllOrganizations" },
+                  { "key": "administrators", "entitySet": "Administrators", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllAdministrators" }
+                ]
+              },
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": { "type": "ResponsiveTable" },
+                  "actions": {
+                    "createOrganization": {
+                      "press": "finfly.staff.ext.CustomActions.createOrganization",
+                      "text": "Create Organization",
+                      "requiresSelection": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fiori": { "registrationIds": [], "archeType": "transactional" },
+  "sap.fe": { "app": { "enableLazyLoading": true } }
+}

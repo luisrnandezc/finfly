@@ -6,6 +6,7 @@ const applications = [
   ['flightreports', '/finfly.flightreports'],
   ['audit', '/finfly.audit'],
   ['admin', '/finfly.admin'],
+  ['staff', '/finfly.staff'],
 ] as const;
 
 /** Serves the optimized Fiori builds without development UI5 middleware. */
