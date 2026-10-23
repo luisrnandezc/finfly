@@ -1,5 +1,8 @@
 import cds from '@sap/cds';
-import { bootstrapOrganizationAdministrator } from '../srv/auth/bootstrap-admin.ts';
+import {
+  bootstrapOrganizationAdministrator,
+  bootstrapStaffUser,
+} from '../srv/auth/bootstrap-admin.ts';
 import { verifyPassword } from '../srv/auth/passwords.ts';
 import { expenseServiceTest } from './support/expense-service-test';
 
@@ -49,6 +52,58 @@ describe('Organization administrator bootstrap', () => {
       expect(
         await verifyPassword('Replacement bootstrap password 84!', credential.passwordHash),
       ).to.equal(true);
+    } finally {
+      const organization = await db.run(
+        SELECT.one.from(entities.Organizations).columns('ID').where({ code: input.organizationCode }),
+      );
+      if (organization) {
+        const users = await db.run(
+          SELECT.from(entities.CrewMembers).columns('ID').where({
+            organization_ID: organization.ID,
+          }),
+        );
+        for (const user of users) {
+          await db.run(DELETE.from(entities.UserSessions).where({ crewMember_ID: user.ID }));
+          await db.run(DELETE.from(entities.UserCredentials).where({ crewMember_ID: user.ID }));
+        }
+        await db.run(
+          DELETE.from(entities.OrganizationMembers).where({
+            organization_ID: organization.ID,
+          }),
+        );
+        await db.run(
+          DELETE.from(entities.CrewMembers).where({ organization_ID: organization.ID }),
+        );
+        await db.run(DELETE.from(entities.Organizations).where({ ID: organization.ID }));
+      }
+    }
+  });
+
+  it('creates a staff-only user in the internal organization', async () => {
+    const db = await cds.connect.to('db');
+    const entities = cds.entities('finfly');
+    const input = {
+      organizationCode: 'BOOTSTRAP-STAFF',
+      organizationName: 'Bootstrap Internal Organization',
+      userId: 'bootstrap.staff',
+      password: 'Temporary staff password 42!',
+      nationalId: 'BOOTSTRAP-STAFF-ID',
+      firstName: 'Bootstrap',
+      lastName: 'Staff',
+    };
+
+    try {
+      const result = await bootstrapStaffUser(db, input);
+      const staffUser = await db.run(
+        SELECT.one.from(entities.CrewMembers).where({ ID: result.crewMemberID }),
+      );
+
+      expect(result.createdOrganization).to.equal(true);
+      expect(result.createdStaffUser).to.equal(true);
+      expect(staffUser.isStaff).to.equal(true);
+      expect(staffUser.isAdmin).to.equal(false);
+      expect(staffUser.isPilot).to.equal(false);
+      expect(staffUser.isAuditor).to.equal(false);
     } finally {
       const organization = await db.run(
         SELECT.one.from(entities.Organizations).columns('ID').where({ code: input.organizationCode }),

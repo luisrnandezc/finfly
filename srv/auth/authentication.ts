@@ -11,6 +11,7 @@ export type SessionUser = {
   isPilot: boolean;
   isAuditor: boolean;
   isAdmin: boolean;
+  isStaff: boolean;
   mustChangePassword?: boolean;
   organizationName: string;
 };
@@ -32,7 +33,7 @@ export async function resolveSessionUser(req: Request): Promise<SessionUser | un
   const user = (await db.run(
     SELECT.one
       .from(entities.CrewMembers)
-      .columns('userId', 'organization_ID', 'isPilot', 'isAuditor', 'isAdmin')
+      .columns('userId', 'organization_ID', 'isPilot', 'isAuditor', 'isAdmin', 'isStaff')
       .where({ ID: session.crewMember_ID, active: true }),
   )) as SessionUser | undefined;
   if (!user?.userId) return undefined;
@@ -78,6 +79,7 @@ export default async function databaseAuthentication(
         sessionUser.isPilot && 'Pilot',
         sessionUser.isAuditor && 'Auditor',
         sessionUser.isAdmin && 'Admin',
+        sessionUser.isStaff && 'Staff',
           ].filter((role): role is string => Boolean(role));
       cds.context!.user = new cds.User({
         id: sessionUser.userId,

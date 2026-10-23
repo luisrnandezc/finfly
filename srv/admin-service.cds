@@ -60,6 +60,7 @@ annotate AdminService.Users with {
     organization @readonly;
     active       @readonly;
     fullName     @readonly;
+    isStaff      @readonly;
 };
 
 annotate AdminService.Aircraft with {

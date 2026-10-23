@@ -29,23 +29,42 @@ export type BootstrapAdminResult = {
   createdAdministrator: boolean;
 };
 
+export type BootstrapStaffInput = BootstrapAdminInput;
+
+export type BootstrapStaffResult = {
+  organizationID: string;
+  crewMemberID: string;
+  createdOrganization: boolean;
+  createdStaffUser: boolean;
+};
+
+type AccountType = 'administrator' | 'staff';
+
+type BootstrapAccountResult = {
+  organizationID: string;
+  crewMemberID: string;
+  createdOrganization: boolean;
+  createdAccount: boolean;
+};
+
 function required(value: string, label: string): string {
   const normalized = value.trim();
   if (!normalized) throw new Error(`${label} is required`);
   return normalized;
 }
 
-/** Creates or refreshes the first administrator for an organization. */
-export async function bootstrapOrganizationAdministrator(
+async function bootstrapOrganizationAccount(
   db: Service,
   input: BootstrapAdminInput,
-): Promise<BootstrapAdminResult> {
+  accountType: AccountType,
+): Promise<BootstrapAccountResult> {
   const organizationCode = required(input.organizationCode, 'Organization code').toUpperCase();
   const organizationName = required(input.organizationName, 'Organization name');
-  const userId = required(input.userId, 'Administrator User ID');
-  const nationalId = required(input.nationalId, 'Administrator National ID');
-  const firstName = required(input.firstName, 'Administrator first name');
-  const lastName = required(input.lastName, 'Administrator last name');
+  const accountLabel = accountType === 'staff' ? 'Staff' : 'Administrator';
+  const userId = required(input.userId, `${accountLabel} User ID`);
+  const nationalId = required(input.nationalId, `${accountLabel} National ID`);
+  const firstName = required(input.firstName, `${accountLabel} first name`);
+  const lastName = required(input.lastName, `${accountLabel} last name`);
   validatePassword(input.password);
   const passwordHash = await hashPassword(input.password);
   return (await db.tx(async (tx) => {
@@ -71,18 +90,18 @@ export async function bootstrapOrganizationAdministrator(
       );
     }
 
-    let administrator = (await tx.run(
+    let account = (await tx.run(
       SELECT.one.from(entities.CrewMembers).columns('ID', 'organization_ID').where({ userId }),
     )) as { ID: string; organization_ID: string } | undefined;
-    if (administrator && administrator.organization_ID !== organization.ID) {
-      throw new Error(`Administrator User ID ${userId} is already in use`);
+    if (account && account.organization_ID !== organization.ID) {
+      throw new Error(`${accountLabel} User ID ${userId} is already in use`);
     }
-    const createdAdministrator = !administrator;
-    if (!administrator) {
-      administrator = { ID: randomUUID(), organization_ID: organization.ID };
+    const createdAccount = !account;
+    if (!account) {
+      account = { ID: randomUUID(), organization_ID: organization.ID };
       await tx.run(
         INSERT.into(entities.CrewMembers).entries({
-          ID: administrator.ID,
+          ID: account.ID,
           organization_ID: organization.ID,
           nationalId,
           firstName,
@@ -90,15 +109,23 @@ export async function bootstrapOrganizationAdministrator(
           userId,
           isPilot: false,
           isAuditor: false,
-          isAdmin: true,
+          isAdmin: accountType === 'administrator',
+          isStaff: accountType === 'staff',
           active: true,
         }),
       );
     } else {
       await tx.run(
         UPDATE.entity(entities.CrewMembers)
-          .set({ nationalId, firstName, lastName, isAdmin: true, active: true })
-          .where({ ID: administrator.ID }),
+          .set({
+            nationalId,
+            firstName,
+            lastName,
+            isAdmin: accountType === 'administrator',
+            isStaff: accountType === 'staff',
+            active: true,
+          })
+          .where({ ID: account.ID }),
       );
     }
 
@@ -128,7 +155,7 @@ export async function bootstrapOrganizationAdministrator(
       SELECT.one
         .from(entities.UserCredentials)
         .columns('ID')
-        .where({ crewMember_ID: administrator.ID }),
+        .where({ crewMember_ID: account.ID }),
     )) as { ID: string } | undefined;
     if (credential) {
       await tx.run(
@@ -145,7 +172,7 @@ export async function bootstrapOrganizationAdministrator(
       await tx.run(
         INSERT.into(entities.UserCredentials).entries({
           ID: randomUUID(),
-          crewMember_ID: administrator.ID,
+          crewMember_ID: account.ID,
           passwordHash,
           mustChangePassword: true,
           failedLoginAttempts: 0,
@@ -153,14 +180,40 @@ export async function bootstrapOrganizationAdministrator(
       );
     }
     await tx.run(
-      DELETE.from(entities.UserSessions).where({ crewMember_ID: administrator.ID }),
+      DELETE.from(entities.UserSessions).where({ crewMember_ID: account.ID }),
     );
 
     return {
       organizationID: organization.ID,
-      crewMemberID: administrator.ID,
+      crewMemberID: account.ID,
       createdOrganization,
-      createdAdministrator,
+      createdAccount,
     };
-  })) as BootstrapAdminResult;
+  })) as BootstrapAccountResult;
+}
+
+/** Creates or refreshes the first administrator for an organization. */
+export async function bootstrapOrganizationAdministrator(
+  db: Service,
+  input: BootstrapAdminInput,
+): Promise<BootstrapAdminResult> {
+  const result = await bootstrapOrganizationAccount(db, input, 'administrator');
+  const { createdAccount, ...account } = result;
+  return {
+    ...account,
+    createdAdministrator: createdAccount,
+  };
+}
+
+/** Creates or refreshes a FinFly staff account in the internal organization. */
+export async function bootstrapStaffUser(
+  db: Service,
+  input: BootstrapStaffInput,
+): Promise<BootstrapStaffResult> {
+  const result = await bootstrapOrganizationAccount(db, input, 'staff');
+  const { createdAccount, ...account } = result;
+  return {
+    ...account,
+    createdStaffUser: createdAccount,
+  };
 }

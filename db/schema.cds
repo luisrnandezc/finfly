@@ -154,6 +154,7 @@ entity CrewMembers : cuid, managed {
     isPilot   : Boolean not null default true;
     isAuditor : Boolean not null default false;
     isAdmin   : Boolean not null default false;
+    isStaff   : Boolean not null default false;
     positionTitle : String(100);
     licenseType : PilotLicenseType;
     @assert.range: [(0), _]

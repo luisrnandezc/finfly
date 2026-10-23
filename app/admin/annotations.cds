@@ -152,6 +152,7 @@ annotate admin.Users with {
     isPilot      @title : 'Pilot';
     isAuditor    @title : 'Auditor';
     isAdmin      @title : 'Administrator';
+    isStaff      @UI.Hidden;
     positionTitle @title : 'Position';
     totalFlightHours @title : 'Total Flight Hours';
     active       @title : 'Active';

@@ -23,6 +23,7 @@ type LoginRecord = {
   isPilot: boolean;
   isAuditor: boolean;
   isAdmin: boolean;
+  isStaff: boolean;
   passwordHash: string;
   mustChangePassword: boolean;
   failedLoginAttempts: number;
@@ -46,6 +47,7 @@ function safeReturnPath(value: unknown): string | undefined {
 }
 
 function defaultPath(user: LoginRecord): string {
+  if (user.isStaff) return '/finfly.staff/index.html';
   if (user.isAdmin) return '/finfly.admin/index.html';
   if (user.isAuditor) return '/finfly.audit/index.html';
   return '/finfly.flightreports/index.html';
@@ -238,7 +240,7 @@ export function registerAuthenticationRoutes(app: Application): void {
     const user = (await db.run(
       SELECT.one
         .from(entities.CrewMembers)
-        .columns('isAdmin', 'isAuditor', 'isPilot')
+        .columns('isAdmin', 'isAuditor', 'isPilot', 'isStaff')
         .where({ ID: session.crewMember_ID }),
     )) as LoginRecord | undefined;
     if (!user) {
