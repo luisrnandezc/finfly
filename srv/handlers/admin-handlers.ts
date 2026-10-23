@@ -76,6 +76,22 @@ async function validateUserId(
   }
 }
 
+async function validateNationalId(
+  tx: Transaction,
+  nationalId: string | undefined,
+  userID: string | undefined,
+  req: Request,
+): Promise<void> {
+  const normalized = nationalId?.trim();
+  if (!normalized) return;
+  const duplicate = (await tx.run(
+    SELECT.one.from('finfly.CrewMembers').columns('ID').where({ nationalId: normalized }),
+  )) as { ID: string } | undefined;
+  if (duplicate && duplicate.ID !== userID) {
+    req.reject(409, 'A user with this National ID already exists');
+  }
+}
+
 function validateUser(user: AdminUserData, req: Request): void {
   if (!user.nationalId?.trim()) req.reject(400, 'National ID is required');
   if (!user.userId?.trim()) req.reject(400, 'User ID is required');
@@ -133,7 +149,9 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
     req.data.organization_ID = organizationID;
     req.data.active = true;
     validateUser(req.data as AdminUserData, req);
-    await validateUserId(cds.tx(req), req.data.userId, undefined, req);
+    const tx = cds.tx(req);
+    await validateUserId(tx, req.data.userId, undefined, req);
+    await validateNationalId(tx, req.data.nationalId, undefined, req);
   });
 
   service.after('CREATE', Users, async (data: AdminUserData, req: Request) => {
@@ -159,7 +177,9 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
     const merged = { ...existing, ...req.data } as AdminUserData;
     merged.organization_ID = organizationID;
     validateUser(merged, req);
-    await validateUserId(cds.tx(req), merged.userId, ID, req);
+    const tx = cds.tx(req);
+    await validateUserId(tx, merged.userId, ID, req);
+    await validateNationalId(tx, merged.nationalId, ID, req);
     (req as Request & { previousUserId?: string | null }).previousUserId =
       existing!.userId;
     req.data.organization_ID = organizationID;

@@ -66,6 +66,7 @@ describe('StaffService customer access administration', () => {
   it('creates an organization and its first administrator together', async () => {
     const suffix = randomUUID().slice(0, 8).toUpperCase();
     const code = `STAFF-${suffix}`;
+    const duplicateCode = `DUP-${suffix}`;
     const userId = `staff.created.${suffix.toLowerCase()}`;
     const password = 'Temporary staff-created password';
     try {
@@ -103,7 +104,31 @@ describe('StaffService customer access administration', () => {
       expect(administrator.isStaff).to.equal(false);
       expect(credential.mustChangePassword).to.equal(true);
       expect(await verifyPassword(password, credential.passwordHash)).to.equal(true);
+
+      try {
+        await POST(
+          `${baseUrl}/createOrganization`,
+          {
+            code: duplicateCode,
+            name: 'Duplicate National ID Operator',
+            administratorUserId: `duplicate.${suffix.toLowerCase()}`,
+            temporaryPassword: 'Temporary duplicate password',
+            nationalId: `STAFF-ID-${suffix}`,
+            firstName: 'Duplicate',
+            lastName: 'Administrator',
+          },
+          staffConfiguration,
+        );
+        expect.fail('Expected the duplicate National ID to be rejected');
+      } catch (error) {
+        expect(String(error)).to.match(/409/);
+      }
+      const partialOrganization = await db.run(
+        SELECT.one.from(entities.Organizations).where({ code: duplicateCode }),
+      );
+      expect(partialOrganization).not.to.exist;
     } finally {
+      await removeOrganization(duplicateCode);
       await removeOrganization(code);
     }
   });

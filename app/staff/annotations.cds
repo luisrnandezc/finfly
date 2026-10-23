@@ -24,7 +24,6 @@ annotate staff.Organizations with @(
         { $Type : 'UI.DataField', Label : 'Auditors', Value : activeAuditorCount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Administrators', Value : activeAdministratorCount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataFieldForAction', Label : 'Add Administrator', Action : 'StaffService.addAdministrator' },
         { $Type : 'UI.DataFieldForAction', Label : 'Deactivate', Action : 'StaffService.deactivateOrganization', Criticality : #Negative },
         { $Type : 'UI.DataFieldForAction', Label : 'Reactivate', Action : 'StaffService.reactivateOrganization', Criticality : #Positive }
     ]
@@ -64,8 +63,14 @@ annotate staff.Organizations actions {
 };
 
 annotate staff.Administrators actions {
-    deactivateAdministrator @Core.OperationAvailable : ($self.active = true);
-    reactivateAdministrator @Core.OperationAvailable : ($self.active = false);
+    deactivateAdministrator @(
+        Core.OperationAvailable : ($self.active = true),
+        Common.SideEffects : { TargetEntities : [organization] }
+    );
+    reactivateAdministrator @(
+        Core.OperationAvailable : ($self.active = false),
+        Common.SideEffects : { TargetEntities : [organization] }
+    );
     setTemporaryPassword @Core.OperationAvailable : ($self.active = true);
 };
 

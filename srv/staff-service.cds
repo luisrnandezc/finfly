@@ -17,10 +17,15 @@ service StaffService {
         virtual activeAdministratorCount : Integer
     } actions {
         action addAdministrator(
+            @title: 'User ID'
             userId            : String(255) not null,
+            @title: 'Temporary Password'
             temporaryPassword : String(200) not null,
+            @title: 'National ID'
             nationalId        : String(40) not null,
+            @title: 'First Name'
             firstName         : String(80) not null,
+            @title: 'Last Name'
             lastName          : String(80) not null
         ) returns Administrators;
         action deactivateOrganization() returns Organizations;
@@ -41,7 +46,10 @@ service StaffService {
     actions {
         action deactivateAdministrator() returns Administrators;
         action reactivateAdministrator() returns Administrators;
-        action setTemporaryPassword(password : String(200) not null) returns Administrators;
+        action setTemporaryPassword(
+            @title: 'Temporary Password'
+            password : String(200) not null
+        ) returns Administrators;
     };
 
     action createOrganization(

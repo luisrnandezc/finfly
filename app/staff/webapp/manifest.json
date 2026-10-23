@@ -74,6 +74,11 @@
                       "press": "finfly.staff.ext.CustomActions.createOrganization",
                       "text": "Create Organization",
                       "requiresSelection": false
+                    },
+                    "addAdministrator": {
+                      "press": "finfly.staff.ext.CustomActions.addAdministrator",
+                      "text": "Add Administrator",
+                      "requiresSelection": true
                     }
                   }
                 }

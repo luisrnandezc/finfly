@@ -64,12 +64,11 @@ async function createAdministrator(
 
   const duplicateNationalID = await tx.run(
     SELECT.one.from('finfly.CrewMembers').columns('ID').where({
-      organization_ID: organizationID,
       nationalId,
     }),
   );
   if (duplicateNationalID) {
-    return req.reject(409, 'A user with this National ID already exists in the organization');
+    return req.reject(409, 'A user with this National ID already exists');
   }
 
   const crewMemberID = randomUUID();

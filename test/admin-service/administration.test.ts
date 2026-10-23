@@ -197,6 +197,29 @@ describe('AdminService organization administration', () => {
     }
   });
 
+  it('rejects a National ID already used by another organization', async () => {
+    const userID = '72000000-0000-0000-0000-000000000010';
+    const draftUrl = await createUserDraft(userID, {
+      nationalId: 'DEMO-ID-003',
+      userId: 'duplicate.national.id',
+      firstName: 'Duplicate',
+      lastName: 'Identity',
+      isPilot: false,
+      isAuditor: true,
+      isAdmin: false,
+      positionTitle: 'Auditor',
+    });
+
+    try {
+      await expectRequestFailure(
+        activateUserDraft(draftUrl),
+        /National ID already exists/,
+      );
+    } finally {
+      await discardUserDraft(draftUrl);
+    }
+  });
+
   it('does not create a user or membership when its draft is discarded', async () => {
     const userID = '72000000-0000-0000-0000-000000000005';
     const userId = 'discarded.demo.pilot';
