@@ -4,7 +4,7 @@ import { cookieValue, SESSION_COOKIE, sessionTokenHash } from './session.ts';
 
 const { SELECT } = cds.ql;
 
-type SessionUser = {
+export type SessionUser = {
   ID?: string;
   userId: string;
   organization_ID: string;
@@ -12,6 +12,7 @@ type SessionUser = {
   isAuditor: boolean;
   isAdmin: boolean;
   mustChangePassword?: boolean;
+  organizationName: string;
 };
 
 export async function resolveSessionUser(req: Request): Promise<SessionUser | undefined> {
@@ -53,13 +54,13 @@ export async function resolveSessionUser(req: Request): Promise<SessionUser | un
   );
   if (!membership) return undefined;
 
-  const organization = await db.run(
-    SELECT.one.from(entities.Organizations).columns('ID').where({
+  const organization = (await db.run(
+    SELECT.one.from(entities.Organizations).columns('name').where({
       ID: user.organization_ID,
       active: true,
     }),
-  );
-  return organization ? { ...user, ...credential } : undefined;
+  )) as { name: string } | undefined;
+  return organization ? { ...user, ...credential, organizationName: organization.name } : undefined;
 }
 
 /** CAP custom-authentication middleware backed by FinFly sessions. */

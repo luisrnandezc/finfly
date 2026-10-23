@@ -7,6 +7,7 @@ type DemoUser = {
   label: string;
   description: string;
   defaultPath: string;
+  organizationName: string;
 };
 
 const demoUsers: Record<string, DemoUser> = {
@@ -15,24 +16,28 @@ const demoUsers: Record<string, DemoUser> = {
     label: 'Pilot',
     description: 'Create and maintain flight reports',
     defaultPath: '/finfly.flightreports/index.html',
+    organizationName: 'FinFly Demo Operator',
   },
   auditor: {
     password: 'auditor',
     label: 'Auditor',
     description: 'Review reports and expenses',
     defaultPath: '/finfly.audit/index.html',
+    organizationName: 'FinFly Demo Operator',
   },
   admin: {
     password: 'admin',
     label: 'Administrator',
     description: 'Manage users, aircraft, reports, and audits',
     defaultPath: '/finfly.admin/index.html',
+    organizationName: 'FinFly Demo Operator',
   },
   otherpilot: {
     password: 'otherpilot',
     label: 'Other-organization pilot',
     description: 'Verify organization data isolation',
     defaultPath: '/finfly.flightreports/index.html',
+    organizationName: 'Other Test Operator',
   },
 };
 
@@ -152,6 +157,19 @@ export function registerDevelopmentLogin(app: Application): void {
         ? safeReturnPath(req.query.returnTo, '/')
         : undefined;
     return res.type('html').send(loginPage(currentUser, returnTo));
+  });
+
+  app.get('/auth/context', (req: Request, res: Response) => {
+    res.set('Cache-Control', 'no-store');
+    const userID = cookiesFrom(req)[COOKIE_NAME];
+    const user = userID ? demoUsers[userID] : undefined;
+    if (!user) return res.sendStatus(401);
+    return res.json({ userId: userID, organizationName: user.organizationName });
+  });
+
+  app.post('/auth/logout', (req: Request, res: Response) => {
+    res.clearCookie(COOKIE_NAME, { path: '/' });
+    return res.redirect('/dev/login');
   });
 
   app.use((req: Request, res: Response, next: NextFunction) => {

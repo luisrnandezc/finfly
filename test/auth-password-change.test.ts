@@ -111,5 +111,27 @@ describe('forced password change', () => {
     } as unknown as Request);
     expect(sessionUser?.isAdmin).to.equal(true);
     expect(sessionUser?.mustChangePassword).to.equal(false);
+
+    const context = await fetch(`${baseUrl}/auth/context`, {
+      headers: { cookie: cookie! },
+    });
+    expect(context.status).to.equal(200);
+    expect(await context.json()).to.deep.equal({
+      userId: input.userId,
+      organizationName: input.organizationName,
+    });
+
+    const logout = await fetch(`${baseUrl}/auth/logout`, {
+      method: 'POST',
+      headers: { cookie: cookie! },
+      redirect: 'manual',
+    });
+    expect(logout.status).to.equal(302);
+    expect(logout.headers.get('location')).to.equal('/auth/login');
+
+    const contextAfterLogout = await fetch(`${baseUrl}/auth/context`, {
+      headers: { cookie: cookie! },
+    });
+    expect(contextAfterLogout.status).to.equal(401);
   });
 });

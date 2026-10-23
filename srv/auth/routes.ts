@@ -1,6 +1,7 @@
 import cds from '@sap/cds';
 import type { Application, Request, Response } from 'express';
 import express from 'express';
+import { resolveSessionUser } from './authentication.ts';
 import { hashPassword, validatePassword, verifyPassword } from './passwords.ts';
 import {
   cookieValue,
@@ -187,6 +188,16 @@ export function registerAuthenticationRoutes(app: Application): void {
     if (!cookieValue(req.headers.cookie, SESSION_COOKIE)) return res.redirect('/auth/login');
     res.set('Cache-Control', 'no-store');
     return res.type('html').send(changePasswordPage());
+  });
+
+  app.get('/auth/context', async (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    const user = await resolveSessionUser(req);
+    if (!user || user.mustChangePassword) return res.sendStatus(401);
+    return res.json({
+      userId: user.userId,
+      organizationName: user.organizationName,
+    });
   });
 
   app.post('/auth/change-password', async (req: Request, res: Response) => {
