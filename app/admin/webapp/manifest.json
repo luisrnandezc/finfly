@@ -74,7 +74,8 @@
                   { "key": "users", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllUsers" },
                   { "key": "aircraft", "entitySet": "Aircraft", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllAircraft" },
                   { "key": "reports", "entitySet": "FlightReports", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllReports" },
-                  { "key": "expenses", "entitySet": "Expenses", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllExpenses" }
+                  { "key": "expenses", "entitySet": "Expenses", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllExpenses" },
+                  { "key": "organization", "entitySet": "Organizations", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#CurrentOrganization" }
                 ]
               },
               "navigation": {

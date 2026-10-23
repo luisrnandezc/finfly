@@ -26,6 +26,34 @@ annotate admin.Expenses with @(UI.SelectionPresentationVariant #AllExpenses : {
     PresentationVariant : { SortOrder : [{ Property : modifiedAt, Descending : true }] }
 });
 
+annotate admin.Organizations with @(UI.SelectionPresentationVariant #CurrentOrganization : {
+    Text : 'Organization',
+    SelectionVariant : { Text : 'Organization' },
+    PresentationVariant : { SortOrder : [{ Property : name }] }
+});
+
+annotate admin.Organizations with @(
+    UI.HeaderInfo : {
+        $Type : 'UI.HeaderInfoType',
+        TypeName : 'Organization',
+        TypeNamePlural : 'Organizations',
+        Title : { $Type : 'UI.DataField', Value : name },
+        Description : { $Type : 'UI.DataField', Value : code }
+    },
+    UI.LineItem : [
+        { $Type : 'UI.DataField', Label : 'Name', Value : name, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Code', Value : code, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High }
+    ]
+);
+
+annotate admin.Organizations with {
+    ID     @UI.Hidden;
+    code   @title : 'Code';
+    name   @title : 'Name';
+    active @title : 'Active';
+};
+
 annotate admin.Users with @(
     Capabilities.InsertRestrictions : { Insertable : true },
     Capabilities.DeleteRestrictions : { Deletable : false },

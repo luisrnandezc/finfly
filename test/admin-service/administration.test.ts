@@ -102,6 +102,19 @@ describe('AdminService organization administration', () => {
     expect(response.status).to.equal(200);
   });
 
+  it('shows only the administrator organization', async () => {
+    const response = await GET(`${baseUrl}/Organizations`, adminConfiguration);
+
+    expect(response.status).to.equal(200);
+    expect(response.data.value).to.have.length(1);
+    expect(response.data.value[0]).to.include({
+      ID: masterDataIDs.organization,
+      name: 'FinFly Demo Operator',
+      code: 'DEMO',
+      active: true,
+    });
+  });
+
   it('creates a user and its organization membership together', async () => {
     const userID = '72000000-0000-0000-0000-000000000001';
     const userId = 'new.demo.pilot';
