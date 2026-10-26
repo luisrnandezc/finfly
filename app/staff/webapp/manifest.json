@@ -48,7 +48,9 @@
     "routing": {
       "config": {},
       "routes": [
-        { "pattern": ":?query:", "name": "StaffList", "target": "StaffList" }
+        { "pattern": ":?query:", "name": "StaffList", "target": "StaffList" },
+        { "pattern": "Organizations({key}):?query:", "name": "OrganizationObjectPage", "target": "OrganizationObjectPage" },
+        { "pattern": "Users({key}):?query:", "name": "UserObjectPage", "target": "UserObjectPage" }
       ],
       "targets": {
         "StaffList": {
@@ -65,6 +67,10 @@
                   { "key": "organizations", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllOrganizations" },
                   { "key": "users", "entitySet": "Users", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllUsers" }
                 ]
+              },
+              "navigation": {
+                "Organizations": { "detail": { "route": "OrganizationObjectPage" } },
+                "Users": { "detail": { "route": "UserObjectPage" } }
               },
               "controlConfiguration": {
                 "@com.sap.vocabularies.UI.v1.LineItem": {
@@ -83,6 +89,30 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "OrganizationObjectPage": {
+          "type": "Component",
+          "id": "OrganizationObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/Organizations",
+              "enhanceI18n": "i18n/i18n.properties"
+            }
+          }
+        },
+        "UserObjectPage": {
+          "type": "Component",
+          "id": "UserObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "editableHeaderContent": false,
+              "contextPath": "/Users",
+              "enhanceI18n": "i18n/i18n.properties"
             }
           }
         }

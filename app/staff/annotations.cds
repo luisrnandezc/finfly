@@ -21,6 +21,13 @@ annotate staff.Users with @(UI.SelectionPresentationVariant #AllUsers : {
 annotate staff.Organizations with @(
     Capabilities.InsertRestrictions : { Insertable : false },
     Capabilities.DeleteRestrictions : { Deletable : false },
+    UI.HeaderInfo : {
+        $Type : 'UI.HeaderInfoType',
+        TypeName : 'Organization',
+        TypeNamePlural : 'Organizations',
+        Title : { $Type : 'UI.DataField', Value : name },
+        Description : { $Type : 'UI.DataField', Value : code }
+    },
     UI.SelectionFields : [name, code, active],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Name', Value : name, ![@UI.Importance] : #High },
@@ -32,6 +39,37 @@ annotate staff.Organizations with @(
         { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High },
         { $Type : 'UI.DataFieldForAction', Label : 'Deactivate', Action : 'StaffService.deactivateOrganization', Criticality : #Negative },
         { $Type : 'UI.DataFieldForAction', Label : 'Reactivate', Action : 'StaffService.reactivateOrganization', Criticality : #Positive }
+    ],
+    UI.FieldGroup #OrganizationDetails : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Name', Value : name },
+            { $Type : 'UI.DataField', Label : 'Code', Value : code },
+            { $Type : 'UI.DataField', Label : 'Active', Value : active }
+        ]
+    },
+    UI.FieldGroup #UserSummary : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Active Users', Value : activeUserCount },
+            { $Type : 'UI.DataField', Label : 'Pilots', Value : activePilotCount },
+            { $Type : 'UI.DataField', Label : 'Auditors', Value : activeAuditorCount },
+            { $Type : 'UI.DataField', Label : 'Administrators', Value : activeAdministratorCount }
+        ]
+    },
+    UI.Facets : [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'OrganizationDetails',
+            Label : 'Organization Details',
+            Target : '@UI.FieldGroup#OrganizationDetails'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'UserSummary',
+            Label : 'Active User Summary',
+            Target : '@UI.FieldGroup#UserSummary'
+        }
     ]
 );
 
@@ -42,6 +80,13 @@ annotate staff.Organizations with {
 annotate staff.Users with @(
     Capabilities.InsertRestrictions : { Insertable : false },
     Capabilities.DeleteRestrictions : { Deletable : false },
+    UI.HeaderInfo : {
+        $Type : 'UI.HeaderInfoType',
+        TypeName : 'User',
+        TypeNamePlural : 'Users',
+        Title : { $Type : 'UI.DataField', Value : fullName },
+        Description : { $Type : 'UI.DataField', Value : organizationName }
+    },
     UI.SelectionFields : [fullName, userId, organizationName, isPilot, isAuditor, isAdmin, active],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Full Name', Value : fullName, ![@UI.Importance] : #High },
@@ -51,6 +96,53 @@ annotate staff.Users with @(
         { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High }
+    ],
+    UI.FieldGroup #PersonalDetails : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'National ID', Value : nationalId },
+            { $Type : 'UI.DataField', Label : 'First Name', Value : firstName },
+            { $Type : 'UI.DataField', Label : 'Last Name', Value : lastName },
+            { $Type : 'UI.DataField', Label : 'User ID', Value : userId },
+            { $Type : 'UI.DataField', Label : 'Organization', Value : organizationName },
+            { $Type : 'UI.DataField', Label : 'Active', Value : active }
+        ]
+    },
+    UI.FieldGroup #ApplicationRoles : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot },
+            { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor },
+            { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin }
+        ]
+    },
+    UI.FieldGroup #ProfessionalDetails : {
+        $Type : 'UI.FieldGroupType',
+        Data : [
+            { $Type : 'UI.DataField', Label : 'Position', Value : positionTitle },
+            { $Type : 'UI.DataField', Label : 'License Type', Value : licenseType },
+            { $Type : 'UI.DataField', Label : 'Total Flight Hours', Value : totalFlightHours }
+        ]
+    },
+    UI.Facets : [
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'PersonalDetails',
+            Label : 'Personal Details',
+            Target : '@UI.FieldGroup#PersonalDetails'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'ApplicationRoles',
+            Label : 'Application Roles',
+            Target : '@UI.FieldGroup#ApplicationRoles'
+        },
+        {
+            $Type : 'UI.ReferenceFacet',
+            ID : 'ProfessionalDetails',
+            Label : 'Professional Details',
+            Target : '@UI.FieldGroup#ProfessionalDetails'
+        }
     ]
 );
 
