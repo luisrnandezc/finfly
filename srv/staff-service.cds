@@ -33,6 +33,27 @@ service StaffService {
     };
 
     @readonly
+    entity Users as projection on db.CrewMembers {
+        key ID,
+        organization,
+        organization.name as organizationName : String(120),
+        nationalId,
+        firstName,
+        lastName,
+        fullName,
+        userId,
+        isPilot,
+        isAuditor,
+        isAdmin,
+        positionTitle,
+        licenseType,
+        totalFlightHours,
+        active,
+        createdAt,
+        modifiedAt
+    } where isStaff = false;
+
+    @readonly
     entity Administrators as projection on db.CrewMembers {
         key ID,
         organization,

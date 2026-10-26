@@ -33,7 +33,7 @@ async function removeOrganization(code: string): Promise<void> {
 }
 
 describe('StaffService customer access administration', () => {
-  it('is staff-only and returns organization-level user counts', async () => {
+  it('is staff-only and returns organization-level user counts and customer users', async () => {
     try {
       await GET(`${baseUrl}/Organizations`, {
         auth: { username: 'admin', password: 'admin' },
@@ -61,6 +61,25 @@ describe('StaffService customer access administration', () => {
     expect(administrators.data.value[0]).not.to.have.property('isPilot');
     expect(administrators.data.value[0]).not.to.have.property('isAuditor');
     expect(administrators.data.value[0]).not.to.have.property('totalFlightHours');
+
+    const users = await GET(`${baseUrl}/Users`, staffConfiguration);
+    expect(users.data.value).to.have.length(7);
+    const pilot = users.data.value.find(
+      (user: { ID: string }) => user.ID === masterDataIDs.captain,
+    );
+    expect(pilot).to.include({
+      organizationName: 'FinFly Demo Operator',
+      fullName: 'Alex Demo',
+      userId: 'pilot',
+      isPilot: true,
+      isAuditor: false,
+      isAdmin: false,
+    });
+    const otherOrganizationPilot = users.data.value.find(
+      (user: { ID: string }) => user.ID === masterDataIDs.otherCrewMember,
+    );
+    expect(otherOrganizationPilot.organizationName).to.equal('Other Test Operator');
+    expect(pilot).not.to.have.property('passwordHash');
   });
 
   it('creates an organization and its first administrator together', async () => {
