@@ -86,7 +86,6 @@ service StaffService {
 
 annotate StaffService.Organizations with {
     ID                           @readonly;
-    code                         @readonly;
     active                       @readonly;
     createdAt                    @readonly;
     modifiedAt                   @readonly;

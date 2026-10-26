@@ -8,6 +8,7 @@ const INTERNAL_ORGANIZATION_CODE = 'FINFLY';
 type OrganizationRow = {
   ID: string;
   code: string;
+  name: string;
   active: boolean;
   activeUserCount?: number;
   activePilotCount?: number;
@@ -128,11 +129,25 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
   service.before('UPDATE', Organizations, async (req: Request) => {
     const ID = entityID(req);
     const tx = cds.tx(req);
-    const organization = await tx.run(
-      SELECT.one.from('finfly.Organizations').columns('ID').where({ ID }),
-    );
+    const organization = (await tx.run(
+      SELECT.one.from('finfly.Organizations').columns('ID', 'code', 'name').where({ ID }),
+    )) as OrganizationRow | undefined;
     if (!organization) req.reject(404, 'This organization is no longer available');
-    req.data.name = required(req.data.name, 'Organization name', req);
+
+    const code = required(req.data.code ?? organization!.code, 'Organization code', req)
+      .toUpperCase();
+    if (organization!.code === INTERNAL_ORGANIZATION_CODE && code !== organization!.code) {
+      req.reject(400, 'The internal FinFly organization code cannot be changed');
+    }
+    const duplicate = (await tx.run(
+      SELECT.one.from('finfly.Organizations').columns('ID').where({ code }),
+    )) as { ID: string } | undefined;
+    if (duplicate && duplicate.ID !== ID) {
+      req.reject(409, 'An organization with this code already exists');
+    }
+
+    req.data.code = code;
+    req.data.name = required(req.data.name ?? organization!.name, 'Organization name', req);
   });
 
   service.before('UPDATE', Users, async (req: StaffUpdateRequest) => {

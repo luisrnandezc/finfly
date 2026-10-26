@@ -190,6 +190,7 @@ describe('StaffService customer access administration', () => {
   it('updates organization and user details while preserving login membership', async () => {
     const suffix = randomUUID().slice(0, 8).toUpperCase();
     const code = `EDIT-${suffix}`;
+    const updatedCode = `UPDATED-${suffix}`;
     const originalUserId = `edit.original.${suffix.toLowerCase()}`;
     const updatedUserId = `edit.updated.${suffix.toLowerCase()}`;
     try {
@@ -219,7 +220,10 @@ describe('StaffService customer access administration', () => {
       const organizationDraft = await editStaffDraft(
         'Organizations',
         organization.ID,
-        { name: 'Updated Organization Name' },
+        {
+          name: 'Updated Organization Name',
+          code: updatedCode.toLowerCase(),
+        },
       );
       await activateStaffDraft(organizationDraft);
       const userDraft = await editStaffDraft('Users', user.ID, {
@@ -242,7 +246,7 @@ describe('StaffService customer access administration', () => {
         }),
       );
       expect(updatedOrganization.name).to.equal('Updated Organization Name');
-      expect(updatedOrganization.code).to.equal(code);
+      expect(updatedOrganization.code).to.equal(updatedCode);
       expect(updatedUser).to.include({
         firstName: 'Updated',
         userId: updatedUserId,
@@ -250,6 +254,23 @@ describe('StaffService customer access administration', () => {
         isAdmin: true,
       });
       expect(updatedMembership).to.exist;
+
+      const duplicateOrganizationDraft = await editStaffDraft(
+        'Organizations',
+        organization.ID,
+        { code: 'DEMO' },
+      );
+      try {
+        await activateStaffDraft(duplicateOrganizationDraft);
+        expect.fail('Expected the duplicate organization code to be rejected');
+      } catch (error) {
+        expect(String(error)).to.match(/409/);
+      } finally {
+        await HTTP_DELETE(duplicateOrganizationDraft, {
+          ...staffConfiguration,
+          headers: { 'If-Match': '*' },
+        });
+      }
 
       const duplicateDraft = await editStaffDraft('Users', user.ID, {
         nationalId: 'DEMO-ID-001',
@@ -266,6 +287,7 @@ describe('StaffService customer access administration', () => {
         });
       }
     } finally {
+      await removeOrganization(updatedCode);
       await removeOrganization(code);
     }
   });
