@@ -63,7 +63,7 @@
               "views": {
                 "paths": [
                   { "key": "organizations", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllOrganizations" },
-                  { "key": "administrators", "entitySet": "Administrators", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllAdministrators" }
+                  { "key": "users", "entitySet": "Users", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#AllUsers" }
                 ]
               },
               "controlConfiguration": {

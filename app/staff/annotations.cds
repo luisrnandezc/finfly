@@ -12,6 +12,12 @@ annotate staff.Administrators with @(UI.SelectionPresentationVariant #AllAdminis
     PresentationVariant : { SortOrder : [{ Property : fullName }] }
 });
 
+annotate staff.Users with @(UI.SelectionPresentationVariant #AllUsers : {
+    Text : 'Users',
+    SelectionVariant : { Text : 'Users' },
+    PresentationVariant : { SortOrder : [{ Property : fullName }] }
+});
+
 annotate staff.Organizations with @(
     Capabilities.InsertRestrictions : { Insertable : false },
     Capabilities.DeleteRestrictions : { Deletable : false },
@@ -31,6 +37,40 @@ annotate staff.Organizations with @(
 
 annotate staff.Organizations with {
     ID @UI.Hidden;
+};
+
+annotate staff.Users with @(
+    Capabilities.InsertRestrictions : { Insertable : false },
+    Capabilities.DeleteRestrictions : { Deletable : false },
+    UI.SelectionFields : [fullName, userId, organizationName, isPilot, isAuditor, isAdmin, active],
+    UI.LineItem : [
+        { $Type : 'UI.DataField', Label : 'Full Name', Value : fullName, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'User ID', Value : userId, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Organization', Value : organizationName, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High }
+    ]
+);
+
+annotate staff.Users with {
+    ID @UI.Hidden;
+    organization_ID @UI.Hidden;
+    organization @UI.Hidden;
+    organizationName @title : 'Organization';
+    nationalId @title : 'National ID';
+    firstName @title : 'First Name';
+    lastName @title : 'Last Name';
+    fullName @title : 'Full Name';
+    userId @title : 'User ID';
+    isPilot @title : 'Pilot';
+    isAuditor @title : 'Auditor';
+    isAdmin @title : 'Administrator';
+    positionTitle @title : 'Position';
+    licenseType @title : 'License Type';
+    totalFlightHours @title : 'Total Flight Hours';
+    active @title : 'Active';
 };
 
 annotate staff.Administrators with @(
