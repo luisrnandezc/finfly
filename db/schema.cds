@@ -157,7 +157,7 @@ entity CrewMembers : cuid, managed {
     isStaff   : Boolean not null default false;
     positionTitle : String(100);
     licenseType : PilotLicenseType;
-    @assert.range: [(0), _]
+    @assert.range: [0, _]
     totalFlightHours : Decimal(12,2) not null default 0;
     active    : Boolean not null default true;
 }

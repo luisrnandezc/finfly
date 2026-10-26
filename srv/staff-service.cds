@@ -3,7 +3,7 @@ using { finfly as db } from '../db/schema';
 @path: '/staff'
 @requires: 'Staff'
 service StaffService {
-    @readonly
+    @odata.draft.enabled
     entity Organizations as projection on db.Organizations {
         key ID,
         code,
@@ -32,7 +32,7 @@ service StaffService {
         action reactivateOrganization() returns Organizations;
     };
 
-    @readonly
+    @odata.draft.enabled
     entity Users as projection on db.CrewMembers {
         key ID,
         organization,
@@ -83,3 +83,28 @@ service StaffService {
         lastName           : String(80) not null
     ) returns Organizations;
 }
+
+annotate StaffService.Organizations with {
+    ID                           @readonly;
+    code                         @readonly;
+    active                       @readonly;
+    createdAt                    @readonly;
+    modifiedAt                   @readonly;
+    activeUserCount              @readonly;
+    activePilotCount             @readonly;
+    activeAuditorCount           @readonly;
+    activeAdministratorCount     @readonly;
+};
+
+annotate StaffService.Users with {
+    ID               @readonly;
+    organization     @readonly;
+    organizationName @readonly;
+    fullName         @readonly;
+    isPilot          @readonly;
+    isAuditor        @readonly;
+    isAdmin          @readonly;
+    active           @readonly;
+    createdAt        @readonly;
+    modifiedAt       @readonly;
+};

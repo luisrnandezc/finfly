@@ -4,10 +4,45 @@ import { verifyPassword } from '../../srv/auth/passwords.ts';
 import { expenseServiceTest } from '../support/expense-service-test';
 import { masterDataIDs } from '../support/ids';
 
-const { GET, POST, expect } = expenseServiceTest();
+const { DELETE: HTTP_DELETE, GET, POST, PATCH, expect } = expenseServiceTest();
 const { SELECT, DELETE } = cds.ql;
 const baseUrl = '/staff';
 const staffConfiguration = { auth: { username: 'staff', password: 'staff' } };
+
+function staffDraftUrl(entity: 'Organizations' | 'Users', ID: string): string {
+  return `${baseUrl}/${entity}(ID=${ID},IsActiveEntity=false)`;
+}
+
+async function editStaffDraft(
+  entity: 'Organizations' | 'Users',
+  ID: string,
+  data: Record<string, unknown>,
+): Promise<string> {
+  const activeUrl = `${baseUrl}/${entity}(ID=${ID},IsActiveEntity=true)`;
+  const edited = await POST(
+    `${activeUrl}/StaffService.draftEdit`,
+    { PreserveChanges: true },
+    staffConfiguration,
+  );
+  expect(edited.status).to.equal(201);
+  const draftUrl = staffDraftUrl(entity, ID);
+  await PATCH(draftUrl, data, {
+    ...staffConfiguration,
+    headers: { 'If-Match': '*' },
+  });
+  return draftUrl;
+}
+
+async function activateStaffDraft(draftUrl: string) {
+  return POST(
+    `${draftUrl}/StaffService.draftActivate`,
+    {},
+    {
+      ...staffConfiguration,
+      headers: { 'If-Match': '*' },
+    },
+  );
+}
 
 async function removeOrganization(code: string): Promise<void> {
   const db = await cds.connect.to('db');
@@ -152,6 +187,89 @@ describe('StaffService customer access administration', () => {
     }
   });
 
+  it('updates organization and user details while preserving login membership', async () => {
+    const suffix = randomUUID().slice(0, 8).toUpperCase();
+    const code = `EDIT-${suffix}`;
+    const originalUserId = `edit.original.${suffix.toLowerCase()}`;
+    const updatedUserId = `edit.updated.${suffix.toLowerCase()}`;
+    try {
+      await POST(
+        `${baseUrl}/createOrganization`,
+        {
+          code,
+          name: 'Original Organization Name',
+          administratorUserId: originalUserId,
+          temporaryPassword: 'Temporary edit password',
+          nationalId: `EDIT-ID-${suffix}`,
+          firstName: 'Original',
+          lastName: 'Administrator',
+        },
+        staffConfiguration,
+      );
+
+      const db = await cds.connect.to('db');
+      const entities = cds.entities('finfly');
+      const organization = await db.run(
+        SELECT.one.from(entities.Organizations).where({ code }),
+      );
+      const user = await db.run(
+        SELECT.one.from(entities.CrewMembers).where({ userId: originalUserId }),
+      );
+
+      const organizationDraft = await editStaffDraft(
+        'Organizations',
+        organization.ID,
+        { name: 'Updated Organization Name' },
+      );
+      await activateStaffDraft(organizationDraft);
+      const userDraft = await editStaffDraft('Users', user.ID, {
+          firstName: 'Updated',
+          userId: updatedUserId,
+          positionTitle: 'Customer Administrator',
+      });
+      await activateStaffDraft(userDraft);
+
+      const updatedOrganization = await db.run(
+        SELECT.one.from(entities.Organizations).where({ ID: organization.ID }),
+      );
+      const updatedUser = await db.run(
+        SELECT.one.from(entities.CrewMembers).where({ ID: user.ID }),
+      );
+      const updatedMembership = await db.run(
+        SELECT.one.from(entities.OrganizationMembers).where({
+          organization_ID: organization.ID,
+          userId: updatedUserId,
+        }),
+      );
+      expect(updatedOrganization.name).to.equal('Updated Organization Name');
+      expect(updatedOrganization.code).to.equal(code);
+      expect(updatedUser).to.include({
+        firstName: 'Updated',
+        userId: updatedUserId,
+        positionTitle: 'Customer Administrator',
+        isAdmin: true,
+      });
+      expect(updatedMembership).to.exist;
+
+      const duplicateDraft = await editStaffDraft('Users', user.ID, {
+        nationalId: 'DEMO-ID-001',
+      });
+      try {
+        await activateStaffDraft(duplicateDraft);
+        expect.fail('Expected the duplicate National ID to be rejected');
+      } catch (error) {
+        expect(String(error)).to.match(/409/);
+      } finally {
+        await HTTP_DELETE(duplicateDraft, {
+          ...staffConfiguration,
+          headers: { 'If-Match': '*' },
+        });
+      }
+    } finally {
+      await removeOrganization(code);
+    }
+  });
+
   it('adds and deactivates an administrator and safely deactivates its organization', async () => {
     const suffix = randomUUID().slice(0, 8).toUpperCase();
     const code = `LIFE-${suffix}`;
@@ -178,7 +296,7 @@ describe('StaffService customer access administration', () => {
       );
 
       const added = await POST(
-        `${baseUrl}/Organizations(${organization.ID})/StaffService.addAdministrator`,
+        `${baseUrl}/Organizations(ID=${organization.ID},IsActiveEntity=true)/StaffService.addAdministrator`,
         {
           userId: secondUserId,
           temporaryPassword: 'Temporary second password',
@@ -204,7 +322,7 @@ describe('StaffService customer access administration', () => {
       expect(inactiveAdministrator.active).to.equal(false);
 
       await POST(
-        `${baseUrl}/Organizations(${organization.ID})/StaffService.deactivateOrganization`,
+        `${baseUrl}/Organizations(ID=${organization.ID},IsActiveEntity=true)/StaffService.deactivateOrganization`,
         {},
         staffConfiguration,
       );

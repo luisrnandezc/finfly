@@ -18,8 +18,21 @@ type OrganizationRow = {
 type AdministratorRow = {
   ID: string;
   organization_ID: string;
-  userId: string;
+  userId: string | null;
   active: boolean;
+};
+
+type StaffUserRow = AdministratorRow & {
+  nationalId: string;
+  firstName: string;
+  lastName: string;
+  positionTitle?: string | null;
+  licenseType?: string | null;
+  totalFlightHours: number;
+};
+
+type StaffUpdateRequest = Request & {
+  previousUserId?: string | null;
 };
 
 function required(value: unknown, label: string, req: Request): string {
@@ -110,7 +123,113 @@ async function createAdministrator(
 
 /** Registers internal customer-organization and administrator management. */
 export function registerStaffHandlers(service: cds.ApplicationService): void {
-  const { Organizations, Administrators } = service.entities as any;
+  const { Organizations, Users, Administrators } = service.entities as any;
+
+  service.before('UPDATE', Organizations, async (req: Request) => {
+    const ID = entityID(req);
+    const tx = cds.tx(req);
+    const organization = await tx.run(
+      SELECT.one.from('finfly.Organizations').columns('ID').where({ ID }),
+    );
+    if (!organization) req.reject(404, 'This organization is no longer available');
+    req.data.name = required(req.data.name, 'Organization name', req);
+  });
+
+  service.before('UPDATE', Users, async (req: StaffUpdateRequest) => {
+    const ID = entityID(req);
+    const tx = cds.tx(req);
+    const existing = (await tx.run(
+      SELECT.one.from('finfly.CrewMembers').where({ ID, isStaff: false }),
+    )) as StaffUserRow | undefined;
+    if (!existing) req.reject(404, 'This user is no longer available');
+
+    const merged = { ...existing, ...req.data } as StaffUserRow;
+    merged.nationalId = required(merged.nationalId, 'National ID', req);
+    merged.firstName = required(merged.firstName, 'First name', req);
+    merged.lastName = required(merged.lastName, 'Last name', req);
+
+    if (Object.hasOwn(req.data, 'userId')) {
+      merged.userId = required(merged.userId, 'User ID', req);
+    }
+    if (merged.userId) {
+      merged.userId = merged.userId.trim();
+      const duplicateUser = (await tx.run(
+        SELECT.one.from('finfly.CrewMembers').columns('ID').where({
+          userId: merged.userId,
+        }),
+      )) as { ID: string } | undefined;
+      if (duplicateUser && duplicateUser.ID !== ID) {
+        req.reject(409, 'A user with this User ID already exists');
+      }
+    }
+
+    const duplicateNationalID = (await tx.run(
+      SELECT.one.from('finfly.CrewMembers').columns('ID').where({
+        nationalId: merged.nationalId,
+      }),
+    )) as { ID: string } | undefined;
+    if (duplicateNationalID && duplicateNationalID.ID !== ID) {
+      req.reject(409, 'A user with this National ID already exists');
+    }
+
+    const totalFlightHours = Number(merged.totalFlightHours);
+    if (!Number.isFinite(totalFlightHours) || totalFlightHours < 0) {
+      req.reject(400, 'Total flight hours must be zero or greater');
+    }
+
+    req.previousUserId = existing!.userId;
+    req.data.nationalId = merged.nationalId;
+    req.data.firstName = merged.firstName;
+    req.data.lastName = merged.lastName;
+    if (Object.hasOwn(req.data, 'userId')) req.data.userId = merged.userId;
+  });
+
+  service.after('UPDATE', Users, async (_data: StaffUserRow, req: StaffUpdateRequest) => {
+    const ID = entityID(req);
+    const tx = cds.tx(req);
+    const updated = (await tx.run(
+      SELECT.one
+        .from('finfly.CrewMembers')
+        .columns('organization_ID', 'userId', 'active')
+        .where({ ID }),
+    )) as StaffUserRow;
+
+    if (req.previousUserId === updated.userId || !updated.userId) return;
+
+    const membership = req.previousUserId
+      ? await tx.run(
+        SELECT.one.from('finfly.OrganizationMembers').columns('ID').where({
+          organization_ID: updated.organization_ID,
+          userId: req.previousUserId,
+        }),
+      )
+      : undefined;
+    if (membership) {
+      await tx.run(
+        UPDATE.entity('finfly.OrganizationMembers')
+          .set({ userId: updated.userId, active: updated.active })
+          .where({ ID: membership.ID }),
+      );
+    } else {
+      const currentMembership = await tx.run(
+        SELECT.one.from('finfly.OrganizationMembers').columns('ID').where({
+          organization_ID: updated.organization_ID,
+          userId: updated.userId,
+        }),
+      );
+      if (!currentMembership) {
+        await tx.run(
+          INSERT.into('finfly.OrganizationMembers').entries({
+            ID: randomUUID(),
+            organization_ID: updated.organization_ID,
+            userId: updated.userId,
+            active: updated.active,
+          }),
+        );
+      }
+    }
+    await tx.run(DELETE.from('finfly.UserSessions').where({ crewMember_ID: ID }));
+  });
 
   service.after('READ', Organizations, async (result: OrganizationRow | OrganizationRow[], req) => {
     const organizations = Array.isArray(result) ? result : result ? [result] : [];
