@@ -51,7 +51,15 @@ service StaffService {
         active,
         createdAt,
         modifiedAt
-    } where isStaff = false;
+    } where isStaff = false
+    actions {
+        action deactivateUser() returns Users;
+        action reactivateUser() returns Users;
+        action setTemporaryPassword(
+            @title: 'Temporary Password'
+            password : String(200) not null
+        ) returns Users;
+    };
 
     @readonly
     entity Administrators as projection on db.CrewMembers {

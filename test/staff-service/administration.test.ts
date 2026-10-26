@@ -334,7 +334,7 @@ describe('StaffService customer access administration', () => {
       );
 
       await POST(
-        `${baseUrl}/Administrators(${secondAdministrator.ID})/StaffService.deactivateAdministrator`,
+        `${baseUrl}/Users(ID=${secondAdministrator.ID},IsActiveEntity=true)/StaffService.deactivateUser`,
         {},
         staffConfiguration,
       );

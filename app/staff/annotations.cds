@@ -95,7 +95,15 @@ annotate staff.Users with @(
         { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High }
+        { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataFieldForAction', Label : 'Set Temporary Password', Action : 'StaffService.setTemporaryPassword' },
+        { $Type : 'UI.DataFieldForAction', Label : 'Deactivate', Action : 'StaffService.deactivateUser', Criticality : #Negative },
+        { $Type : 'UI.DataFieldForAction', Label : 'Reactivate', Action : 'StaffService.reactivateUser', Criticality : #Positive }
+    ],
+    UI.Identification : [
+        { $Type : 'UI.DataFieldForAction', Label : 'Set Temporary Password', Action : 'StaffService.setTemporaryPassword' },
+        { $Type : 'UI.DataFieldForAction', Label : 'Deactivate User', Action : 'StaffService.deactivateUser', Criticality : #Negative },
+        { $Type : 'UI.DataFieldForAction', Label : 'Reactivate User', Action : 'StaffService.reactivateUser', Criticality : #Positive }
     ],
     UI.FieldGroup #PersonalDetails : {
         $Type : 'UI.FieldGroupType',
@@ -203,6 +211,12 @@ annotate staff.Administrators actions {
         Core.OperationAvailable : ($self.active = false),
         Common.SideEffects : { TargetEntities : [organization] }
     );
+    setTemporaryPassword @Core.OperationAvailable : ($self.active = true);
+};
+
+annotate staff.Users actions {
+    deactivateUser @Core.OperationAvailable : ($self.active = true);
+    reactivateUser @Core.OperationAvailable : ($self.active = false);
     setTemporaryPassword @Core.OperationAvailable : ($self.active = true);
 };
 

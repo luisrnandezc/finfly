@@ -351,12 +351,14 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     setOrganizationActive(req, true),
   );
 
-  const administratorForAction = async (
+  const userForAction = async (
     req: Request,
     active?: boolean,
+    administratorOnly = false,
   ): Promise<AdministratorRow | undefined> => {
     const ID = entityID(req);
-    const where: Record<string, unknown> = { ID, isAdmin: true, isStaff: false };
+    const where: Record<string, unknown> = { ID, isStaff: false };
+    if (administratorOnly) where.isAdmin = true;
     if (active !== undefined) where.active = active;
     return cds.tx(req).run(
       SELECT.one
@@ -366,38 +368,61 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     );
   };
 
-  const setAdministratorActive = async (req: Request, active: boolean): Promise<unknown> => {
-    const administrator = await administratorForAction(req);
-    if (!administrator) return req.reject(404, 'This administrator is no longer available');
+  const setUserActive = async (
+    req: Request,
+    active: boolean,
+    administratorOnly = false,
+  ): Promise<unknown> => {
+    const user = await userForAction(req, undefined, administratorOnly);
+    if (!user) return req.reject(404, 'This user is no longer available');
     const tx = cds.tx(req);
     await tx.run(
-      UPDATE.entity('finfly.CrewMembers').set({ active }).where({ ID: administrator.ID }),
+      UPDATE.entity('finfly.CrewMembers').set({ active }).where({ ID: user.ID }),
     );
-    await tx.run(
-      UPDATE.entity('finfly.OrganizationMembers').set({ active }).where({
-        organization_ID: administrator.organization_ID,
-        userId: administrator.userId,
-      }),
-    );
-    if (!active) {
+    if (user.userId) {
       await tx.run(
-        DELETE.from('finfly.UserSessions').where({ crewMember_ID: administrator.ID }),
+        UPDATE.entity('finfly.OrganizationMembers').set({ active }).where({
+          organization_ID: user.organization_ID,
+          userId: user.userId,
+        }),
       );
     }
-    req.notify(`Administrator ${active ? 'reactivated' : 'deactivated'} successfully`);
-    return tx.run(SELECT.one.from('finfly.CrewMembers').where({ ID: administrator.ID }));
+    if (!active) {
+      await tx.run(
+        DELETE.from('finfly.UserSessions').where({ crewMember_ID: user.ID }),
+      );
+      await tx.run(
+        UPDATE.entity('finfly.Aircraft').set({ defaultPIC_ID: null }).where({
+          organization_ID: user.organization_ID,
+          defaultPIC_ID: user.ID,
+        }),
+      );
+      await tx.run(
+        UPDATE.entity('finfly.Aircraft').set({ defaultSIC_ID: null }).where({
+          organization_ID: user.organization_ID,
+          defaultSIC_ID: user.ID,
+        }),
+      );
+    }
+    req.notify(`User ${active ? 'reactivated' : 'deactivated'} successfully`);
+    return tx.run(SELECT.one.from('finfly.CrewMembers').where({ ID: user.ID }));
   };
 
   service.on('deactivateAdministrator', Administrators, (req: Request) =>
-    setAdministratorActive(req, false),
+    setUserActive(req, false, true),
   );
   service.on('reactivateAdministrator', Administrators, (req: Request) =>
-    setAdministratorActive(req, true),
+    setUserActive(req, true, true),
   );
+  service.on('deactivateUser', Users, (req: Request) => setUserActive(req, false));
+  service.on('reactivateUser', Users, (req: Request) => setUserActive(req, true));
 
-  service.on('setTemporaryPassword', Administrators, async (req: Request) => {
-    const administrator = await administratorForAction(req, true);
-    if (!administrator) return req.reject(404, 'This active administrator is no longer available');
+  const setTemporaryPassword = async (
+    req: Request,
+    administratorOnly = false,
+  ): Promise<unknown> => {
+    const user = await userForAction(req, true, administratorOnly);
+    if (!user) return req.reject(404, 'This active user is no longer available');
     const password = required(req.data.password, 'Temporary password', req);
     try {
       validatePassword(password);
@@ -409,7 +434,7 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     const passwordHash = await hashPassword(password);
     const credential = await tx.run(
       SELECT.one.from('finfly.UserCredentials').columns('ID').where({
-        crewMember_ID: administrator.ID,
+        crewMember_ID: user.ID,
       }),
     );
     if (credential) {
@@ -422,15 +447,22 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
       await tx.run(
         INSERT.into('finfly.UserCredentials').entries({
           ID: randomUUID(),
-          crewMember_ID: administrator.ID,
+          crewMember_ID: user.ID,
           passwordHash,
           mustChangePassword: true,
           failedLoginAttempts: 0,
         }),
       );
     }
-    await tx.run(DELETE.from('finfly.UserSessions').where({ crewMember_ID: administrator.ID }));
+    await tx.run(DELETE.from('finfly.UserSessions').where({ crewMember_ID: user.ID }));
     req.notify('Temporary password set successfully');
-    return tx.run(SELECT.one.from('finfly.CrewMembers').where({ ID: administrator.ID }));
-  });
+    return tx.run(SELECT.one.from('finfly.CrewMembers').where({ ID: user.ID }));
+  };
+
+  service.on('setTemporaryPassword', Administrators, (req: Request) =>
+    setTemporaryPassword(req, true),
+  );
+  service.on('setTemporaryPassword', Users, (req: Request) =>
+    setTemporaryPassword(req),
+  );
 }
