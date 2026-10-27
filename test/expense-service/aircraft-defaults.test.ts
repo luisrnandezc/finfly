@@ -130,7 +130,7 @@ describe('ExpenseService default aircraft selection', () => {
   it('leaves aircraft empty when the user has no default assignment', async () => {
     const reportID = '71400000-0000-0000-0000-000000000003';
     const adminConfiguration = {
-      auth: { username: 'admin', password: 'admin' },
+      auth: { username: 'ralvarez', password: 'ralvarez' },
     };
 
     try {

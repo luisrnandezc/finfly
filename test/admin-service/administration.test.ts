@@ -9,7 +9,7 @@ const { SELECT, INSERT, UPDATE, DELETE } = cds.ql;
 
 const baseUrl = '/admin';
 const adminConfiguration = {
-  auth: { username: 'admin', password: 'admin' },
+  auth: { username: 'ralvarez', password: 'ralvarez' },
 };
 
 function userDraftUrl(ID: string): string {
@@ -93,7 +93,7 @@ describe('AdminService organization administration', () => {
   it('allows only administrators to access the service', async () => {
     await expectRequestFailure(
       GET(`${baseUrl}/Users`, {
-        auth: { username: 'auditor', password: 'auditor' },
+        auth: { username: 'vherrera', password: 'vherrera' },
       }),
       /403/,
     );
@@ -109,8 +109,8 @@ describe('AdminService organization administration', () => {
     expect(response.data.value).to.have.length(1);
     expect(response.data.value[0]).to.include({
       ID: masterDataIDs.organization,
-      name: 'FinFly Demo Operator',
-      code: 'DEMO',
+      name: 'Caribe Executive Aviation',
+      code: 'CEA',
       active: true,
     });
   });
@@ -200,7 +200,7 @@ describe('AdminService organization administration', () => {
   it('rejects a National ID already used by another organization', async () => {
     const userID = '72000000-0000-0000-0000-000000000010';
     const draftUrl = await createUserDraft(userID, {
-      nationalId: 'DEMO-ID-003',
+      nationalId: '20157934',
       userId: 'duplicate.national.id',
       firstName: 'Duplicate',
       lastName: 'Identity',
@@ -296,7 +296,7 @@ describe('AdminService organization administration', () => {
           .set({ active: true })
           .where({
             organization_ID: masterDataIDs.organization,
-            userId: 'pilot',
+            userId: 'cmendoza',
           }),
       );
       await db.run(

@@ -30,7 +30,22 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .finfly-shell__apps {
+      display: none;
+      margin-left: auto;
+    }
+    .finfly-shell__apps--visible { display: flex; }
+    .finfly-shell__apps select {
+      padding: 6px 28px 6px 9px;
+      color: #1d2d3e;
+      background: #fff;
+      border: 1px solid #89919a;
+      border-radius: 6px;
+      font: inherit;
+      cursor: pointer;
+    }
     .finfly-shell__logout { margin-left: auto; }
+    .finfly-shell__apps--visible + .finfly-shell__logout { margin-left: 0; }
     .finfly-shell__logout button {
       padding: 6px 12px;
       color: #0064d9;
@@ -50,6 +65,9 @@
   shell.innerHTML = `
     <span class="finfly-shell__brand">FinFly</span>
     <span class="finfly-shell__organization" aria-live="polite">Loading organization…</span>
+    <label class="finfly-shell__apps">
+      <select aria-label="Switch application"></select>
+    </label>
     <form class="finfly-shell__logout" method="post" action="/auth/logout">
       <button type="submit">Log out</button>
     </form>
@@ -70,6 +88,21 @@
     .then((context) => {
       if (!context) return;
       shell.querySelector('.finfly-shell__organization').textContent = context.organizationName;
+      if (context.applications.length > 1) {
+        const appSwitcher = shell.querySelector('.finfly-shell__apps');
+        const select = appSwitcher.querySelector('select');
+        for (const application of context.applications) {
+          const option = document.createElement('option');
+          option.value = application.path;
+          option.textContent = application.label;
+          option.selected = window.location.pathname.startsWith(
+            application.path.replace('/index.html', ''),
+          );
+          select.append(option);
+        }
+        select.addEventListener('change', () => window.location.assign(select.value));
+        appSwitcher.classList.add('finfly-shell__apps--visible');
+      }
     })
     .catch(() => {
       shell.querySelector('.finfly-shell__organization').textContent = 'Organization unavailable';

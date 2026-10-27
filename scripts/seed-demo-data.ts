@@ -7,8 +7,8 @@ const baseUrl = (process.env.FINFLY_URL ?? 'http://localhost:4004').replace(
   '',
 );
 
-const pilotAuthorization = basicAuthorization('pilot', 'pilot');
-const auditorAuthorization = basicAuthorization('auditor', 'auditor');
+const pilotAuthorization = basicAuthorization('cmendoza', 'cmendoza');
+const auditorAuthorization = basicAuthorization('vherrera', 'vherrera');
 
 const masterData = {
   organization: '50000000-0000-0000-0000-000000000001',

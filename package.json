@@ -83,8 +83,8 @@
       "auth": {
         "kind": "mocked",
         "users": {
-          "pilot": {
-            "password": "pilot",
+          "cmendoza": {
+            "password": "cmendoza",
             "attr": {
               "organization": "50000000-0000-0000-0000-000000000001"
             },
@@ -92,8 +92,35 @@
               "Pilot"
             ]
           },
-          "auditor": {
-            "password": "auditor",
+          "asalazar": {
+            "password": "asalazar",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000001"
+            },
+            "roles": [
+              "Pilot"
+            ]
+          },
+          "jfernandez": {
+            "password": "jfernandez",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000001"
+            },
+            "roles": [
+              "Pilot"
+            ]
+          },
+          "dtorres": {
+            "password": "dtorres",
+            "attr": {
+              "organization": "50000000-0000-0000-0000-000000000001"
+            },
+            "roles": [
+              "Pilot"
+            ]
+          },
+          "vherrera": {
+            "password": "vherrera",
             "attr": {
               "organization": "50000000-0000-0000-0000-000000000001"
             },
@@ -101,8 +128,8 @@
               "Auditor"
             ]
           },
-          "admin": {
-            "password": "admin",
+          "ralvarez": {
+            "password": "ralvarez",
             "attr": {
               "organization": "50000000-0000-0000-0000-000000000001"
             },
@@ -112,8 +139,8 @@
               "Auditor"
             ]
           },
-          "otherpilot": {
-            "password": "otherpilot",
+          "mrojas": {
+            "password": "mrojas",
             "attr": {
               "organization": "50000000-0000-0000-0000-000000000002"
             },

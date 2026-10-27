@@ -68,8 +68,8 @@ describe('ExpenseService exchange rates', () => {
           'If-Match': '*',
         },
         auth: {
-          username: 'pilot',
-          password: 'pilot',
+          username: 'cmendoza',
+          password: 'cmendoza',
         },
       },
     );

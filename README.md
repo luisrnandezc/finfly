@@ -153,10 +153,13 @@ When the server is started with `npm start`, use `/dev/login` to select or switc
 
 | User         | Password     | Roles                 | Organization        |
 | ------------ | ------------ | --------------------- | ------------------- |
-| `pilot`      | `pilot`      | Pilot                 | Demo organization 1 |
-| `auditor`    | `auditor`    | Auditor               | Demo organization 1 |
-| `admin`      | `admin`      | Admin, Pilot, Auditor | Demo organization 1 |
-| `otherpilot` | `otherpilot` | Pilot                 | Demo organization 2 |
+| `cmendoza`   | `cmendoza`   | Pilot                 | Caribe Executive Aviation |
+| `asalazar`   | `asalazar`   | Pilot                 | Caribe Executive Aviation |
+| `jfernandez` | `jfernandez` | Pilot                 | Caribe Executive Aviation |
+| `dtorres`    | `dtorres`    | Pilot                 | Caribe Executive Aviation |
+| `vherrera`   | `vherrera`   | Auditor               | Caribe Executive Aviation |
+| `ralvarez`   | `ralvarez`   | Admin, Pilot, Auditor | Caribe Executive Aviation |
+| `mrojas`     | `mrojas`     | Pilot                 | Orinoco Corporate Air |
 
 ### Load demonstration scenarios
 

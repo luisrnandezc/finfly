@@ -8,29 +8,61 @@ type DemoUser = {
   description: string;
   defaultPath: string;
   organizationName: string;
+  applications: Array<{ id: string; label: string; path: string }>;
 };
 
 const demoUsers: Record<string, DemoUser> = {
-  pilot: {
-    password: 'pilot',
-    label: 'Pilot',
+  cmendoza: {
+    password: 'cmendoza',
+    label: 'Carlos Mendoza',
     description: 'Create and maintain flight reports',
     defaultPath: '/finfly.flightreports/index.html',
-    organizationName: 'FinFly Demo Operator',
+    organizationName: 'Caribe Executive Aviation',
+    applications: [{ id: 'flightreports', label: 'Flight Reports', path: '/finfly.flightreports/index.html' }],
   },
-  auditor: {
-    password: 'auditor',
-    label: 'Auditor',
+  asalazar: {
+    password: 'asalazar',
+    label: 'Andrea Salazar',
+    description: 'Create and maintain flight reports',
+    defaultPath: '/finfly.flightreports/index.html',
+    organizationName: 'Caribe Executive Aviation',
+    applications: [{ id: 'flightreports', label: 'Flight Reports', path: '/finfly.flightreports/index.html' }],
+  },
+  jfernandez: {
+    password: 'jfernandez',
+    label: 'Jose Fernandez',
+    description: 'Create and maintain flight reports',
+    defaultPath: '/finfly.flightreports/index.html',
+    organizationName: 'Caribe Executive Aviation',
+    applications: [{ id: 'flightreports', label: 'Flight Reports', path: '/finfly.flightreports/index.html' }],
+  },
+  dtorres: {
+    password: 'dtorres',
+    label: 'Daniela Torres',
+    description: 'Create and maintain flight reports',
+    defaultPath: '/finfly.flightreports/index.html',
+    organizationName: 'Caribe Executive Aviation',
+    applications: [{ id: 'flightreports', label: 'Flight Reports', path: '/finfly.flightreports/index.html' }],
+  },
+  vherrera: {
+    password: 'vherrera',
+    label: 'Valentina Herrera',
     description: 'Review reports and expenses',
     defaultPath: '/finfly.audit/index.html',
-    organizationName: 'FinFly Demo Operator',
+    organizationName: 'Caribe Executive Aviation',
+    applications: [{ id: 'audit', label: 'Expense Audit', path: '/finfly.audit/index.html' }],
   },
-  admin: {
-    password: 'admin',
-    label: 'Administrator',
+  ralvarez: {
+    password: 'ralvarez',
+    label: 'Ricardo Alvarez',
     description: 'Manage users, aircraft, reports, and audits',
     defaultPath: '/finfly.admin/index.html',
-    organizationName: 'FinFly Demo Operator',
+    organizationName: 'Caribe Executive Aviation',
+    applications: [
+      { id: 'flightreports', label: 'Flight Reports', path: '/finfly.flightreports/index.html' },
+      { id: 'audit', label: 'Expense Audit', path: '/finfly.audit/index.html' },
+      { id: 'admin', label: 'Administration', path: '/finfly.admin/index.html' },
+    ],
   },
   staff: {
     password: 'staff',
@@ -38,13 +70,15 @@ const demoUsers: Record<string, DemoUser> = {
     description: 'Manage customer organizations and administrators',
     defaultPath: '/finfly.staff/index.html',
     organizationName: 'FinFly',
+    applications: [{ id: 'staff', label: 'Staff Administration', path: '/finfly.staff/index.html' }],
   },
-  otherpilot: {
-    password: 'otherpilot',
-    label: 'Other-organization pilot',
+  mrojas: {
+    password: 'mrojas',
+    label: 'Miguel Rojas',
     description: 'Verify organization data isolation',
     defaultPath: '/finfly.flightreports/index.html',
-    organizationName: 'Other Test Operator',
+    organizationName: 'Orinoco Corporate Air',
+    applications: [{ id: 'flightreports', label: 'Flight Reports', path: '/finfly.flightreports/index.html' }],
   },
 };
 
@@ -171,7 +205,11 @@ export function registerDevelopmentLogin(app: Application): void {
     const userID = cookiesFrom(req)[COOKIE_NAME];
     const user = userID ? demoUsers[userID] : undefined;
     if (!user) return res.sendStatus(401);
-    return res.json({ userId: userID, organizationName: user.organizationName });
+    return res.json({
+      userId: userID,
+      organizationName: user.organizationName,
+      applications: user.applications,
+    });
   });
 
   app.post('/auth/logout', (req: Request, res: Response) => {

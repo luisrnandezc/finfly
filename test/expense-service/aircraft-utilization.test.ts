@@ -9,7 +9,7 @@ const { INSERT } = cds.ql;
 const baseUrl = '/expenses';
 const pilotConfiguration = {
   headers: { 'If-Match': '*' },
-  auth: { username: 'pilot', password: 'pilot' },
+  auth: { username: 'cmendoza', password: 'cmendoza' },
 };
 
 async function seedCompleteDraftReport(

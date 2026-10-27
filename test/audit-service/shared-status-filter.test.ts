@@ -8,7 +8,7 @@ const { INSERT } = cds.ql;
 
 const baseUrl = '/audit';
 const auditorConfiguration = {
-  auth: { username: 'auditor', password: 'auditor' },
+  auth: { username: 'vherrera', password: 'vherrera' },
 };
 
 describe('AuditService shared status filter', () => {

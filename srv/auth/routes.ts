@@ -31,6 +31,12 @@ type LoginRecord = {
   credentialID: string;
 };
 
+type AvailableApplication = {
+  id: 'staff' | 'admin' | 'audit' | 'flightreports';
+  label: string;
+  path: string;
+};
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -51,6 +57,33 @@ function defaultPath(user: LoginRecord): string {
   if (user.isAdmin) return '/finfly.admin/index.html';
   if (user.isAuditor) return '/finfly.audit/index.html';
   return '/finfly.flightreports/index.html';
+}
+
+function availableApplications(
+  user: Pick<LoginRecord, 'isPilot' | 'isAuditor' | 'isAdmin' | 'isStaff'>,
+): AvailableApplication[] {
+  return [
+    user.isPilot && {
+      id: 'flightreports' as const,
+      label: 'Flight Reports',
+      path: '/finfly.flightreports/index.html',
+    },
+    user.isAuditor && {
+      id: 'audit' as const,
+      label: 'Expense Audit',
+      path: '/finfly.audit/index.html',
+    },
+    user.isAdmin && {
+      id: 'admin' as const,
+      label: 'Administration',
+      path: '/finfly.admin/index.html',
+    },
+    user.isStaff && {
+      id: 'staff' as const,
+      label: 'Staff Administration',
+      path: '/finfly.staff/index.html',
+    },
+  ].filter((application): application is AvailableApplication => Boolean(application));
 }
 
 function loginPage(error = '', returnTo?: string): string {
@@ -199,6 +232,7 @@ export function registerAuthenticationRoutes(app: Application): void {
     return res.json({
       userId: user.userId,
       organizationName: user.organizationName,
+      applications: availableApplications(user),
     });
   });
 

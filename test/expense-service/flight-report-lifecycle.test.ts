@@ -10,7 +10,7 @@ describe('ExpenseService flight report lifecycle', () => {
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: flightReportIDs.report,
       aircraft_ID: masterDataIDs.aircraft,
-      requesterName: 'Alex Demo (FinFly Demo Operator)',
+      requesterName: 'Carlos Mendoza (Caribe Executive Aviation)',
       status: 'DRAFT',
       notes: 'Automated test report',
     });
@@ -26,7 +26,7 @@ describe('ExpenseService flight report lifecycle', () => {
     response = await GET(`${draftUrl}?$select=displayTitle`);
 
     expect(response.status).to.equal(200);
-    expect(response.data.displayTitle).to.equal('Draft - N1234');
+    expect(response.data.displayTitle).to.equal('Draft - YV3051');
 
     response = await POST(`${draftUrl}/legs`, {
       ID: flightReportIDs.outboundLeg,
@@ -154,8 +154,8 @@ describe('ExpenseService flight report lifecycle', () => {
           'If-Match': '*',
         },
         auth: {
-          username: 'pilot',
-          password: 'pilot',
+          username: 'cmendoza',
+          password: 'cmendoza',
         },
       },
     );
@@ -169,7 +169,7 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(response.data.auditStatus).to.equal('PENDING');
     expect(response.data.pendingExpenseCount).to.equal(2);
     expect(response.data.submittedAt).to.exist;
-    expect(response.data.submittedBy).to.equal('pilot');
+    expect(response.data.submittedBy).to.equal('cmendoza');
 
     const submissionMessages = JSON.parse(
       response.headers['sap-messages'] as string,
@@ -192,8 +192,8 @@ describe('ExpenseService flight report lifecycle', () => {
           'If-Match': '*',
         },
         auth: {
-          username: 'auditor',
-          password: 'auditor',
+          username: 'vherrera',
+          password: 'vherrera',
         },
       },
     );

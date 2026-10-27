@@ -8,7 +8,7 @@ const { INSERT } = cds.ql;
 
 const pilotConfiguration = {
   headers: { 'If-Match': '*' },
-  auth: { username: 'pilot', password: 'pilot' },
+  auth: { username: 'cmendoza', password: 'cmendoza' },
 };
 
 async function seedSubmittedReport(ID: string): Promise<string> {

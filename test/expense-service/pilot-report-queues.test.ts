@@ -8,7 +8,7 @@ const { INSERT } = cds.ql;
 
 const baseUrl = '/expenses';
 const pilotConfiguration = {
-  auth: { username: 'pilot', password: 'pilot' },
+  auth: { username: 'cmendoza', password: 'cmendoza' },
 };
 
 type SubmittedAuditStatus = 'PENDING' | 'ACTION_REQUIRED' | 'APPROVED';
@@ -53,7 +53,7 @@ describe('ExpenseService pilot report queues', () => {
       pilotConfiguration,
     );
 
-    for (const searchTerm of ['N1234', 'n1234', '1234']) {
+    for (const searchTerm of ['YV3051', 'yv3051', '3051']) {
       const response = await GET(
         `${baseUrl}/FlightReports?$search=${searchTerm}&$select=ID,displayTitle&$filter=IsActiveEntity eq false`,
         pilotConfiguration,

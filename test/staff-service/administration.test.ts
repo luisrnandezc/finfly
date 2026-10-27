@@ -71,7 +71,7 @@ describe('StaffService customer access administration', () => {
   it('is staff-only and returns organization-level user counts and customer users', async () => {
     try {
       await GET(`${baseUrl}/Organizations`, {
-        auth: { username: 'admin', password: 'admin' },
+        auth: { username: 'ralvarez', password: 'ralvarez' },
       });
       expect.fail('Expected the request to be rejected');
     } catch (error) {
@@ -85,13 +85,13 @@ describe('StaffService customer access administration', () => {
     );
     expect(demo).to.include({
       activeUserCount: 6,
-      activePilotCount: 4,
+      activePilotCount: 5,
       activeAuditorCount: 2,
       activeAdministratorCount: 1,
     });
 
     const administrators = await GET(`${baseUrl}/Administrators`, staffConfiguration);
-    expect(administrators.data.value[0].organizationName).to.equal('FinFly Demo Operator');
+    expect(administrators.data.value[0].organizationName).to.equal('Caribe Executive Aviation');
     expect(administrators.data.value[0]).not.to.have.property('nationalId');
     expect(administrators.data.value[0]).not.to.have.property('isPilot');
     expect(administrators.data.value[0]).not.to.have.property('isAuditor');
@@ -103,9 +103,9 @@ describe('StaffService customer access administration', () => {
       (user: { ID: string }) => user.ID === masterDataIDs.captain,
     );
     expect(pilot).to.include({
-      organizationName: 'FinFly Demo Operator',
-      fullName: 'Alex Demo',
-      userId: 'pilot',
+      organizationName: 'Caribe Executive Aviation',
+      fullName: 'Carlos Mendoza',
+      userId: 'cmendoza',
       isPilot: true,
       isAuditor: false,
       isAdmin: false,
@@ -113,7 +113,7 @@ describe('StaffService customer access administration', () => {
     const otherOrganizationPilot = users.data.value.find(
       (user: { ID: string }) => user.ID === masterDataIDs.otherCrewMember,
     );
-    expect(otherOrganizationPilot.organizationName).to.equal('Other Test Operator');
+    expect(otherOrganizationPilot.organizationName).to.equal('Orinoco Corporate Air');
     expect(pilot).not.to.have.property('passwordHash');
   });
 
@@ -280,7 +280,7 @@ describe('StaffService customer access administration', () => {
       const duplicateOrganizationDraft = await editStaffDraft(
         'Organizations',
         organization.ID,
-        { code: 'DEMO' },
+        { code: 'CEA' },
       );
       try {
         await activateStaffDraft(duplicateOrganizationDraft);
@@ -295,7 +295,7 @@ describe('StaffService customer access administration', () => {
       }
 
       const duplicateDraft = await editStaffDraft('Users', user.ID, {
-        nationalId: 'DEMO-ID-001',
+        nationalId: '18452763',
       });
       try {
         await activateStaffDraft(duplicateDraft);

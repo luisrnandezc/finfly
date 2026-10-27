@@ -8,7 +8,7 @@ const { INSERT, DELETE } = cds.ql;
 
 const baseUrl = '/admin';
 const adminConfiguration = {
-  auth: { username: 'admin', password: 'admin' },
+  auth: { username: 'ralvarez', password: 'ralvarez' },
   headers: { 'If-Match': '*' },
 };
 
@@ -57,7 +57,7 @@ describe('AdminService audit workflow', () => {
       );
       expect(response.status).to.equal(200);
       expect(response.data.auditStatus).to.equal('APPROVED');
-      expect(response.data.auditedBy).to.equal('admin');
+      expect(response.data.auditedBy).to.equal('ralvarez');
     } finally {
       await db.run(
         DELETE.from(entities.ExpenseAuditHistory).where({

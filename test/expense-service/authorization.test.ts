@@ -14,8 +14,8 @@ const pilotConfiguration = {
     'If-Match': '*',
   },
   auth: {
-    username: 'pilot',
-    password: 'pilot',
+    username: 'cmendoza',
+    password: 'cmendoza',
   },
 };
 
@@ -24,8 +24,8 @@ const auditorConfiguration = {
     'If-Match': '*',
   },
   auth: {
-    username: 'auditor',
-    password: 'auditor',
+    username: 'vherrera',
+    password: 'vherrera',
   },
 };
 

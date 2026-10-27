@@ -13,7 +13,7 @@ import { expenseServiceTest } from './support/expense-service-test';
 
 expenseServiceTest();
 
-const { DELETE, SELECT } = cds.ql;
+const { DELETE, SELECT, UPDATE } = cds.ql;
 const temporaryPassword = 'Temporary route password 42!';
 const replacementPassword = 'Replacement route password 84!';
 const testSuffix = randomUUID().slice(0, 8);
@@ -119,7 +119,33 @@ describe('forced password change', () => {
     expect(await context.json()).to.deep.equal({
       userId: input.userId,
       organizationName: input.organizationName,
+      applications: [
+        {
+          id: 'admin',
+          label: 'Administration',
+          path: '/finfly.admin/index.html',
+        },
+      ],
     });
+
+    await db.run(
+      UPDATE.entity(entities.CrewMembers).set({ isPilot: true }).where({ ID: crewMemberID }),
+    );
+    const multiRoleContext = await fetch(`${baseUrl}/auth/context`, {
+      headers: { cookie: cookie! },
+    });
+    expect((await multiRoleContext.json()).applications).to.deep.equal([
+      {
+        id: 'flightreports',
+        label: 'Flight Reports',
+        path: '/finfly.flightreports/index.html',
+      },
+      {
+        id: 'admin',
+        label: 'Administration',
+        path: '/finfly.admin/index.html',
+      },
+    ]);
 
     const logout = await fetch(`${baseUrl}/auth/logout`, {
       method: 'POST',

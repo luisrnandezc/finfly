@@ -9,7 +9,7 @@ const { INSERT } = cds.ql;
 const baseUrl = '/audit';
 const auditorConfiguration = {
   headers: { 'If-Match': '*' },
-  auth: { username: 'auditor', password: 'auditor' },
+  auth: { username: 'vherrera', password: 'vherrera' },
 };
 
 type ReportAuditStatus = 'PENDING' | 'ACTION_REQUIRED' | 'APPROVED';

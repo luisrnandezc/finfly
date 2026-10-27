@@ -4,7 +4,7 @@ const { GET, expect } = expenseServiceTest();
 
 const baseUrl = '/audit';
 const auditorConfiguration = {
-  auth: { username: 'auditor', password: 'auditor' },
+  auth: { username: 'vherrera', password: 'vherrera' },
 };
 
 describe('AuditService filter value helps', () => {

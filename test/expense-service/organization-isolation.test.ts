@@ -12,7 +12,7 @@ const pilotActionConfiguration = {
 
 const otherPilotConfiguration = {
   headers: { 'If-Match': '*' },
-  auth: { username: 'otherpilot', password: 'otherpilot' },
+  auth: { username: 'mrojas', password: 'mrojas' },
 };
 
 function draftReportUrl(ID: string): string {

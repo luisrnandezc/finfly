@@ -10,7 +10,7 @@ const baseUrl = '/audit';
 
 const auditorConfiguration = {
   headers: { 'If-Match': '*' },
-  auth: { username: 'auditor', password: 'auditor' },
+  auth: { username: 'vherrera', password: 'vherrera' },
 };
 
 async function seedReport(
@@ -58,7 +58,7 @@ async function seedExpense(ID: string, reportID: string): Promise<void> {
 describe('AuditService authorization', () => {
   it('rejects users without the Auditor or Admin role', async () => {
     const response = await GET(`${baseUrl}/Expenses`, {
-      auth: { username: 'pilot', password: 'pilot' },
+      auth: { username: 'cmendoza', password: 'cmendoza' },
       validateStatus: (status: number) => status === 403,
     });
 
@@ -112,7 +112,7 @@ describe('AuditService authorization', () => {
 
     expect(response.status).to.equal(200);
     expect(response.data.auditStatus).to.equal('APPROVED');
-    expect(response.data.auditedBy).to.equal('auditor');
+    expect(response.data.auditedBy).to.equal('vherrera');
   });
 
   it('uses the expense key for actions invoked from a report Object Page', async () => {

@@ -8,11 +8,14 @@ Open the local user selector at:
 
 | User ID | Password | Access | Organization |
 | --- | --- | --- | --- |
-| `pilot` | `pilot` | Pilot application | FinFly Demo Operator |
-| `auditor` | `auditor` | Auditor application | FinFly Demo Operator |
-| `admin` | `admin` | Admin, auditor, and pilot applications | FinFly Demo Operator |
-| `staff` | `staff` | Internal Staff application | FinFly |
-| `otherpilot` | `otherpilot` | Pilot application | Other Test Operator |
+| `cmendoza` | `cmendoza` | Pilot | Caribe Executive Aviation |
+| `asalazar` | `asalazar` | Pilot | Caribe Executive Aviation |
+| `jfernandez` | `jfernandez` | Pilot | Caribe Executive Aviation |
+| `dtorres` | `dtorres` | Pilot | Caribe Executive Aviation |
+| `vherrera` | `vherrera` | Auditor | Caribe Executive Aviation |
+| `ralvarez` | `ralvarez` | Administrator, auditor, and pilot | Caribe Executive Aviation |
+| `mrojas` | `mrojas` | Pilot | Orinoco Corporate Air |
+| `staff` | `staff` | Internal Staff | FinFly |
 
 To change users, return to `/dev/login` and select another account.
 

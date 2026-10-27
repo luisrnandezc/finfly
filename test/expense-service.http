@@ -17,7 +17,7 @@ Content-Type: application/json
   "ID": "{{reportId}}",
   "reportNumber": "FR-2026-0001",
   "aircraft_ID": "20000000-0000-0000-0000-000000000001",
-  "requesterName": "Alex Demo (FinFly Demo Operator)",
+  "requesterName": "Carlos Mendoza (Caribe Executive Aviation)",
   "status": "DRAFT",
   "notes": "Synthetic sample report for local development"
 }

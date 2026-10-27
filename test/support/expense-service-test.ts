@@ -19,8 +19,8 @@ export function expenseServiceTest(options: { withMocks?: boolean } = {}) {
   // Most existing tests exercise pilot-owned CRUD behavior.
   // Individual authorization tests can override this per request.
   test.defaults.auth = {
-    username: 'pilot',
-    password: 'pilot',
+    username: 'cmendoza',
+    password: 'cmendoza',
   };
 
   return test;
