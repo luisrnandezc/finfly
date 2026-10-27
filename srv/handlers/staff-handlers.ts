@@ -30,10 +30,14 @@ type StaffUserRow = AdministratorRow & {
   positionTitle?: string | null;
   licenseType?: string | null;
   totalFlightHours: number;
+  isPilot: boolean;
+  isAuditor: boolean;
+  isAdmin: boolean;
 };
 
 type StaffUpdateRequest = Request & {
   previousUserId?: string | null;
+  previousRoles?: Pick<StaffUserRow, 'isPilot' | 'isAuditor' | 'isAdmin'>;
 };
 
 function required(value: unknown, label: string, req: Request): string {
@@ -162,6 +166,12 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     merged.nationalId = required(merged.nationalId, 'National ID', req);
     merged.firstName = required(merged.firstName, 'First name', req);
     merged.lastName = required(merged.lastName, 'Last name', req);
+    if (!merged.isPilot && !merged.isAuditor && !merged.isAdmin) {
+      req.reject(400, 'Select at least one application role');
+    }
+    if (merged.isPilot && !merged.licenseType) {
+      req.reject(400, 'License type is required for pilots');
+    }
 
     if (Object.hasOwn(req.data, 'userId')) {
       merged.userId = required(merged.userId, 'User ID', req);
@@ -193,6 +203,11 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     }
 
     req.previousUserId = existing!.userId;
+    req.previousRoles = {
+      isPilot: existing!.isPilot,
+      isAuditor: existing!.isAuditor,
+      isAdmin: existing!.isAdmin,
+    };
     req.data.nationalId = merged.nationalId;
     req.data.firstName = merged.firstName;
     req.data.lastName = merged.lastName;
@@ -205,45 +220,69 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     const updated = (await tx.run(
       SELECT.one
         .from('finfly.CrewMembers')
-        .columns('organization_ID', 'userId', 'active')
+        .columns('organization_ID', 'userId', 'active', 'isPilot', 'isAuditor', 'isAdmin')
         .where({ ID }),
     )) as StaffUserRow;
 
-    if (req.previousUserId === updated.userId || !updated.userId) return;
+    const rolesChanged = req.previousRoles !== undefined && (
+      req.previousRoles.isPilot !== updated.isPilot
+      || req.previousRoles.isAuditor !== updated.isAuditor
+      || req.previousRoles.isAdmin !== updated.isAdmin
+    );
+    const userIdChanged = req.previousUserId !== updated.userId && Boolean(updated.userId);
 
-    const membership = req.previousUserId
-      ? await tx.run(
-        SELECT.one.from('finfly.OrganizationMembers').columns('ID').where({
-          organization_ID: updated.organization_ID,
-          userId: req.previousUserId,
-        }),
-      )
-      : undefined;
-    if (membership) {
-      await tx.run(
-        UPDATE.entity('finfly.OrganizationMembers')
-          .set({ userId: updated.userId, active: updated.active })
-          .where({ ID: membership.ID }),
-      );
-    } else {
-      const currentMembership = await tx.run(
-        SELECT.one.from('finfly.OrganizationMembers').columns('ID').where({
-          organization_ID: updated.organization_ID,
-          userId: updated.userId,
-        }),
-      );
-      if (!currentMembership) {
+    if (userIdChanged) {
+      const membership = req.previousUserId
+        ? await tx.run(
+          SELECT.one.from('finfly.OrganizationMembers').columns('ID').where({
+            organization_ID: updated.organization_ID,
+            userId: req.previousUserId,
+          }),
+        )
+        : undefined;
+      if (membership) {
         await tx.run(
-          INSERT.into('finfly.OrganizationMembers').entries({
-            ID: randomUUID(),
+          UPDATE.entity('finfly.OrganizationMembers')
+            .set({ userId: updated.userId, active: updated.active })
+            .where({ ID: membership.ID }),
+        );
+      } else {
+        const currentMembership = await tx.run(
+          SELECT.one.from('finfly.OrganizationMembers').columns('ID').where({
             organization_ID: updated.organization_ID,
             userId: updated.userId,
-            active: updated.active,
           }),
         );
+        if (!currentMembership) {
+          await tx.run(
+            INSERT.into('finfly.OrganizationMembers').entries({
+              ID: randomUUID(),
+              organization_ID: updated.organization_ID,
+              userId: updated.userId,
+              active: updated.active,
+            }),
+          );
+        }
       }
     }
-    await tx.run(DELETE.from('finfly.UserSessions').where({ crewMember_ID: ID }));
+
+    if (req.previousRoles?.isPilot && !updated.isPilot) {
+      await tx.run(
+        UPDATE.entity('finfly.Aircraft').set({ defaultPIC_ID: null }).where({
+          organization_ID: updated.organization_ID,
+          defaultPIC_ID: ID,
+        }),
+      );
+      await tx.run(
+        UPDATE.entity('finfly.Aircraft').set({ defaultSIC_ID: null }).where({
+          organization_ID: updated.organization_ID,
+          defaultSIC_ID: ID,
+        }),
+      );
+    }
+    if (userIdChanged || rolesChanged) {
+      await tx.run(DELETE.from('finfly.UserSessions').where({ crewMember_ID: ID }));
+    }
   });
 
   service.after('READ', Organizations, async (result: OrganizationRow | OrganizationRow[], req) => {

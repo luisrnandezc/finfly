@@ -108,9 +108,6 @@ annotate StaffService.Users with {
     organization     @readonly;
     organizationName @readonly;
     fullName         @readonly;
-    isPilot          @readonly;
-    isAuditor        @readonly;
-    isAdmin          @readonly;
     active           @readonly;
     createdAt        @readonly;
     modifiedAt       @readonly;

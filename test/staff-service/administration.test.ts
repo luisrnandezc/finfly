@@ -230,6 +230,9 @@ describe('StaffService customer access administration', () => {
           firstName: 'Updated',
           userId: updatedUserId,
           positionTitle: 'Customer Administrator',
+          isPilot: true,
+          isAuditor: true,
+          licenseType: 'COMMERCIAL',
       });
       await activateStaffDraft(userDraft);
 
@@ -251,9 +254,28 @@ describe('StaffService customer access administration', () => {
         firstName: 'Updated',
         userId: updatedUserId,
         positionTitle: 'Customer Administrator',
+        isPilot: true,
+        isAuditor: true,
         isAdmin: true,
       });
       expect(updatedMembership).to.exist;
+
+      const noRoleDraft = await editStaffDraft('Users', user.ID, {
+        isPilot: false,
+        isAuditor: false,
+        isAdmin: false,
+      });
+      try {
+        await activateStaffDraft(noRoleDraft);
+        expect.fail('Expected removing every application role to be rejected');
+      } catch (error) {
+        expect(String(error)).to.match(/Select at least one application role/);
+      } finally {
+        await HTTP_DELETE(noRoleDraft, {
+          ...staffConfiguration,
+          headers: { 'If-Match': '*' },
+        });
+      }
 
       const duplicateOrganizationDraft = await editStaffDraft(
         'Organizations',
