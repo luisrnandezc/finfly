@@ -152,6 +152,28 @@ describe('ExpenseService expense correction lifecycle', () => {
     );
   });
 
+  it('resubmits a corrected amount from the Flight Report Object Page', async () => {
+    const reportID = '90000000-0000-0000-0000-000000000016';
+    const expenseID = '90100000-0000-0000-0000-000000000016';
+
+    await seedSubmittedReport(
+      reportID,
+      'FR-2026-NESTED-EXPENSE-CORRECTION',
+      'ACTION_REQUIRED',
+    );
+    await seedExpense(expenseID, reportID, 'NEEDS_CORRECTION');
+
+    const response = await POST(
+      `${reportUrl(reportID)}/expenses(ID=${expenseID},IsActiveEntity=true)/ExpenseService.resubmitExpense`,
+      { originalAmount: 1600 },
+      pilotConfiguration,
+    );
+
+    expect(response.status).to.equal(200);
+    expect(Number(response.data.originalAmount)).to.equal(1600);
+    expect(response.data.auditStatus).to.equal('PENDING');
+  });
+
   it('resolves the readable category code to its technical association key', async () => {
     const reportID = '90000000-0000-0000-0000-000000000015';
     const expenseID = '90100000-0000-0000-0000-000000000015';
