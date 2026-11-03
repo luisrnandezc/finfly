@@ -41,6 +41,27 @@ async function activateUserDraft(draftUrl: string) {
   );
 }
 
+async function editUserDraft(
+  ID: string,
+  data: Record<string, unknown>,
+): Promise<string> {
+  const activeUrl = `${baseUrl}/Users(ID=${ID},IsActiveEntity=true)`;
+  const edited = await POST(
+    `${activeUrl}/AdminService.draftEdit`,
+    { PreserveChanges: true },
+    adminConfiguration,
+  );
+  expect(edited.status).to.equal(201);
+
+  const draftUrl = userDraftUrl(ID);
+  const updated = await PATCH(draftUrl, data, {
+    ...adminConfiguration,
+    headers: { 'If-Match': '*' },
+  });
+  expect(updated.status).to.equal(200);
+  return draftUrl;
+}
+
 async function discardUserDraft(draftUrl: string): Promise<void> {
   await HTTP_DELETE(draftUrl, {
     ...adminConfiguration,
@@ -194,6 +215,49 @@ describe('AdminService organization administration', () => {
     } finally {
       await discardUserDraft(noRoleDraftUrl);
       await discardUserDraft(noLicenseDraftUrl);
+    }
+  });
+
+  it('clears the pilot license when changing a pilot back to an auditor', async () => {
+    const userID = '72000000-0000-0000-0000-000000000011';
+    const userId = 'role.transition.user';
+    const db = await cds.connect.to('db');
+    const entities = cds.entities('finfly');
+
+    try {
+      let draftUrl = await createUserDraft(userID, {
+        nationalId: 'TEST-ID-011',
+        userId,
+        firstName: 'Role',
+        lastName: 'Transition',
+        isPilot: false,
+        isAuditor: true,
+        isAdmin: false,
+        positionTitle: 'Auditor',
+      });
+      await activateUserDraft(draftUrl);
+
+      draftUrl = await editUserDraft(userID, {
+        isPilot: true,
+        isAuditor: false,
+        licenseType: 'COMMERCIAL',
+      });
+      await activateUserDraft(draftUrl);
+
+      draftUrl = await editUserDraft(userID, {
+        isPilot: false,
+        isAuditor: true,
+        licenseType: '',
+      });
+      const response = await activateUserDraft(draftUrl);
+
+      expect([200, 201]).to.include(response.status);
+      expect(response.data.isPilot).to.equal(false);
+      expect(response.data.isAuditor).to.equal(true);
+      expect(response.data.licenseType).to.equal(null);
+    } finally {
+      await db.run(DELETE.from(entities.OrganizationMembers).where({ userId }));
+      await db.run(DELETE.from(entities.CrewMembers).where({ ID: userID }));
     }
   });
 

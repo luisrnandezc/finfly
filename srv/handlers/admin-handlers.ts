@@ -148,6 +148,7 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
     const organizationID = organizationFor(req);
     req.data.organization_ID = organizationID;
     req.data.active = true;
+    if (!req.data.isPilot) req.data.licenseType = null;
     validateUser(req.data as AdminUserData, req);
     const tx = cds.tx(req);
     await validateUserId(tx, req.data.userId, undefined, req);
@@ -176,6 +177,10 @@ export function registerAdminHandlers(service: cds.ApplicationService): void {
 
     const merged = { ...existing, ...req.data } as AdminUserData;
     merged.organization_ID = organizationID;
+    if (!merged.isPilot) {
+      merged.licenseType = null;
+      req.data.licenseType = null;
+    }
     validateUser(merged, req);
     const tx = cds.tx(req);
     await validateUserId(tx, merged.userId, ID, req);

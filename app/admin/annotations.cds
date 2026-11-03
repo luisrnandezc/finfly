@@ -115,7 +115,12 @@ annotate admin.Users with @(
         $Type : 'UI.FieldGroupType',
         Data : [
             { $Type : 'UI.DataField', Label : 'Position', Value : positionTitle },
-            { $Type : 'UI.DataField', Label : 'Pilot License', Value : licenseType },
+            {
+                $Type : 'UI.DataField',
+                Label : 'Pilot License',
+                Value : licenseType,
+                ![@UI.Hidden] : (isPilot = false)
+            },
             { $Type : 'UI.DataField', Label : 'Total Flight Hours', Value : totalFlightHours }
         ]
     },

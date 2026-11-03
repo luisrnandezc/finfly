@@ -163,6 +163,10 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     if (!existing) req.reject(404, 'This user is no longer available');
 
     const merged = { ...existing, ...req.data } as StaffUserRow;
+    if (!merged.isPilot) {
+      merged.licenseType = null;
+      req.data.licenseType = null;
+    }
     merged.nationalId = required(merged.nationalId, 'National ID', req);
     merged.firstName = required(merged.firstName, 'First name', req);
     merged.lastName = required(merged.lastName, 'Last name', req);

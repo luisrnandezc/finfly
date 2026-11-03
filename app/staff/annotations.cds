@@ -128,7 +128,12 @@ annotate staff.Users with @(
         $Type : 'UI.FieldGroupType',
         Data : [
             { $Type : 'UI.DataField', Label : 'Position', Value : positionTitle },
-            { $Type : 'UI.DataField', Label : 'License Type', Value : licenseType },
+            {
+                $Type : 'UI.DataField',
+                Label : 'License Type',
+                Value : licenseType,
+                ![@UI.Hidden] : (isPilot = false)
+            },
             { $Type : 'UI.DataField', Label : 'Total Flight Hours', Value : totalFlightHours }
         ]
     },
