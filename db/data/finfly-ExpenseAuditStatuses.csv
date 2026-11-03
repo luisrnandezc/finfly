@@ -1,0 +1,5 @@
+code,name,sortOrder
+DRAFT,Draft,1
+PENDING,Pending,2
+NEEDS_CORRECTION,Needs correction,3
+APPROVED,Approved,4

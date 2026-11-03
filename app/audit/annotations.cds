@@ -438,6 +438,8 @@ annotate audit.Expenses with {
     addedAfterReportSubmission @title : 'Added After Submission';
     auditStatus @(
         title : 'Audit Status',
+        Common.Text : auditStatusDetails.name,
+        Common.TextArrangement : #TextOnly,
         UI.ValueCriticality : [
             { Value : 'PENDING', Criticality : #Information },
             { Value : 'NEEDS_CORRECTION', Criticality : #Negative },
@@ -461,6 +463,17 @@ annotate audit.Expenses with {
                 }
             ]
         }
+    );
+};
+
+annotate audit.ExpenseAuditHistory with {
+    fromStatus @(
+        Common.Text : fromStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
+    toStatus @(
+        Common.Text : toStatusDetails.name,
+        Common.TextArrangement : #TextOnly
     );
 };
 
@@ -490,6 +503,10 @@ annotate audit.FlightReports with {
         }
     );
     reportNumber @title : 'Report Number';
+    status @(
+        Common.Text : statusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
     requesterName @title : 'Flight Requester';
     firstFlightDate @title : 'First Flight Date';
     lastFlightDate  @title : 'Last Flight Date';

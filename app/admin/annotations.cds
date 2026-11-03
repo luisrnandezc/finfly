@@ -467,6 +467,17 @@ annotate admin.ExpenseAuditHistory with @(UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Changed By', Value : createdBy }
 ]);
 
+annotate admin.ExpenseAuditHistory with {
+    fromStatus @(
+        Common.Text : fromStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
+    toStatus @(
+        Common.Text : toStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
+};
+
 annotate admin.FlightReports with {
     aircraft @(
         title : 'Aircraft',
@@ -491,9 +502,17 @@ annotate admin.FlightReports with {
         Common.Text : auditStatusDetails.name,
         Common.TextArrangement : #TextOnly
     );
+    status @(
+        Common.Text : statusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
 };
 
 annotate admin.Expenses with {
+    auditStatus @(
+        Common.Text : auditStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
     report @(
         title : 'Flight Report',
         Common.Text : report.displayTitle,

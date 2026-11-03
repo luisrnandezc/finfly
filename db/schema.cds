@@ -65,6 +65,13 @@ entity ReportAuditStatuses {
     sortOrder : Integer not null;
 }
 
+// UI-facing labels and ordering for expense audit-status values.
+entity ExpenseAuditStatuses {
+    key code : ExpenseAuditStatus;
+    name     : String(80) not null;
+    sortOrder : Integer not null;
+}
+
 entity CrewRoles {
     key code : CrewRole;
     name     : String(50) not null;
@@ -229,6 +236,8 @@ entity FlightReports : cuid, managed {
 
     // Business workflow state-not the Fiori draft state.
     status          : FlightReportStatus not null default #draft;
+    statusDetails   : Association to FlightReportStatuses
+        on statusDetails.code = status;
     auditStatus     : ReportAuditStatus not null default #notStarted;
     auditStatusDetails : Association to ReportAuditStatuses
         on auditStatusDetails.code = auditStatus;
@@ -257,7 +266,11 @@ entity FlightReportHistory : cuid, managed {
     report : Association to FlightReports not null;
 
     fromStatus : FlightReportStatus;
+    fromStatusDetails : Association to FlightReportStatuses
+        on fromStatusDetails.code = fromStatus;
     toStatus   : FlightReportStatus not null;
+    toStatusDetails : Association to FlightReportStatuses
+        on toStatusDetails.code = toStatus;
 
     comment : String(1000);
 }
@@ -320,6 +333,8 @@ entity Expenses : cuid, managed {
     amountVES    : Decimal(15,2);
 
     auditStatus  : ExpenseAuditStatus not null default #draft;
+    auditStatusDetails : Association to ExpenseAuditStatuses
+        on auditStatusDetails.code = auditStatus;
 
     submittedForAuditAt : Timestamp;
 
@@ -344,7 +359,11 @@ entity ExpenseAuditHistory : cuid, managed {
     expense : Association to Expenses not null;
 
     fromStatus : ExpenseAuditStatus;
+    fromStatusDetails : Association to ExpenseAuditStatuses
+        on fromStatusDetails.code = fromStatus;
     toStatus   : ExpenseAuditStatus not null;
+    toStatusDetails : Association to ExpenseAuditStatuses
+        on toStatusDetails.code = toStatus;
 
     comment : String(1000);
 }

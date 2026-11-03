@@ -446,6 +446,8 @@ annotate service.FlightReports with {
     totalFlightHours @title : 'Total Flight Hours';
     status @(
         title : 'Report Status',
+        Common.Text : statusDetails.name,
+        Common.TextArrangement : #TextOnly,
         Common.ValueListWithFixedValues : true,
         Common.ValueList : {
             CollectionPath : 'FlightReportStatuses',
@@ -717,6 +719,8 @@ annotate service.Expenses with {
     amountVES                    @title : 'Amount (VES)';
     auditStatus @(
         title : 'Audit Status',
+        Common.Text : auditStatusDetails.name,
+        Common.TextArrangement : #TextOnly,
         UI.ValueCriticality : [
             { Value : 'DRAFT', Criticality : #Neutral },
             { Value : 'PENDING', Criticality : #Information },
@@ -740,6 +744,28 @@ annotate service.Expenses with {
     );
     fuelQuantityLiters           @(title : 'Fuel Quantity (L)', UI.Hidden);
     addedAfterReportSubmission   @title : 'Added After Submission';
+};
+
+annotate service.FlightReportHistory with {
+    fromStatus @(
+        Common.Text : fromStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
+    toStatus @(
+        Common.Text : toStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
+};
+
+annotate service.ExpenseAuditHistory with {
+    fromStatus @(
+        Common.Text : fromStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
+    toStatus @(
+        Common.Text : toStatusDetails.name,
+        Common.TextArrangement : #TextOnly
+    );
 };
 
 annotate service.Aircraft with {

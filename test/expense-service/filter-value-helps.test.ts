@@ -30,4 +30,18 @@ describe('ExpenseService filter value helps', () => {
       { code: 'APPROVED', name: 'Approved' },
     ]);
   });
+
+  it('exposes readable expense audit statuses in business order', async () => {
+    const response = await GET(
+      `${baseUrl}/ExpenseAuditStatuses?$select=code,name&$orderby=sortOrder`,
+    );
+
+    expect(response.status).to.equal(200);
+    expect(response.data.value).to.deep.equal([
+      { code: 'DRAFT', name: 'Draft' },
+      { code: 'PENDING', name: 'Pending' },
+      { code: 'NEEDS_CORRECTION', name: 'Needs correction' },
+      { code: 'APPROVED', name: 'Approved' },
+    ]);
+  });
 });
