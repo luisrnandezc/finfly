@@ -296,10 +296,19 @@ export function registerAuthenticationRoutes(app: Application): void {
     return res.redirect('/auth/login');
   });
 
-  app.use((req, res, next) => {
-    if (req.path.startsWith('/finfly.') && !cookieValue(req.headers.cookie, SESSION_COOKIE)) {
-      return res.redirect(`/auth/login?returnTo=${encodeURIComponent(req.originalUrl)}`);
+  app.use(async (req, res, next) => {
+    if (!req.path.startsWith('/finfly.')) return next();
+
+    try {
+      const user = await resolveSessionUser(req);
+      if (!user) {
+        res.clearCookie(SESSION_COOKIE, { path: '/' });
+        return res.redirect(`/auth/login?returnTo=${encodeURIComponent(req.originalUrl)}`);
+      }
+      if (user.mustChangePassword) return res.redirect('/auth/change-password');
+      return next();
+    } catch (error) {
+      return next(error);
     }
-    next();
   });
 }

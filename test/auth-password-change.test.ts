@@ -87,6 +87,18 @@ describe('forced password change', () => {
     );
     expect(session.crewMember_ID).to.equal(crewMemberID);
 
+    const protectedBeforePasswordChange = await fetch(
+      `${baseUrl}/finfly.admin/index.html`,
+      {
+        headers: { cookie: cookie! },
+        redirect: 'manual',
+      },
+    );
+    expect(protectedBeforePasswordChange.status).to.equal(302);
+    expect(protectedBeforePasswordChange.headers.get('location')).to.equal(
+      '/auth/change-password',
+    );
+
     const change = await fetch(`${baseUrl}/auth/change-password`, {
       method: 'POST',
       headers: { cookie: cookie! },
@@ -111,6 +123,15 @@ describe('forced password change', () => {
     } as unknown as Request);
     expect(sessionUser?.isAdmin).to.equal(true);
     expect(sessionUser?.mustChangePassword).to.equal(false);
+
+    const protectedAfterPasswordChange = await fetch(
+      `${baseUrl}/finfly.admin/index.html`,
+      {
+        headers: { cookie: cookie! },
+        redirect: 'manual',
+      },
+    );
+    expect(protectedAfterPasswordChange.status).to.equal(404);
 
     const context = await fetch(`${baseUrl}/auth/context`, {
       headers: { cookie: cookie! },
@@ -159,5 +180,20 @@ describe('forced password change', () => {
       headers: { cookie: cookie! },
     });
     expect(contextAfterLogout.status).to.equal(401);
+
+    const protectedAfterLogout = await fetch(
+      `${baseUrl}/finfly.admin/index.html?section=users`,
+      {
+        headers: { cookie: cookie! },
+        redirect: 'manual',
+      },
+    );
+    expect(protectedAfterLogout.status).to.equal(302);
+    expect(protectedAfterLogout.headers.get('location')).to.equal(
+      '/auth/login?returnTo=%2Ffinfly.admin%2Findex.html%3Fsection%3Dusers',
+    );
+    expect(protectedAfterLogout.headers.get('set-cookie')).to.contain(
+      'finfly_session=;',
+    );
   });
 });
