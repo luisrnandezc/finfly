@@ -15,6 +15,7 @@ const pilotConfiguration = {
 async function seedCompleteDraftReport(
   reportID: string,
   hours: number[],
+  dates: string[] = hours.map(() => '2026-09-10'),
 ): Promise<void> {
   const db = await cds.connect.to('db');
   const { FlightReports, FlightLegs, CrewAssignments, Expenses } =
@@ -38,7 +39,7 @@ async function seedCompleteDraftReport(
         ID: cds.utils.uuid(),
         report_ID: reportID,
         sequence: index + 1,
-        flightDate: '2026-09-10',
+        flightDate: dates[index],
         originAirportCode: index === 0 ? 'SVMI' : 'TNCC',
         destinationAirportCode: index === 0 ? 'TNCC' : 'SVMI',
         flightHours,
@@ -166,5 +167,28 @@ describe('ExpenseService aircraft utilization', () => {
     expect(response.status).to.equal(409);
     const afterRepeatedSubmission = await aircraftUtilization();
     expect(afterRepeatedSubmission).to.deep.equal(afterFirstSubmission);
+  });
+
+  it('rejects flight legs whose dates do not follow their sequence', async () => {
+    const reportID = '95000000-0000-0000-0000-000000000005';
+    await seedCompleteDraftReport(
+      reportID,
+      [1.5, 1.25],
+      ['2026-09-12', '2026-09-11'],
+    );
+
+    const response = await POST(
+      `${reportUrl(reportID)}/ExpenseService.submit`,
+      {},
+      {
+        ...pilotConfiguration,
+        validateStatus: (status: number) => status === 400,
+      },
+    );
+
+    expect(response.status).to.equal(400);
+    expect(response.data.error.message).to.equal(
+      'Flight leg dates must follow their sequence',
+    );
   });
 });

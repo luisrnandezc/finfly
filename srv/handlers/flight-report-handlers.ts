@@ -18,6 +18,11 @@ type ExpenseReference = {
   fuelUnit?: string | null;
 };
 type LegSequenceReference = { sequence: number };
+type SubmittedLegReference = {
+  ID: string;
+  sequence: number;
+  flightDate: string;
+};
 type CrewMemberReference = { crewMember_ID: string };
 type BoundReportKey = { ID: string; IsActiveEntity?: boolean };
 type FinFlyConfiguration = {
@@ -337,13 +342,27 @@ export function registerFlightReportHandlers(
       );
     }
 
-    const legs = await tx.run(
-      SELECT.from(db.FlightLegs).columns('ID').where({ report_ID: key.ID }),
-    );
+    const legs = (await tx.run(
+      SELECT.from(db.FlightLegs)
+        .columns('ID', 'sequence', 'flightDate')
+        .where({ report_ID: key.ID })
+        .orderBy('sequence'),
+    )) as SubmittedLegReference[];
     if (legs.length === 0) {
       return req.reject(
         400,
         `${reportLabel} cannot be submitted because it has no flight legs`,
+      );
+    }
+
+    const hasOutOfOrderLeg = legs.some(
+      (leg, index) =>
+        index > 0 && leg.flightDate < legs[index - 1].flightDate,
+    );
+    if (hasOutOfOrderLeg) {
+      return req.reject(
+        400,
+        'Flight leg dates must follow their sequence',
       );
     }
 
