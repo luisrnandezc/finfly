@@ -331,9 +331,11 @@ annotate audit.FlightLegs with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Leg', Value : sequence, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Date', Value : flightDate, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Origin ICAO', Value : originAirportCode, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Destination ICAO', Value : destinationAirportCode, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Origin ICAO Code', Value : originAirportCode, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Destination ICAO Code', Value : destinationAirportCode, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Passengers', Value : passengerCount, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'PIC', Value : pic_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'SIC', Value : sic_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours, ![@UI.Importance] : #High }
     ]
 );
@@ -574,6 +576,16 @@ annotate audit.FlightLegs with {
     ID @(
         UI.Hidden,
         Common.Text : sequenceText,
+        Common.TextArrangement : #TextOnly
+    );
+    pic @(
+        title : 'PIC',
+        Common.Text : pic.fullName,
+        Common.TextArrangement : #TextOnly
+    );
+    sic @(
+        title : 'SIC',
+        Common.Text : sic.fullName,
         Common.TextArrangement : #TextOnly
     );
 };

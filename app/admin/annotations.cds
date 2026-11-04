@@ -470,11 +470,26 @@ annotate admin.Expenses with @(
 annotate admin.FlightLegs with @(UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Leg', Value : sequence },
     { $Type : 'UI.DataField', Label : 'Date', Value : flightDate },
-    { $Type : 'UI.DataField', Label : 'Origin ICAO', Value : originAirportCode },
-    { $Type : 'UI.DataField', Label : 'Destination ICAO', Value : destinationAirportCode },
+    { $Type : 'UI.DataField', Label : 'Origin ICAO Code', Value : originAirportCode },
+    { $Type : 'UI.DataField', Label : 'Destination ICAO Code', Value : destinationAirportCode },
     { $Type : 'UI.DataField', Label : 'Passengers', Value : passengerCount },
+    { $Type : 'UI.DataField', Label : 'PIC', Value : pic_ID },
+    { $Type : 'UI.DataField', Label : 'SIC', Value : sic_ID },
     { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours }
 ]);
+
+annotate admin.FlightLegs with {
+    pic @(
+        title : 'PIC',
+        Common.Text : pic.fullName,
+        Common.TextArrangement : #TextOnly
+    );
+    sic @(
+        title : 'SIC',
+        Common.Text : sic.fullName,
+        Common.TextArrangement : #TextOnly
+    );
+};
 
 annotate admin.CrewAssignments with @(UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID },
