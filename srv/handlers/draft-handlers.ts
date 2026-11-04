@@ -101,6 +101,32 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
 
     req.data.sequence = Number(lastLeg?.sequence ?? 0) + 1;
     req.data.flightDate ??= currentDate();
+
+    const tx = cds.tx(req);
+    const report = (await tx.run(
+      SELECT.one
+        .from(FlightReports.drafts)
+        .columns('aircraft_ID')
+        .where({ ID: reportID }),
+    )) as { aircraft_ID?: string } | undefined;
+
+    if (report?.aircraft_ID) {
+      const aircraft = (await tx.run(
+        SELECT.one
+          .from(db.Aircraft)
+          .columns('defaultPIC_ID', 'defaultSIC_ID')
+          .where({ ID: report.aircraft_ID }),
+      )) as
+        | { defaultPIC_ID?: string | null; defaultSIC_ID?: string | null }
+        | undefined;
+
+      if (!Object.hasOwn(req.data, 'pic_ID') && aircraft?.defaultPIC_ID) {
+        req.data.pic_ID = aircraft.defaultPIC_ID;
+      }
+      if (!Object.hasOwn(req.data, 'sic_ID') && aircraft?.defaultSIC_ID) {
+        req.data.sic_ID = aircraft.defaultSIC_ID;
+      }
+    }
   });
 
   service.before(['NEW', 'CREATE', 'UPDATE'], FlightLegs.drafts, async (req: Request) => {

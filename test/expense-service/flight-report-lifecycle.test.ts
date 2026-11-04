@@ -35,8 +35,6 @@ describe('ExpenseService flight report lifecycle', () => {
       destinationAirportCode: 'SKBO',
       flightHours: 2.3,
       passengerCount: 4,
-      pic_ID: masterDataIDs.captain,
-      sic_ID: masterDataIDs.firstOfficer,
     });
 
     expect(response.status).to.equal(201);
