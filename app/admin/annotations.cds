@@ -472,6 +472,7 @@ annotate admin.FlightLegs with @(UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Date', Value : flightDate },
     { $Type : 'UI.DataField', Label : 'Origin ICAO', Value : originAirportCode },
     { $Type : 'UI.DataField', Label : 'Destination ICAO', Value : destinationAirportCode },
+    { $Type : 'UI.DataField', Label : 'Passengers', Value : passengerCount },
     { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours }
 ]);
 

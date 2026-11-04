@@ -333,6 +333,7 @@ annotate audit.FlightLegs with @(
         { $Type : 'UI.DataField', Label : 'Date', Value : flightDate, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Origin ICAO', Value : originAirportCode, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Destination ICAO', Value : destinationAirportCode, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Passengers', Value : passengerCount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours, ![@UI.Importance] : #High }
     ]
 );

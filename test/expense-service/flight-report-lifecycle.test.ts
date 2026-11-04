@@ -34,6 +34,7 @@ describe('ExpenseService flight report lifecycle', () => {
       originAirportCode: 'SVMI',
       destinationAirportCode: 'SKBO',
       flightHours: 2.3,
+      passengerCount: 4,
     });
 
     expect(response.status).to.equal(201);
@@ -45,6 +46,7 @@ describe('ExpenseService flight report lifecycle', () => {
       originAirportCode: 'SKBO',
       destinationAirportCode: 'SVMI',
       flightHours: 2.2,
+      passengerCount: 3,
     });
 
     expect(response.status).to.equal(201);
@@ -115,6 +117,11 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(
       response.data.legs.map((leg: { sequenceText: string }) => leg.sequenceText),
     ).to.deep.equal(['1', '2']);
+    expect(
+      response.data.legs.map((leg: { passengerCount: number }) =>
+        leg.passengerCount,
+      ),
+    ).to.deep.equal([4, 3]);
     expect(response.data.crew).to.have.length(2);
     expect(response.data.expenses).to.have.length(2);
 

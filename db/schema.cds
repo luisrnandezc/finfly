@@ -304,6 +304,9 @@ entity FlightLegs : cuid, managed {
     originAirportCode      : String(4) not null;
     destinationAirportCode : String(4) not null;
 
+    @assert.range: [0, _]
+    passengerCount         : Integer not null default 0;
+
     takeoffTime            : Time;
     landingTime            : Time;
 

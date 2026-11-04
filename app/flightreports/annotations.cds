@@ -376,6 +376,7 @@ annotate service.FlightLegs with @(
             ![@UI.Importance] : #High,
             ![@HTML5.CssDefaults] : { width : '11rem' }
         },
+        { $Type : 'UI.DataField', Label : 'Passengers', Value : passengerCount, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Takeoff Time', Value : takeoffTime, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Landing Time', Value : landingTime, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Hobbs Start', Value : hourMeterStart, ![@UI.Importance] : #High },
@@ -614,6 +615,7 @@ annotate service.FlightLegs with {
     flightDate             @title : 'Flight Date';
     originAirportCode      @title : 'Origin ICAO Code';
     destinationAirportCode @title : 'Destination ICAO Code';
+    passengerCount         @title : 'Passengers';
     takeoffTime @(
         title : 'Takeoff Time',
         UI.Hidden : {$edmJson : {$Eq : [{$Path : 'report/aircraft/flightTimeMethod'}, 'HOBBS']}}
