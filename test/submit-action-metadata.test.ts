@@ -1,4 +1,5 @@
 import cds from '@sap/cds';
+import { readFileSync } from 'node:fs';
 
 describe('submit action metadata', () => {
   it('requires a saved draft-status report and asks for confirmation', async () => {
@@ -19,5 +20,19 @@ describe('submit action metadata', () => {
     expect(metadata).toContain('<Path>in/IsActiveEntity</Path>');
     expect(metadata).toContain('<Path>in/status</Path>');
     expect(metadata).toContain('<String>DRAFT</String>');
+  });
+
+  it('provides an action-specific confirmation message', () => {
+    const resourceBundle = readFileSync(
+      new URL(
+        '../app/flightreports/webapp/i18n/i18n.properties',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+
+    expect(resourceBundle).toContain(
+      'C_OPERATIONS_ACTION_CONFIRM_MESSAGE|FlightReports|submit=Submit this flight report for expense audit?',
+    );
   });
 });
