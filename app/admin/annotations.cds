@@ -219,6 +219,7 @@ annotate admin.Aircraft with @(
             { $Type : 'UI.DataField', Label : 'Model', Value : model },
             { $Type : 'UI.DataField', Label : 'Serial Number', Value : serialNumber },
             { $Type : 'UI.DataField', Label : 'Aircraft Type', Value : aircraftType },
+            { $Type : 'UI.DataField', Label : 'Flight Time Method', Value : flightTimeMethod },
             { $Type : 'UI.DataField', Label : 'Description', Value : description },
             { $Type : 'UI.DataField', Label : 'Active', Value : active }
         ]
@@ -275,6 +276,26 @@ annotate admin.Aircraft with {
                 {
                     $Type : 'Common.ValueListParameterInOut',
                     LocalDataProperty : aircraftType,
+                    ValueListProperty : 'code'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'name'
+                }
+            ]
+        }
+    );
+    flightTimeMethod @(
+        title : 'Flight Time Method',
+        Common.Text : flightTimeMethodDetails.name,
+        Common.TextArrangement : #TextOnly,
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            CollectionPath : 'FlightTimeMethods',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : flightTimeMethod,
                     ValueListProperty : 'code'
                 },
                 {
@@ -574,3 +595,4 @@ annotate admin.FlightReports actions {
 
 annotate admin.PilotLicenseTypes with @(UI.PresentationVariant : { SortOrder : [{ Property : sortOrder }] });
 annotate admin.AircraftTypes with @(UI.PresentationVariant : { SortOrder : [{ Property : sortOrder }] });
+annotate admin.FlightTimeMethods with @(UI.PresentationVariant : { SortOrder : [{ Property : sortOrder }] });

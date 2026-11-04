@@ -1,4 +1,9 @@
 import cds, { type Request } from '@sap/cds';
+import {
+  calculateFlightHours,
+  type FlightTimeInput,
+  type FlightTimeMethod,
+} from '../domain/flight-time.ts';
 
 const { SELECT } = cds.ql;
 
@@ -98,7 +103,7 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
     req.data.flightDate ??= currentDate();
   });
 
-  service.before(['NEW', 'CREATE', 'UPDATE'], FlightLegs.drafts, (req: Request) => {
+  service.before(['NEW', 'CREATE', 'UPDATE'], FlightLegs.drafts, async (req: Request) => {
     if (Object.hasOwn(req.data, 'originAirportCode')) {
       req.data.originAirportCode = normalizeAirportCode(
         req.data.originAirportCode,
@@ -112,6 +117,62 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
         'Destination',
         req,
       );
+    }
+
+    if (req.event === 'NEW') return;
+
+    const timeInputChanged = [
+      'takeoffTime',
+      'landingTime',
+      'hourMeterStart',
+      'hourMeterEnd',
+    ].some((property) => Object.hasOwn(req.data, property));
+    if (!timeInputChanged) return;
+
+    const tx = cds.tx(req);
+    const existing = req.data.ID
+      ? ((await tx.run(
+          SELECT.one
+            .from(FlightLegs.drafts)
+            .columns(
+              'report_ID',
+              'takeoffTime',
+              'landingTime',
+              'hourMeterStart',
+              'hourMeterEnd',
+            )
+            .where({ ID: req.data.ID }),
+        )) as (FlightTimeInput & { report_ID?: string }) | undefined)
+      : undefined;
+
+    const reportID = (req.data.report_ID ?? existing?.report_ID) as
+      | string
+      | undefined;
+    if (!reportID) return;
+
+    const report = (await tx.run(
+      SELECT.one
+        .from(FlightReports.drafts)
+        .columns('aircraft_ID')
+        .where({ ID: reportID }),
+    )) as { aircraft_ID?: string } | undefined;
+    if (!report?.aircraft_ID) return;
+
+    const aircraft = (await tx.run(
+      SELECT.one
+        .from(db.Aircraft)
+        .columns('flightTimeMethod')
+        .where({ ID: report.aircraft_ID }),
+    )) as { flightTimeMethod: FlightTimeMethod } | undefined;
+    if (!aircraft) return;
+
+    try {
+      req.data.flightHours = calculateFlightHours(aircraft.flightTimeMethod, {
+        ...existing,
+        ...req.data,
+      });
+    } catch (error) {
+      req.reject(400, (error as Error).message);
     }
   });
 

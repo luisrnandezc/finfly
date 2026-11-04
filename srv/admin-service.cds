@@ -56,6 +56,7 @@ service AdminService {
     @readonly entity ExpenseAuditStatuses as projection on db.ExpenseAuditStatuses;
     @readonly entity PilotLicenseTypes as projection on db.PilotLicenseTypes;
     @readonly entity AircraftTypes as projection on db.AircraftTypes;
+    @readonly entity FlightTimeMethods as projection on db.FlightTimeMethods;
     @readonly entity Currencies as projection on common.Currencies;
 }
 

@@ -176,6 +176,16 @@ export function registerFlightReportHandlers(
       );
     }
 
+    const incompleteFlightTime = legs.some(
+      (leg) =>
+        leg.flightHours == null ||
+        !Number.isFinite(Number(leg.flightHours)) ||
+        Number(leg.flightHours) <= 0,
+    );
+    if (incompleteFlightTime) {
+      req.reject(400, 'Enter valid flight time for every flight leg');
+    }
+
     const crewAssignments = (await SELECT.from(CrewAssignments.drafts)
       .columns('crewMember_ID')
       .where({ report_ID: reportID })) as CrewMemberReference[];

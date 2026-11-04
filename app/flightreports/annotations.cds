@@ -364,19 +364,22 @@ annotate service.FlightLegs with @(
         { $Type : 'UI.DataField', Label : 'Date', Value : flightDate, ![@UI.Importance] : #High },
         {
             $Type : 'UI.DataField',
-            Label : 'Origin ICAO',
+            Label : 'Origin ICAO Code',
             Value : originAirportCode,
             ![@UI.Importance] : #High,
-            ![@HTML5.CssDefaults.width] : '8rem'
+            ![@HTML5.CssDefaults] : { width : '9rem' }
         },
         {
             $Type : 'UI.DataField',
-            Label : 'Destination ICAO',
+            Label : 'Destination ICAO Code',
             Value : destinationAirportCode,
             ![@UI.Importance] : #High,
-            ![@HTML5.CssDefaults.width] : '8rem'
+            ![@HTML5.CssDefaults] : { width : '11rem' }
         },
-        { $Type : 'UI.DataField', Label : 'Hours', Value : flightHours, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Takeoff Time', Value : takeoffTime, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Landing Time', Value : landingTime, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Hobbs Start', Value : hourMeterStart, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Hobbs End', Value : hourMeterEnd, ![@UI.Importance] : #High },
     ]
 );
 
@@ -609,9 +612,25 @@ annotate service.FlightLegs with {
     );
     sequence               @(title : 'Leg Number', Common.FieldControl : #ReadOnly);
     flightDate             @title : 'Flight Date';
-    originAirportCode      @title : 'Origin ICAO';
-    destinationAirportCode @title : 'Destination ICAO';
-    flightHours            @title : 'Flight Hours';
+    originAirportCode      @title : 'Origin ICAO Code';
+    destinationAirportCode @title : 'Destination ICAO Code';
+    takeoffTime @(
+        title : 'Takeoff Time',
+        UI.Hidden : {$edmJson : {$Eq : [{$Path : 'report/aircraft/flightTimeMethod'}, 'HOBBS']}}
+    );
+    landingTime @(
+        title : 'Landing Time',
+        UI.Hidden : {$edmJson : {$Eq : [{$Path : 'report/aircraft/flightTimeMethod'}, 'HOBBS']}}
+    );
+    hourMeterStart @(
+        title : 'Hobbs Start',
+        UI.Hidden : {$edmJson : {$Ne : [{$Path : 'report/aircraft/flightTimeMethod'}, 'HOBBS']}}
+    );
+    hourMeterEnd @(
+        title : 'Hobbs End',
+        UI.Hidden : {$edmJson : {$Ne : [{$Path : 'report/aircraft/flightTimeMethod'}, 'HOBBS']}}
+    );
+    flightHours @title : 'Flight Hours';
 };
 
 annotate service.CrewAssignments with {

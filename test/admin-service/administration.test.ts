@@ -436,6 +436,7 @@ describe('AdminService organization administration', () => {
         model: '208B Grand Caravan',
         serialNumber: 'TEST-C208-8080',
         aircraftType: 'TURBOPROP_SINGLE',
+        flightTimeMethod: 'HOBBS',
         defaultPIC_ID: masterDataIDs.captain,
         defaultSIC_ID: masterDataIDs.firstOfficer,
         currentFlightHours: 1200,
@@ -445,6 +446,7 @@ describe('AdminService organization administration', () => {
       expect([200, 201]).to.include(created.status);
       expect(created.data.IsActiveEntity).to.equal(true);
       expect(created.data.active).to.equal(true);
+      expect(created.data.flightTimeMethod).to.equal('HOBBS');
 
       const deactivated = await POST(
         `${baseUrl}/Aircraft(ID=${aircraftID},IsActiveEntity=true)/AdminService.deactivateAircraft`,
@@ -458,6 +460,7 @@ describe('AdminService organization administration', () => {
       );
       expect(stored).to.exist;
       expect(stored.registration).to.equal('N8080');
+      expect(stored.flightTimeMethod).to.equal('HOBBS');
     } finally {
       await db.run(DELETE.from(entities.Aircraft).where({ ID: aircraftID }));
     }

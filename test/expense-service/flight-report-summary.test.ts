@@ -41,7 +41,7 @@ describe('ExpenseService flight report summary', () => {
       flightDate: '2026-08-12',
       originAirportCode: 'SVMI',
       destinationAirportCode: 'SKRG',
-      flightHours: 1.15,
+      flightHours: 1.2,
     });
     expect(response.status).to.equal(201);
 
@@ -67,7 +67,7 @@ describe('ExpenseService flight report summary', () => {
     expect([200, 201]).to.include(response.status);
     expect(response.data.firstFlightDate).to.equal('2026-08-12');
     expect(response.data.lastFlightDate).to.equal('2026-08-15');
-    expect(response.data.totalFlightHours).to.equal(3.35);
+    expect(response.data.totalFlightHours).to.equal(3.4);
 
     response = await POST(
       `${activeUrl}/ExpenseService.draftEdit`,

@@ -51,6 +51,11 @@ type AircraftType : String enum {
     other           = 'OTHER';
 };
 
+type FlightTimeMethod : String enum {
+    takeoffLanding = 'TAKEOFF_LANDING';
+    hobbs          = 'HOBBS';
+};
+
 // UI-facing labels and ordering for flight-report status value helps.
 entity FlightReportStatuses {
     key code : FlightReportStatus;
@@ -96,6 +101,12 @@ entity AircraftTypes {
     sortOrder : Integer not null;
 }
 
+entity FlightTimeMethods {
+    key code : FlightTimeMethod;
+    name     : String(60) not null;
+    sortOrder : Integer not null;
+}
+
 @assert.unique: {
     code: [code]
 }
@@ -134,6 +145,9 @@ entity Aircraft : cuid, managed {
     aircraftType  : AircraftType not null;
     aircraftTypeDetails : Association to AircraftTypes
         on aircraftTypeDetails.code = aircraftType;
+    flightTimeMethod : FlightTimeMethod not null default #takeoffLanding;
+    flightTimeMethodDetails : Association to FlightTimeMethods
+        on flightTimeMethodDetails.code = flightTimeMethod;
     defaultPIC    : Association to CrewMembers;
     defaultSIC    : Association to CrewMembers;
     active        : Boolean not null default true;
@@ -290,8 +304,11 @@ entity FlightLegs : cuid, managed {
     originAirportCode      : String(4) not null;
     destinationAirportCode : String(4) not null;
 
+    takeoffTime            : Time;
+    landingTime            : Time;
+
     @assert.range: [(0), _]
-    flightHours            : Decimal(5,2);
+    flightHours            : Decimal(5,1) not null;
 
     @assert.range: [(0), _]
     hourMeterStart         : Decimal(10,2);

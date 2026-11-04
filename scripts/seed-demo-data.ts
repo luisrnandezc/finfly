@@ -102,7 +102,7 @@ async function createScenario(demo: DemoScenario): Promise<void> {
       flightDate: demo.outboundDate,
       originAirportCode: demo.origin,
       destinationAirportCode: demo.destination,
-      flightHours: 2.25,
+      flightHours: 2.3,
     },
   });
 
@@ -114,7 +114,7 @@ async function createScenario(demo: DemoScenario): Promise<void> {
       flightDate: demo.returnDate,
       originAirportCode: demo.destination,
       destinationAirportCode: demo.origin,
-      flightHours: 2.15,
+      flightHours: 2.2,
     },
   });
 
