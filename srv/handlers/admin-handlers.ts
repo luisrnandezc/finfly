@@ -72,7 +72,7 @@ async function validateUserId(
     SELECT.one.from('finfly.CrewMembers').columns('ID').where({ userId: normalized }),
   )) as { ID: string } | undefined;
   if (duplicate && duplicate.ID !== userID) {
-    req.reject(409, 'A user with this User ID already exists');
+    req.reject(409, 'A user with this username already exists');
   }
 }
 
@@ -94,7 +94,7 @@ async function validateNationalId(
 
 function validateUser(user: AdminUserData, req: Request): void {
   if (!user.nationalId?.trim()) req.reject(400, 'National ID is required');
-  if (!user.userId?.trim()) req.reject(400, 'User ID is required');
+  if (!user.userId?.trim()) req.reject(400, 'Username is required');
   if (!user.firstName?.trim()) req.reject(400, 'First name is required');
   if (!user.lastName?.trim()) req.reject(400, 'Last name is required');
   if (!user.isPilot && !user.isAuditor && !user.isAdmin) {

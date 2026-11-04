@@ -90,7 +90,7 @@ annotate staff.Users with @(
     UI.SelectionFields : [fullName, userId, organizationName, isPilot, isAuditor, isAdmin, active],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Full Name', Value : fullName, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'User ID', Value : userId, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Username', Value : userId, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Organization', Value : organizationName, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor, ![@UI.Importance] : #High },
@@ -111,7 +111,7 @@ annotate staff.Users with @(
             { $Type : 'UI.DataField', Label : 'National ID', Value : nationalId },
             { $Type : 'UI.DataField', Label : 'First Name', Value : firstName },
             { $Type : 'UI.DataField', Label : 'Last Name', Value : lastName },
-            { $Type : 'UI.DataField', Label : 'User ID', Value : userId },
+            { $Type : 'UI.DataField', Label : 'Username', Value : userId },
             { $Type : 'UI.DataField', Label : 'Organization', Value : organizationName },
             { $Type : 'UI.DataField', Label : 'Active', Value : active }
         ]
@@ -168,7 +168,7 @@ annotate staff.Users with {
     firstName @title : 'First Name';
     lastName @title : 'Last Name';
     fullName @title : 'Full Name';
-    userId @title : 'User ID';
+    userId @title : 'Username';
     isPilot @title : 'Pilot';
     isAuditor @title : 'Auditor';
     isAdmin @title : 'Administrator';
@@ -184,7 +184,7 @@ annotate staff.Administrators with @(
     UI.SelectionFields : [fullName, userId, organizationName, active],
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Full Name', Value : fullName, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'User ID', Value : userId, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Username', Value : userId, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Organization', Value : organizationName, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Active', Value : active, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Created', Value : createdAt, ![@UI.Importance] : #Medium },
@@ -199,6 +199,7 @@ annotate staff.Administrators with {
     organization_ID @UI.Hidden;
     organization @UI.Hidden;
     organizationName @title : 'Organization';
+    userId @title : 'Username';
 };
 
 annotate staff.Organizations actions {
@@ -234,7 +235,7 @@ annotate staff.Users actions {
 annotate staff.createOrganization with {
     code @title : 'Organization Code';
     name @title : 'Organization Name';
-    administratorUserId @title : 'Administrator User ID';
+    administratorUserId @title : 'Administrator Username';
     temporaryPassword @title : 'Temporary Password';
     nationalId @title : 'Administrator National ID';
     firstName @title : 'Administrator First Name';

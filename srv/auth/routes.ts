@@ -96,7 +96,7 @@ function loginPage(error = '', returnTo?: string): string {
 <title>Sign in | FinFly</title><style>
 :root{font-family:"72",Arial,sans-serif;color:#1d2d3e;background:#f5f6f7}body{margin:0}main{max-width:390px;margin:10vh auto;padding:32px;background:#fff;border:1px solid #d5dadd;border-radius:12px;box-shadow:0 4px 18px #00000012}h1{margin:0 0 8px}p{color:#556b82}label{display:grid;gap:6px;margin:18px 0 0;font-weight:600}input{font:inherit;padding:11px;border:1px solid #89919a;border-radius:6px}button{width:100%;margin-top:24px;padding:12px;border:0;border-radius:6px;background:#0070f2;color:#fff;font:inherit;font-weight:700;cursor:pointer}.error{padding:10px;border-radius:6px;background:#ffeaf4;color:#aa0808}</style></head>
 <body><main><h1>Sign in to FinFly</h1><p>Use the credentials provided by your administrator.</p>${message}
-<form method="post" action="/auth/login">${target}<label>User ID<input name="userId" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Sign in</button></form>
+<form method="post" action="/auth/login">${target}<label>Username<input name="userId" autocomplete="username" required></label><label>Password<input name="password" type="password" autocomplete="current-password" required></label><button type="submit">Sign in</button></form>
 </main></body></html>`;
 }
 

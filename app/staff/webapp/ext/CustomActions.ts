@@ -102,7 +102,7 @@ export default {
       fields: [
         { label: "Organization Code", parameter: "code" },
         { label: "Organization Name", parameter: "name" },
-        { label: "Administrator User ID", parameter: "administratorUserId" },
+        { label: "Administrator Username", parameter: "administratorUserId" },
         { label: "Temporary Password", parameter: "temporaryPassword", password: true },
         { label: "Administrator National ID", parameter: "nationalId" },
         { label: "Administrator First Name", parameter: "firstName" },
@@ -133,7 +133,7 @@ export default {
       submitText: "Add",
       successMessage: "Administrator created successfully",
       fields: [
-        { label: "User ID", parameter: "userId" },
+        { label: "Username", parameter: "userId" },
         { label: "Temporary Password", parameter: "temporaryPassword", password: true },
         { label: "National ID", parameter: "nationalId" },
         { label: "First Name", parameter: "firstName" },

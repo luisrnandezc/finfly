@@ -55,7 +55,7 @@ async function uniqueUserId(tx: Transaction, userId: string, req: Request): Prom
   const existing = await tx.run(
     SELECT.one.from('finfly.CrewMembers').columns('ID').where({ userId }),
   );
-  if (existing) req.reject(409, 'A user with this User ID already exists');
+  if (existing) req.reject(409, 'A user with this username already exists');
 }
 
 async function createAdministrator(
@@ -66,7 +66,7 @@ async function createAdministrator(
 ): Promise<AdministratorRow> {
   const userId = required(
     data.userId ?? data.administratorUserId,
-    'Administrator User ID',
+    'Administrator username',
     req,
   );
   const nationalId = required(data.nationalId, 'National ID', req);
@@ -178,7 +178,7 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
     }
 
     if (Object.hasOwn(req.data, 'userId')) {
-      merged.userId = required(merged.userId, 'User ID', req);
+      merged.userId = required(merged.userId, 'Username', req);
     }
     if (merged.userId) {
       merged.userId = merged.userId.trim();
@@ -188,7 +188,7 @@ export function registerStaffHandlers(service: cds.ApplicationService): void {
         }),
       )) as { ID: string } | undefined;
       if (duplicateUser && duplicateUser.ID !== ID) {
-        req.reject(409, 'A user with this User ID already exists');
+        req.reject(409, 'A user with this username already exists');
       }
     }
 

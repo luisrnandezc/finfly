@@ -68,7 +68,7 @@ annotate admin.Users with @(
     UI.LineItem : [
         { $Type : 'UI.DataField', Label : 'Full Name', Value : fullName, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'National ID', Value : nationalId, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Login ID', Value : userId, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'Username', Value : userId, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Pilot', Value : isPilot, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Auditor', Value : isAuditor, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Administrator', Value : isAdmin, ![@UI.Importance] : #Medium },
@@ -99,7 +99,7 @@ annotate admin.Users with @(
             { $Type : 'UI.DataField', Label : 'National ID', Value : nationalId },
             { $Type : 'UI.DataField', Label : 'First Name', Value : firstName },
             { $Type : 'UI.DataField', Label : 'Last Name', Value : lastName },
-            { $Type : 'UI.DataField', Label : 'Login ID', Value : userId },
+            { $Type : 'UI.DataField', Label : 'Username', Value : userId },
             { $Type : 'UI.DataField', Label : 'Active', Value : active }
         ]
     },
@@ -151,7 +151,7 @@ annotate admin.Users with {
     organization @UI.Hidden;
     fullName     @title : 'Name';
     nationalId   @title : 'National ID';
-    userId       @title : 'Login ID';
+    userId       @title : 'Username';
     firstName    @title : 'First Name';
     lastName     @title : 'Last Name';
     isPilot      @title : 'Pilot';

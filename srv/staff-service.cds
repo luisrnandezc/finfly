@@ -17,7 +17,7 @@ service StaffService {
         virtual activeAdministratorCount : Integer
     } actions {
         action addAdministrator(
-            @title: 'User ID'
+            @title: 'Username'
             userId            : String(255) not null,
             @title: 'Temporary Password'
             temporaryPassword : String(200) not null,
