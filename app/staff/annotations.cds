@@ -220,8 +220,14 @@ annotate staff.Administrators actions {
 };
 
 annotate staff.Users actions {
-    deactivateUser @Core.OperationAvailable : ($self.active = true);
-    reactivateUser @Core.OperationAvailable : ($self.active = false);
+    deactivateUser @(
+        Core.OperationAvailable : ($self.active = true),
+        Common.SideEffects : { TargetProperties : ['in/active'] }
+    );
+    reactivateUser @(
+        Core.OperationAvailable : ($self.active = false),
+        Common.SideEffects : { TargetProperties : ['in/active'] }
+    );
     setTemporaryPassword @Core.OperationAvailable : ($self.active = true);
 };
 
