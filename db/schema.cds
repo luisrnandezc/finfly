@@ -317,7 +317,7 @@ entity FlightLegs : cuid, managed {
     landingTime            : Time;
 
     @assert.range: [(0), _]
-    flightHours            : Decimal(5,1) not null;
+    flightHours            : Decimal(5,2);
 
     @assert.range: [(0), _]
     hourMeterStart         : Decimal(10,2);
