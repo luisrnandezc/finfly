@@ -377,6 +377,8 @@ annotate service.FlightLegs with @(
             ![@HTML5.CssDefaults] : { width : '11rem' }
         },
         { $Type : 'UI.DataField', Label : 'Passengers', Value : passengerCount, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'PIC', Value : pic_ID, ![@UI.Importance] : #High },
+        { $Type : 'UI.DataField', Label : 'SIC', Value : sic_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Takeoff Time', Value : takeoffTime, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Landing Time', Value : landingTime, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Hobbs Start', Value : hourMeterStart, ![@UI.Importance] : #High },
@@ -616,6 +618,54 @@ annotate service.FlightLegs with {
     originAirportCode      @title : 'Origin ICAO Code';
     destinationAirportCode @title : 'Destination ICAO Code';
     passengerCount         @title : 'Passengers';
+    pic @(
+        title : 'PIC',
+        Common.Text : pic.fullName,
+        Common.TextArrangement : #TextOnly,
+        Common.ValueList : {
+            CollectionPath : 'CrewMembers',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : pic_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'fullName'
+                },
+                {
+                    $Type : 'Common.ValueListParameterConstant',
+                    Constant : true,
+                    ValueListProperty : 'active'
+                }
+            ]
+        }
+    );
+    sic @(
+        title : 'SIC',
+        Common.Text : sic.fullName,
+        Common.TextArrangement : #TextOnly,
+        Common.ValueList : {
+            CollectionPath : 'CrewMembers',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : sic_ID,
+                    ValueListProperty : 'ID'
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'fullName'
+                },
+                {
+                    $Type : 'Common.ValueListParameterConstant',
+                    Constant : true,
+                    ValueListProperty : 'active'
+                }
+            ]
+        }
+    );
     takeoffTime @(
         title : 'Takeoff Time',
         UI.Hidden : {$edmJson : {$Eq : [{$Path : 'report/aircraft/flightTimeMethod'}, 'HOBBS']}}

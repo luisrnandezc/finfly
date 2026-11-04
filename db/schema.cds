@@ -307,6 +307,12 @@ entity FlightLegs : cuid, managed {
     @assert.range: [0, _]
     passengerCount         : Integer not null default 0;
 
+    @assert.target
+    pic                    : Association to CrewMembers;
+
+    @assert.target
+    sic                    : Association to CrewMembers;
+
     takeoffTime            : Time;
     landingTime            : Time;
 
