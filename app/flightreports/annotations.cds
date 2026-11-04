@@ -364,14 +364,14 @@ annotate service.FlightLegs with @(
         { $Type : 'UI.DataField', Label : 'Date', Value : flightDate, ![@UI.Importance] : #High },
         {
             $Type : 'UI.DataField',
-            Label : 'Origin',
+            Label : 'Origin ICAO',
             Value : originAirportCode,
             ![@UI.Importance] : #High,
             ![@HTML5.CssDefaults.width] : '8rem'
         },
         {
             $Type : 'UI.DataField',
-            Label : 'Destination',
+            Label : 'Destination ICAO',
             Value : destinationAirportCode,
             ![@UI.Importance] : #High,
             ![@HTML5.CssDefaults.width] : '8rem'
@@ -609,8 +609,8 @@ annotate service.FlightLegs with {
     );
     sequence               @(title : 'Leg Number', Common.FieldControl : #ReadOnly);
     flightDate             @title : 'Flight Date';
-    originAirportCode      @title : 'Origin';
-    destinationAirportCode @title : 'Destination';
+    originAirportCode      @title : 'Origin ICAO';
+    destinationAirportCode @title : 'Destination ICAO';
     flightHours            @title : 'Flight Hours';
 };
 

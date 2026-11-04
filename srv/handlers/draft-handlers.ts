@@ -20,6 +20,18 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
 
   const currentDate = (): string => new Date().toISOString().slice(0, 10);
 
+  const normalizeAirportCode = (
+    value: unknown,
+    label: string,
+    req: Request,
+  ): string => {
+    const normalized = typeof value === 'string' ? value.trim().toUpperCase() : '';
+    if (!/^[A-Z]{4}$/.test(normalized)) {
+      req.reject(400, `${label} must be a four-letter ICAO code`);
+    }
+    return normalized;
+  };
+
   // Fiori draft creation emits NEW, while direct OData clients can emit CREATE.
   service.before(['NEW', 'CREATE'], FlightReports.drafts, async (req: Request) => {
     const organizationID = organizationFor(req);
@@ -84,6 +96,23 @@ export function registerDraftHandlers(service: cds.ApplicationService): void {
 
     req.data.sequence = Number(lastLeg?.sequence ?? 0) + 1;
     req.data.flightDate ??= currentDate();
+  });
+
+  service.before(['NEW', 'CREATE', 'UPDATE'], FlightLegs.drafts, (req: Request) => {
+    if (Object.hasOwn(req.data, 'originAirportCode')) {
+      req.data.originAirportCode = normalizeAirportCode(
+        req.data.originAirportCode,
+        'Origin',
+        req,
+      );
+    }
+    if (Object.hasOwn(req.data, 'destinationAirportCode')) {
+      req.data.destinationAirportCode = normalizeAirportCode(
+        req.data.destinationAirportCode,
+        'Destination',
+        req,
+      );
+    }
   });
 
   service.before(['NEW', 'CREATE'], Expenses.drafts, (req: Request) => {

@@ -53,4 +53,49 @@ describe('ExpenseService date defaults', () => {
       response.data.expenseDate,
     );
   });
+
+  it('normalizes flight-leg airport codes', async () => {
+    const reportID = '47000000-0000-0000-0000-000000000002';
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+
+    await POST(`${baseUrl}/FlightReports`, {
+      ID: reportID,
+      aircraft_ID: masterDataIDs.aircraft,
+    });
+
+    const response = await POST(`${draftUrl}/legs`, {
+      ID: '47100000-0000-0000-0000-000000000002',
+      originAirportCode: 'svmi',
+      destinationAirportCode: 'skbo',
+    });
+
+    expect(response.status).to.equal(201);
+    expect(response.data.originAirportCode).to.equal('SVMI');
+    expect(response.data.destinationAirportCode).to.equal('SKBO');
+  });
+
+  it('rejects airport codes that are not exactly four letters', async () => {
+    const reportID = '47000000-0000-0000-0000-000000000003';
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+
+    await POST(`${baseUrl}/FlightReports`, {
+      ID: reportID,
+      aircraft_ID: masterDataIDs.aircraft,
+    });
+
+    const response = await POST(
+      `${draftUrl}/legs`,
+      {
+        ID: '47100000-0000-0000-0000-000000000003',
+        originAirportCode: 'ABC',
+        destinationAirportCode: 'SKBO',
+      },
+      { validateStatus: (status: number) => status === 400 },
+    );
+
+    expect(response.status).to.equal(400);
+    expect(response.data.error.message).to.equal(
+      'Origin must be a four-letter ICAO code',
+    );
+  });
 });

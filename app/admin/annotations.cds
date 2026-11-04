@@ -449,8 +449,8 @@ annotate admin.Expenses with @(
 annotate admin.FlightLegs with @(UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'Leg', Value : sequence },
     { $Type : 'UI.DataField', Label : 'Date', Value : flightDate },
-    { $Type : 'UI.DataField', Label : 'Origin', Value : originAirportCode },
-    { $Type : 'UI.DataField', Label : 'Destination', Value : destinationAirportCode },
+    { $Type : 'UI.DataField', Label : 'Origin ICAO', Value : originAirportCode },
+    { $Type : 'UI.DataField', Label : 'Destination ICAO', Value : destinationAirportCode },
     { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours }
 ]);
 
