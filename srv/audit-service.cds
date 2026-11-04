@@ -23,6 +23,7 @@ service AuditService {
     } actions {
         action approveExpense() returns Expenses;
         action requestExpenseCorrection(
+            @title: 'Reason'
             reason : String(1000) not null
         ) returns Expenses;
     };

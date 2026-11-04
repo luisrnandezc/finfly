@@ -71,6 +71,7 @@ service ExpenseService {
 
         @requires: 'Auditor'
         action requestExpenseCorrection(
+            @title: 'Reason'
             reason : String(1000) not null
         ) returns Expenses;
 
