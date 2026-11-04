@@ -9,6 +9,8 @@ type LegReference = {
   ID: string;
   flightDate?: string | null;
   flightHours?: number | string | null;
+  pic_ID?: string | null;
+  sic_ID?: string | null;
 };
 type ExpenseReference = {
   ID: string;
@@ -157,7 +159,7 @@ export function registerFlightReportHandlers(
     }
 
     const legs = (await SELECT.from(FlightLegs.drafts)
-      .columns('ID', 'flightDate', 'flightHours')
+      .columns('ID', 'flightDate', 'flightHours', 'pic_ID', 'sic_ID')
       .where({ report_ID: reportID })) as LegReference[];
     const expenses = (await SELECT.from(Expenses.drafts)
       .columns('ID', 'leg_ID', 'category_ID', 'fuelQuantity', 'fuelUnit')
@@ -184,6 +186,31 @@ export function registerFlightReportHandlers(
     );
     if (incompleteFlightTime) {
       req.reject(400, 'Enter valid flight time for every flight leg');
+    }
+
+    if (legs.some((leg) => leg.pic_ID && leg.pic_ID === leg.sic_ID)) {
+      req.reject(400, 'PIC and SIC must be different pilots');
+    }
+
+    if (draftReport) {
+      const selectedLegPilots = new Set(
+        legs.flatMap((leg) => [leg.pic_ID, leg.sic_ID]).filter(Boolean) as string[],
+      );
+
+      for (const pilotID of selectedLegPilots) {
+        const pilot = await SELECT.one
+          .from(db.CrewMembers)
+          .columns('ID')
+          .where({
+            ID: pilotID,
+            organization_ID: draftReport.organization_ID,
+            isPilot: true,
+            active: true,
+          });
+        if (!pilot) {
+          req.reject(400, 'Select active pilots from this organization');
+        }
+      }
     }
 
     const crewAssignments = (await SELECT.from(CrewAssignments.drafts)

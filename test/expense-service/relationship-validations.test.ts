@@ -13,6 +13,43 @@ const IDs = {
 } as const;
 
 describe('ExpenseService relationship validations', () => {
+  it('rejects using the same pilot as PIC and SIC on one leg', async () => {
+    const reportID = '50000000-0000-0000-0000-000000000002';
+    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
+
+    let response = await POST(`${baseUrl}/FlightReports`, {
+      ID: reportID,
+      aircraft_ID: masterDataIDs.aircraft,
+      requesterName: 'Leg crew validation test',
+    });
+    expect(response.status).to.equal(201);
+
+    response = await POST(`${draftUrl}/legs`, {
+      ID: '51000000-0000-0000-0000-000000000002',
+      flightDate: '2026-08-20',
+      originAirportCode: 'SVMI',
+      destinationAirportCode: 'SVVA',
+      flightHours: 1,
+      pic_ID: masterDataIDs.captain,
+      sic_ID: masterDataIDs.captain,
+    });
+    expect(response.status).to.equal(201);
+
+    response = await POST(
+      `${draftUrl}/ExpenseService.draftActivate`,
+      {},
+      {
+        headers: { 'If-Match': '*' },
+        validateStatus: (status: number) => status === 400,
+      },
+    );
+
+    expect(response.status).to.equal(400);
+    expect(response.data.error.message).to.include(
+      'PIC and SIC must be different pilots',
+    );
+  });
+
   it('rejects activation when an expense references an invalid leg', async () => {
     let response = await POST(`${baseUrl}/FlightReports`, {
       ID: IDs.report,
