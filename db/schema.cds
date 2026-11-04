@@ -216,6 +216,7 @@ entity FlightReports : cuid, managed {
 
     @assert.target
     aircraft        : Association to Aircraft not null;
+    aircraftRegistration : String(20) = aircraft.registration;
 
     requesterName   : String(160);
 

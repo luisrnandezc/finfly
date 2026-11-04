@@ -61,6 +61,17 @@ describe('ExpenseService pilot report queues', () => {
 
       expect(IDs(response), `search term ${searchTerm}`).to.include(draftID);
     }
+
+    const filtered = await GET(
+      `${baseUrl}/FlightReports?$filter=IsActiveEntity eq false and aircraftRegistration eq 'YV3051'&$select=ID,aircraftRegistration`,
+      pilotConfiguration,
+    );
+
+    expect(IDs(filtered)).to.include(draftID);
+    expect(
+      filtered.data.value.find(({ ID }: { ID: string }) => ID === draftID)
+        .aircraftRegistration,
+    ).to.equal('YV3051');
   });
 
   it('separates attention, pending, approved, and complete report views', async () => {

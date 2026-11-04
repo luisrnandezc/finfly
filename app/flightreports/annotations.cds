@@ -113,7 +113,7 @@ annotate service.FlightReports with @(
 
     UI.SelectionFields : [
         reportNumber,
-        aircraft_ID,
+        aircraftRegistration,
         requesterName,
         status,
         auditStatus
@@ -331,7 +331,31 @@ annotate service.FlightReports with {
                 ValueListProperty : 'active',
             },
         ],
-    }
+    };
+    aircraftRegistration @(
+        title : 'Aircraft',
+        Common.ValueListWithFixedValues : true,
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'Aircraft',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : aircraftRegistration,
+                    ValueListProperty : 'registration',
+                },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'description',
+                },
+                {
+                    $Type : 'Common.ValueListParameterConstant',
+                    Constant : true,
+                    ValueListProperty : 'active',
+                },
+            ],
+        }
+    )
 };
 
 annotate service.FlightLegs with @(

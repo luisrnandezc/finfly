@@ -59,4 +59,26 @@ describe('report filter metadata', () => {
       elements?.reportNumber?.['@Common.ValueList.CollectionPath'],
     ).toBeUndefined();
   });
+
+  it('displays aircraft registrations and loads their filter values', async () => {
+    const model = await cds.load(['srv', 'app']);
+    const definitions = model.definitions as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    const elements = definitions?.['ExpenseService.FlightReports']?.elements as
+      | Record<string, Record<string, unknown>>
+      | undefined;
+    const aircraftRegistration = elements?.aircraftRegistration;
+
+    expect(aircraftRegistration?.['@title']).toEqual('Aircraft');
+    expect(aircraftRegistration?.['@Common.ValueListWithFixedValues']).toEqual(
+      true,
+    );
+    expect(
+      aircraftRegistration?.['@Common.ValueList.CollectionPath'],
+    ).toEqual('Aircraft');
+    expect(
+      definitions?.['ExpenseService.FlightReports']?.['@UI.SelectionFields'],
+    ).toContainEqual({ '=': 'aircraftRegistration' });
+  });
 });
