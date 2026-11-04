@@ -30,6 +30,11 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .finfly-shell__username {
+      flex: 0 0 auto;
+      color: #556b82;
+      white-space: nowrap;
+    }
     .finfly-shell__apps {
       display: none;
       margin-left: auto;
@@ -65,6 +70,7 @@
   shell.innerHTML = `
     <span class="finfly-shell__brand">FinFly</span>
     <span class="finfly-shell__organization" aria-live="polite">Loading organization…</span>
+    <span class="finfly-shell__username"></span>
     <label class="finfly-shell__apps">
       <select aria-label="Switch application"></select>
     </label>
@@ -88,6 +94,7 @@
     .then((context) => {
       if (!context) return;
       shell.querySelector('.finfly-shell__organization').textContent = context.organizationName;
+      shell.querySelector('.finfly-shell__username').textContent = `Username: ${context.userId}`;
       if (context.applications.length > 1) {
         const appSwitcher = shell.querySelector('.finfly-shell__apps');
         const select = appSwitcher.querySelector('select');
