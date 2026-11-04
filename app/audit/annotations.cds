@@ -292,12 +292,6 @@ annotate audit.FlightReports with @(
             Label : 'Flight Legs',
             Target : 'legs/@UI.LineItem'
         },
-        {
-            $Type : 'UI.ReferenceFacet',
-            ID : 'Crew',
-            Label : 'Crew',
-            Target : 'crew/@UI.LineItem'
-        }
     ]
 );
 
@@ -337,14 +331,6 @@ annotate audit.FlightLegs with @(
         { $Type : 'UI.DataField', Label : 'PIC', Value : pic_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'SIC', Value : sic_ID, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Flight Hours', Value : flightHours, ![@UI.Importance] : #High }
-    ]
-);
-
-// Read-only crew assignments shown inside the Flight Report Object Page.
-annotate audit.CrewAssignments with @(
-    UI.LineItem : [
-        { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Role', Value : role, ![@UI.Importance] : #High }
     ]
 );
 
@@ -588,15 +574,6 @@ annotate audit.FlightLegs with {
         Common.Text : sic.fullName,
         Common.TextArrangement : #TextOnly
     );
-};
-
-annotate audit.CrewAssignments with {
-    crewMember @(
-        title : 'Crew Member',
-        Common.Text : crewMember.fullName,
-        Common.TextArrangement : #TextOnly
-    );
-    role @title : 'Role';
 };
 
 annotate audit.CrewMembers with {

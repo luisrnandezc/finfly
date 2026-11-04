@@ -243,12 +243,6 @@ annotate service.FlightReports with @(
         },
         {
             $Type : 'UI.ReferenceFacet',
-            ID : 'Crew',
-            Label : 'Crew',
-            Target : 'crew/@UI.LineItem',
-        },
-        {
-            $Type : 'UI.ReferenceFacet',
             ID : 'Expenses',
             Label : 'Expenses',
             Target : 'expenses/@UI.LineItem',
@@ -383,13 +377,6 @@ annotate service.FlightLegs with @(
         { $Type : 'UI.DataField', Label : 'Landing Time', Value : landingTime, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Hobbs Start', Value : hourMeterStart, ![@UI.Importance] : #High },
         { $Type : 'UI.DataField', Label : 'Hobbs End', Value : hourMeterEnd, ![@UI.Importance] : #High },
-    ]
-);
-
-annotate service.CrewAssignments with @(
-    UI.LineItem : [
-        { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID, ![@UI.Importance] : #High },
-        { $Type : 'UI.DataField', Label : 'Role', Value : role, ![@UI.Importance] : #High },
     ]
 );
 
@@ -684,59 +671,6 @@ annotate service.FlightLegs with {
     );
     flightHours @title : 'Flight Hours';
 };
-
-annotate service.CrewAssignments with {
-    crewMember @(
-        title : 'Crew Member',
-        Common.Text: crewMember.fullName,
-        Common.TextArrangement : #TextOnly,
-        Common.ValueList : {
-            CollectionPath : 'CrewMembers',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : crewMember_ID,
-                    ValueListProperty : 'ID',
-                },
-                {
-                    $Type : 'Common.ValueListParameterDisplayOnly',
-                    ValueListProperty : 'fullName',
-                },
-                {
-                    $Type : 'Common.ValueListParameterConstant',
-                    Constant : true,
-                    ValueListProperty : 'active',
-                },
-            ],
-        }
-    );
-    role @(
-        title : 'Role',
-        Common.ValueListWithFixedValues : true,
-        Common.ValueList : {
-            CollectionPath : 'CrewRoles',
-            PresentationVariantQualifier : 'RoleOrder',
-            Parameters : [
-                {
-                    $Type : 'Common.ValueListParameterInOut',
-                    LocalDataProperty : role,
-                    ValueListProperty : 'code'
-                }
-            ]
-        }
-    );
-};
-
-annotate service.CrewRoles with @(
-    UI.PresentationVariant #RoleOrder : {
-        SortOrder : [
-            {
-                Property : sortOrder,
-                Descending : false
-            }
-        ]
-    }
-);
 
 annotate service.Expenses with {
     expenseDate                  @title : 'Expense Date';

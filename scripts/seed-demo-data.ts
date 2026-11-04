@@ -14,10 +14,6 @@ const masterData = {
   organization: '50000000-0000-0000-0000-000000000001',
   aircraft: '20000000-0000-0000-0000-000000000001',
   alternateAircraft: '20000000-0000-0000-0000-000000000003',
-  captain: '30000000-0000-0000-0000-000000000001',
-  firstOfficer: '30000000-0000-0000-0000-000000000002',
-  alternateCaptain: '30000000-0000-0000-0000-000000000004',
-  alternateFirstOfficer: '30000000-0000-0000-0000-000000000005',
   fuel: '10000000-0000-0000-0000-000000000001',
   hotel: '10000000-0000-0000-0000-000000000002',
   fbo: '10000000-0000-0000-0000-000000000003',
@@ -30,7 +26,6 @@ interface DemoScenario {
   name: string;
   reportID: string;
   legIDs: [string, string];
-  crewIDs: [string, string];
   expenseIDs: [string, string, string];
   requesterName: string;
   notes: string;
@@ -39,8 +34,6 @@ interface DemoScenario {
   origin: string;
   destination: string;
   aircraftID: string;
-  captainID: string;
-  firstOfficerID: string;
   finalState: FinalState;
 }
 
@@ -49,11 +42,9 @@ const scenarios: DemoScenario[] = [
   scenario('2', 'New report awaiting audit', 'PENDING'),
   scenario('3', 'Report requiring a pilot correction', 'ACTION_REQUIRED'),
   scenario('4', 'Fully approved report', 'APPROVED'),
-  scenario('5', 'Alternate aircraft and crew awaiting audit', 'PENDING', {
+  scenario('5', 'Alternate aircraft awaiting audit', 'PENDING', {
     requesterName: 'Avery Example',
     aircraftID: masterData.alternateAircraft,
-    captainID: masterData.alternateCaptain,
-    firstOfficerID: masterData.alternateFirstOfficer,
     destination: 'TJSJ',
   }),
 ];
@@ -117,24 +108,6 @@ async function createScenario(demo: DemoScenario): Promise<void> {
       destinationAirportCode: demo.origin,
       flightHours: 2.2,
       passengerCount: 3,
-    },
-  });
-
-  await request(`${draftUrl}/crew`, pilotAuthorization, {
-    method: 'POST',
-    body: {
-      ID: demo.crewIDs[0],
-      crewMember_ID: demo.captainID,
-      role: 'PIC',
-    },
-  });
-
-  await request(`${draftUrl}/crew`, pilotAuthorization, {
-    method: 'POST',
-    body: {
-      ID: demo.crewIDs[1],
-      crewMember_ID: demo.firstOfficerID,
-      role: 'SIC',
     },
   });
 
@@ -318,8 +291,6 @@ function scenario(
       DemoScenario,
       | 'requesterName'
       | 'aircraftID'
-      | 'captainID'
-      | 'firstOfficerID'
       | 'origin'
       | 'destination'
     >
@@ -331,10 +302,6 @@ function scenario(
     legIDs: [
       `7110000${number}-0000-0000-0000-000000000001`,
       `7110000${number}-0000-0000-0000-000000000002`,
-    ],
-    crewIDs: [
-      `7120000${number}-0000-0000-0000-000000000001`,
-      `7120000${number}-0000-0000-0000-000000000002`,
     ],
     expenseIDs: [
       `7130000${number}-0000-0000-0000-000000000001`,
@@ -349,8 +316,6 @@ function scenario(
     destination:
       overrides.destination ?? (number === '2' ? 'TNCC' : 'SKBO'),
     aircraftID: overrides.aircraftID ?? masterData.aircraft,
-    captainID: overrides.captainID ?? masterData.captain,
-    firstOfficerID: overrides.firstOfficerID ?? masterData.firstOfficer,
     finalState,
   };
 }

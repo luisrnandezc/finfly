@@ -48,19 +48,6 @@ async function createAndSubmitReport(
   );
 
   await POST(
-    `${draftUrl}/crew`,
-    {
-      ID: `${childIDPrefix}0000-0000-0000-000000000002`,
-      crewMember_ID:
-        aircraftID === masterDataIDs.otherAircraft
-          ? masterDataIDs.otherCrewMember
-          : masterDataIDs.captain,
-      role: 'PIC',
-    },
-    configuration,
-  );
-
-  await POST(
     `${draftUrl}/expenses`,
     {
       ID: `${childIDPrefix}0000-0000-0000-000000000003`,

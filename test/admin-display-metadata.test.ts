@@ -11,7 +11,6 @@ describe('admin business-text metadata', () => {
     ['AdminService.Expenses', 'category', 'category.name'],
     ['AdminService.FlightLegs', 'pic', 'pic.fullName'],
     ['AdminService.FlightLegs', 'sic', 'sic.fullName'],
-    ['AdminService.CrewAssignments', 'crewMember', 'crewMember.fullName'],
   ])('uses business text for %s.%s', async (entityName, elementName, textPath) => {
     const model = await cds.load(['srv', 'app']);
     const definitions = model.definitions as

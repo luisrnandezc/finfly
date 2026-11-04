@@ -54,22 +54,6 @@ describe('ExpenseService flight report lifecycle', () => {
     expect(response.status).to.equal(201);
     expect(response.data.sequence).to.equal(2);
 
-    response = await POST(`${draftUrl}/crew`, {
-      ID: flightReportIDs.captainAssignment,
-      crewMember_ID: masterDataIDs.captain,
-      role: 'PIC',
-    });
-
-    expect(response.status).to.equal(201);
-
-    response = await POST(`${draftUrl}/crew`, {
-      ID: flightReportIDs.firstOfficerAssignment,
-      crewMember_ID: masterDataIDs.firstOfficer,
-      role: 'SIC',
-    });
-
-    expect(response.status).to.equal(201);
-
     response = await POST(`${draftUrl}/expenses`, {
       ID: flightReportIDs.vesExpense,
       leg_ID: flightReportIDs.outboundLeg,
@@ -112,7 +96,7 @@ describe('ExpenseService flight report lifecycle', () => {
       `${baseUrl}/FlightReports(` +
       `ID=${flightReportIDs.report},IsActiveEntity=true)`;
 
-    response = await GET(`${activeUrl}?$expand=legs,crew,expenses`);
+    response = await GET(`${activeUrl}?$expand=legs,expenses`);
 
     expect(response.status).to.equal(200);
     expect(response.data.legs).to.have.length(2);
@@ -133,7 +117,6 @@ describe('ExpenseService flight report lifecycle', () => {
       [masterDataIDs.captain, masterDataIDs.firstOfficer],
       [masterDataIDs.firstOfficer, masterDataIDs.captain],
     ]);
-    expect(response.data.crew).to.have.length(2);
     expect(response.data.expenses).to.have.length(2);
 
     const totalFlightHours = response.data.legs.reduce(

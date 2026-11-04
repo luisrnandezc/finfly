@@ -45,11 +45,6 @@ describe('ExpenseService flight report summary', () => {
     });
     expect(response.status).to.equal(201);
 
-    await POST(`${draftUrl}/crew`, {
-      ID: '48200000-0000-0000-0000-000000000001',
-      crewMember_ID: masterDataIDs.captain,
-      role: 'PIC',
-    });
     await POST(`${draftUrl}/expenses`, {
       ID: '48300000-0000-0000-0000-000000000001',
       category_ID: masterDataIDs.fboCategory,

@@ -102,42 +102,4 @@ describe('ExpenseService uniqueness validations', () => {
     await activate(draftUrl, 201);
   });
 
-  it('rejects assigning the same crew member twice to one report', async () => {
-    const reportID = '72000000-0000-0000-0000-000000000001';
-    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
-
-    let response = await POST(`${baseUrl}/FlightReports`, {
-      ID: reportID,
-      reportNumber: 'FR-2026-DUPLICATE-CREW',
-      aircraft_ID: masterDataIDs.aircraft,
-      requesterName: 'Duplicate crew test',
-      status: 'DRAFT',
-    });
-
-    expect(response.status).to.equal(201);
-
-    for (const assignment of [
-      {
-        ID: '72100000-0000-0000-0000-000000000001',
-        role: 'PIC',
-      },
-      {
-        ID: '72100000-0000-0000-0000-000000000002',
-        role: 'SIC',
-      },
-    ]) {
-      response = await POST(`${draftUrl}/crew`, {
-        ID: assignment.ID,
-        crewMember_ID: masterDataIDs.captain,
-        role: assignment.role,
-      });
-
-      expect(response.status).to.equal(201);
-    }
-
-    response = await activate(draftUrl, 409);
-    expect(response.data.error.message).to.equal(
-      'The selected crew member is assigned more than once',
-    );
-  });
 });

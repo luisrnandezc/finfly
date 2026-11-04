@@ -230,7 +230,6 @@ describe('ExpenseService workflow actions', () => {
   it('automatically approves expenses when the submitter is also an auditor', async () => {
     const reportID = '90000000-0000-0000-0000-000000000006';
     const legID = '90600000-0000-0000-0000-000000000001';
-    const crewAssignmentID = '90600000-0000-0000-0000-000000000002';
     const expenseID = '90600000-0000-0000-0000-000000000003';
     const db = await cds.connect.to('db');
     const { CrewMembers } = cds.entities('finfly');
@@ -262,16 +261,6 @@ describe('ExpenseService workflow actions', () => {
         originAirportCode: 'SVMI',
         destinationAirportCode: 'SVVA',
         flightHours: 1.2,
-      },
-      pilotAuditorConfiguration,
-    );
-
-    await POST(
-      `${draftUrl}/crew`,
-      {
-        ID: crewAssignmentID,
-        crewMember_ID: masterDataIDs.captain,
-        role: 'PIC',
       },
       pilotAuditorConfiguration,
     );

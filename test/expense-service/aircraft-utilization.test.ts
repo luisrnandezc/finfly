@@ -18,8 +18,7 @@ async function seedCompleteDraftReport(
   dates: string[] = hours.map(() => '2026-09-10'),
 ): Promise<void> {
   const db = await cds.connect.to('db');
-  const { FlightReports, FlightLegs, CrewAssignments, Expenses } =
-    cds.entities('finfly');
+  const { FlightReports, FlightLegs, Expenses } = cds.entities('finfly');
 
   await db.run(
     INSERT.into(FlightReports).entries({
@@ -43,18 +42,10 @@ async function seedCompleteDraftReport(
         originAirportCode: index === 0 ? 'SVMI' : 'TNCC',
         destinationAirportCode: index === 0 ? 'TNCC' : 'SVMI',
         flightHours,
+        pic_ID: masterDataIDs.captain,
       }),
     );
   }
-
-  await db.run(
-    INSERT.into(CrewAssignments).entries({
-      ID: cds.utils.uuid(),
-      report_ID: reportID,
-      crewMember_ID: masterDataIDs.captain,
-      role: 'PIC',
-    }),
-  );
   await db.run(
     INSERT.into(Expenses).entries({
       ID: cds.utils.uuid(),

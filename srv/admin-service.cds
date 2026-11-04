@@ -47,7 +47,6 @@ service AdminService {
     };
 
     @readonly entity FlightLegs as projection on db.FlightLegs;
-    @readonly entity CrewAssignments as projection on db.CrewAssignments;
     @readonly entity ExpenseAuditHistory as projection on db.ExpenseAuditHistory;
     @readonly entity Organizations as projection on db.Organizations;
     @readonly entity ExpenseCategories as projection on db.ExpenseCategories;
@@ -113,11 +112,6 @@ annotate AdminService.Expenses with @restrict: [
 ];
 
 annotate AdminService.FlightLegs with @restrict: [{
-    grant : 'READ',
-    where : 'report.organization_ID = $user.organization'
-}];
-
-annotate AdminService.CrewAssignments with @restrict: [{
     grant : 'READ',
     where : 'report.organization_ID = $user.organization'
 }];

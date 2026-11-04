@@ -24,8 +24,8 @@ type SubmittedLegReference = {
   ID: string;
   sequence: number;
   flightDate: string;
+  pic_ID?: string | null;
 };
-type CrewMemberReference = { crewMember_ID: string };
 type BoundReportKey = { ID: string; IsActiveEntity?: boolean };
 type FinFlyConfiguration = {
   finfly?: { selfApprovalEnabled?: boolean };
@@ -63,8 +63,7 @@ const findDuplicate = <T>(values: T[]): T | undefined => {
 export function registerFlightReportHandlers(
   service: cds.ApplicationService,
 ): void {
-  const { FlightReports, FlightLegs, CrewAssignments, Expenses } = service
-    .entities as any;
+  const { FlightReports, FlightLegs, Expenses } = service.entities as any;
   const db = cds.entities('finfly');
   const selfApprovalEnabled =
     (cds.env as unknown as FinFlyConfiguration).finfly?.selfApprovalEnabled ===
@@ -213,39 +212,6 @@ export function registerFlightReportHandlers(
       }
     }
 
-    const crewAssignments = (await SELECT.from(CrewAssignments.drafts)
-      .columns('crewMember_ID')
-      .where({ report_ID: reportID })) as CrewMemberReference[];
-    const duplicateCrewMember = findDuplicate(
-      crewAssignments.map((assignment) => assignment.crewMember_ID),
-    );
-    if (duplicateCrewMember !== undefined) {
-      req.reject(
-        409,
-        'The selected crew member is assigned more than once',
-      );
-    }
-
-    if (draftReport) {
-      for (const assignment of crewAssignments) {
-        const crewMember = await SELECT.one
-          .from(db.CrewMembers)
-          .columns('ID')
-          .where({
-            ID: assignment.crewMember_ID,
-            organization_ID: draftReport.organization_ID,
-            isPilot: true,
-            active: true,
-          });
-        if (!crewMember) {
-          req.reject(
-            400,
-            'Select an active pilot from this organization',
-          );
-        }
-      }
-    }
-
     const validLegIDs = new Set(legs.map((leg) => leg.ID));
     const invalidExpense = expenses.find(
       (expense) => expense.leg_ID && !validLegIDs.has(expense.leg_ID),
@@ -381,7 +347,7 @@ export function registerFlightReportHandlers(
 
     const legs = (await tx.run(
       SELECT.from(db.FlightLegs)
-        .columns('ID', 'sequence', 'flightDate')
+        .columns('ID', 'sequence', 'flightDate', 'pic_ID')
         .where({ report_ID: key.ID })
         .orderBy('sequence'),
     )) as SubmittedLegReference[];
@@ -415,16 +381,10 @@ export function registerFlightReportHandlers(
       );
     }
 
-    const pilotInCommand = await tx.run(
-      SELECT.one
-        .from(db.CrewAssignments)
-        .columns('crewMember_ID')
-        .where({ report_ID: key.ID, role: 'PIC' }),
-    );
-    if (!pilotInCommand) {
+    if (legs.some((leg) => !leg.pic_ID)) {
       return req.reject(
         400,
-        `${reportLabel} cannot be submitted because it has no assigned pilot in command`,
+        `${reportLabel} cannot be submitted because every leg requires a PIC`,
       );
     }
 

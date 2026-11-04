@@ -38,30 +38,6 @@ describe('ExpenseService reference validations', () => {
     await expectActivationRejected(draftUrl);
   });
 
-  it('rejects a report with a nonexistent crew member', async () => {
-    const reportID = '80000000-0000-0000-0000-000000000002';
-    const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;
-
-    let response = await POST(`${baseUrl}/FlightReports`, {
-      ID: reportID,
-      reportNumber: 'FR-2026-INVALID-CREW',
-      aircraft_ID: masterDataIDs.aircraft,
-      requesterName: 'Reference validation test',
-      status: 'DRAFT',
-    });
-
-    expect(response.status).to.equal(201);
-
-    response = await POST(`${draftUrl}/crew`, {
-      ID: '82000000-0000-0000-0000-000000000001',
-      crewMember_ID: nonexistentID,
-      role: 'PIC',
-    });
-
-    expect(response.status).to.equal(201);
-    await expectActivationRejected(draftUrl);
-  });
-
   it('rejects an expense with a nonexistent category', async () => {
     const reportID = '80000000-0000-0000-0000-000000000003';
     const draftUrl = `${baseUrl}/FlightReports(ID=${reportID},IsActiveEntity=false)`;

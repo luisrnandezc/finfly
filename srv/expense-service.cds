@@ -62,7 +62,6 @@ service ExpenseService {
     entity ExpenseAuditStatuses as projection on db.ExpenseAuditStatuses;
 
     entity FlightLegs as projection on db.FlightLegs;
-    entity CrewAssignments as projection on db.CrewAssignments;
 
     entity Expenses as projection on db.Expenses actions {
 
@@ -255,11 +254,6 @@ annotate ExpenseService.FlightReports with @restrict: [
 ];
 
 annotate ExpenseService.FlightLegs with @restrict: [
-    { grant: 'READ', to: [ 'Pilot', 'Auditor', 'Admin' ], where: 'report.organization_ID = $user.organization' },
-    { grant: 'WRITE', to: [ 'Pilot', 'Admin' ], where: 'report.organization_ID = $user.organization' }
-];
-
-annotate ExpenseService.CrewAssignments with @restrict: [
     { grant: 'READ', to: [ 'Pilot', 'Auditor', 'Admin' ], where: 'report.organization_ID = $user.organization' },
     { grant: 'WRITE', to: [ 'Pilot', 'Admin' ], where: 'report.organization_ID = $user.organization' }
 ];

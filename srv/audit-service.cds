@@ -41,9 +41,6 @@ service AuditService {
     entity FlightLegs as projection on db.FlightLegs;
 
     @readonly
-    entity CrewAssignments as projection on db.CrewAssignments;
-
-    @readonly
     entity CrewMembers as projection on db.CrewMembers;
 
     @readonly
@@ -101,11 +98,6 @@ annotate AuditService.Aircraft with @restrict: [{
 }];
 
 annotate AuditService.FlightLegs with @restrict: [{
-    grant : 'READ',
-    where : 'report.organization_ID = $user.organization and report.status = ''SUBMITTED'''
-}];
-
-annotate AuditService.CrewAssignments with @restrict: [{
     grant : 'READ',
     where : 'report.organization_ID = $user.organization and report.status = ''SUBMITTED'''
 }];

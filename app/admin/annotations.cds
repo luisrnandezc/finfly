@@ -408,7 +408,6 @@ annotate admin.FlightReports with @(
         { $Type : 'UI.ReferenceFacet', ID : 'ReportDetails', Label : 'Report Details', Target : '@UI.FieldGroup#ReportDetails' },
         { $Type : 'UI.ReferenceFacet', ID : 'Expenses', Label : 'Expenses', Target : 'expenses/@UI.LineItem#ReportExpenses' },
         { $Type : 'UI.ReferenceFacet', ID : 'FlightLegs', Label : 'Flight Legs', Target : 'legs/@UI.LineItem' },
-        { $Type : 'UI.ReferenceFacet', ID : 'Crew', Label : 'Crew', Target : 'crew/@UI.LineItem' }
     ]
 );
 
@@ -491,11 +490,6 @@ annotate admin.FlightLegs with {
     );
 };
 
-annotate admin.CrewAssignments with @(UI.LineItem : [
-    { $Type : 'UI.DataField', Label : 'Crew Member', Value : crewMember_ID },
-    { $Type : 'UI.DataField', Label : 'Role', Value : role }
-]);
-
 annotate admin.ExpenseAuditHistory with @(UI.LineItem : [
     { $Type : 'UI.DataField', Label : 'From', Value : fromStatus },
     { $Type : 'UI.DataField', Label : 'To', Value : toStatus },
@@ -568,14 +562,6 @@ annotate admin.Expenses with {
     originalCurrency @(
         title : 'Currency',
         Common.Text : originalCurrency.name,
-        Common.TextArrangement : #TextOnly
-    );
-};
-
-annotate admin.CrewAssignments with {
-    crewMember @(
-        title : 'Crew Member',
-        Common.Text : crewMember.fullName,
         Common.TextArrangement : #TextOnly
     );
 };

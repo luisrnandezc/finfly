@@ -32,7 +32,9 @@ Content-Type: application/json
   "flightDate": "2026-08-12",
   "originAirportCode": "SVMI",
   "destinationAirportCode": "SKBO",
-  "flightHours": 2.3
+  "flightHours": 2.3,
+  "pic_ID": "30000000-0000-0000-0000-000000000001",
+  "sic_ID": "30000000-0000-0000-0000-000000000002"
 }
 
 ### Add return flight leg
@@ -45,32 +47,13 @@ Content-Type: application/json
   "flightDate": "2026-08-15",
   "originAirportCode": "SKBO",
   "destinationAirportCode": "SVMI",
-  "flightHours": 2.2
+  "flightHours": 2.2,
+  "pic_ID": "30000000-0000-0000-0000-000000000001",
+  "sic_ID": "30000000-0000-0000-0000-000000000002"
 }
 
 ### Read report with flight legs
 GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)?$expand=legs
-
-### Assign first pilot
-POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/crew
-Content-Type: application/json
-
-{
-  "crewMember_ID": "30000000-0000-0000-0000-000000000001",
-  "role": "PIC"
-}
-
-### Assign second pilot
-POST {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)/crew
-Content-Type: application/json
-
-{
-  "crewMember_ID": "30000000-0000-0000-0000-000000000002",
-  "role": "SIC"
-}
-
-### Read report with legs and crew
-GET {{baseUrl}}/FlightReports(ID={{reportId}},IsActiveEntity=false)?$expand=legs,crew($expand=crewMember)
 
 ### Read currencies
 GET {{baseUrl}}/Currencies
